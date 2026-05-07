@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "a7c336b62d15e4d8db9116a32da079cd6b3ba4a1",
-  "generated_at": "2026-05-07T16:50:13+00:00",
+  "canonical_sha": "87d1bf702d32631d79a8c94418498fd2cc8b8353",
+  "generated_at": "2026-05-07T19:59:30+00:00",
   "files": [
     {
       "path": ".claude/commands/myorg-doctor.md",

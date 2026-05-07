@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import hook_log
 from myorg_message import format_reason
 
 # Python 3.11+ has tomllib built-in
@@ -1237,43 +1238,12 @@ def _hash_repo(cwd: str) -> str | None:
     return hashlib.sha256(cwd.encode("utf-8", errors="replace")).hexdigest()[:12]
 
 
-def _resolve_shadow_log_path() -> Path | None:
-    """Resolve the shadow-log file path, respecting MYORG_HOOK_LOG_DIR.
-
-    Returns None if logging is disabled (env explicitly empty) or the
-    target dir is unsafe (symlink, not owned by us). Mirrors the safety
-    contract in ``hook-lib.sh``.
-    """
-    env_val = os.environ.get("MYORG_HOOK_LOG_DIR")
-    if env_val is not None and env_val == "":
-        return None
-    log_dir = Path(env_val) if env_val else Path("/tmp/claude-hook-logs")
-    try:
-        log_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
-        log_dir.chmod(0o700)
-    except OSError:
-        return None
-    if log_dir.is_symlink() or not log_dir.is_dir():
-        return None
-    try:
-        if hasattr(os, "getuid") and log_dir.stat().st_uid != os.getuid():
-            return None
-    except OSError:
-        return None
-    return log_dir / "shadow.jsonl"
-
-
 def _write_shadow_log(row: dict) -> None:
     """Append one JSONL row to the shadow log. Failures are silent."""
-    path = _resolve_shadow_log_path()
-    if path is None:
+    log_dir = hook_log.resolve_log_dir()
+    if log_dir is None:
         return
-    try:
-        with path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(row, separators=(",", ":")) + "\n")
-    except OSError:
-        # Logging must never break the hook.
-        return
+    hook_log.append_jsonl_row(hook_log.shadow_log_path(log_dir), row)
 
 
 def _build_shadow_row(

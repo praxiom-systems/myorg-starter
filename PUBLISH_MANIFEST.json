@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "07b7d921ad3a55198bf840821511fe726a3c5467",
-  "generated_at": "2026-05-07T22:18:00+00:00",
+  "canonical_sha": "dd986ca65765ef6a5348dd2cf9b92e6b48d53451",
+  "generated_at": "2026-05-07T23:23:29+00:00",
   "files": [
     {
       "path": ".claude/commands/myorg-doctor.md",
@@ -88,7 +88,7 @@
     },
     {
       "path": "blueprint/hooks/bash-patterns.toml",
-      "sha256": "e464cd72cb480d56b702aac910557550537d754fc24f53c70fa23a157ef242d3"
+      "sha256": "bbd2e8fca9020e1a94b3996fe8df736ecff192dfdcaec3e14bb42fdc72cb057d"
     },
     {
       "path": "blueprint/hooks/bash-patterns.windows.toml",

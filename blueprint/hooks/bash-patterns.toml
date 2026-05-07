@@ -2005,7 +2005,7 @@ description = "getmyorg CLI subcommands — read-only or scoped to .myorg/ artif
 # Subcommands listed are either pure reads or operate only on .myorg/ in the
 # current repo (project-map regen, doctor --fix to .git/hooks markers, etc.).
 patterns = [
-    "^getmyorg (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|--help|-h|--version)\\b",
-    "^/[\\w./-]+/getmyorg (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|--help|-h|--version)\\b",
-    "^\"\\$GETMYORG\" (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|--help|-h|--version)\\b",
+    "^getmyorg (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|hq|brief|init|retrospective|--help|-h|--version)\\b",
+    "^/[\\w./-]+/getmyorg (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|hq|brief|init|retrospective|--help|-h|--version)\\b",
+    "^\"\\$GETMYORG\" (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|hq|brief|init|retrospective|--help|-h|--version)\\b",
 ]

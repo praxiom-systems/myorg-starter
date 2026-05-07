@@ -1,0 +1,178 @@
+{
+  "canonical_sha": "db1984cb0cb8d6950e6df3e7693ad758262dc374",
+  "generated_at": "2026-05-07T00:44:22+00:00",
+  "files": [
+    {
+      "path": ".claude/commands/myorg-doctor.md",
+      "sha256": "970229eb8e0242baa4f4318abc9313416510c3949f6183c1322671d6a2bcda1d"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "313bad4152bdcb200ab349141181a7fb0a8d759be8547f1fcace189e390bc369"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "60c9bdd905fcf45ac485c680d32e9773962cf061b6f041dcddd033911558a672"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "6b7df0e29672f2f947453b37458eec86f6fbe2b8c83c7ae08fd000a0dbe35823"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "ad801759a199b57e3bc6352dc54b65e636d05262f893e5d6fc69bfe9e6a8645d"
+    },
+    {
+      "path": "NOTICE",
+      "sha256": "7dd396ba42f3b8fadae59db2aa83562788eb3d37fd1f9453741ee55095e9c34f"
+    },
+    {
+      "path": "README.md",
+      "sha256": "ff9e76a4fa9dc9b0e8496a2e6391a3ed597ad3f51ef6e153128b6a9357b7e774"
+    },
+    {
+      "path": "bin/doctor.sh",
+      "sha256": "5ab4d9f62025a9cab2a23b689ae072a2f85abed50a449a16223b984438568c94"
+    },
+    {
+      "path": "blueprint/agents/code-reviewer.md",
+      "sha256": "b342d67d048f5b40baa518bd8336247f0d66db2b36de47cd6fc518e48040ab7c"
+    },
+    {
+      "path": "blueprint/agents/debugger.md",
+      "sha256": "e298eaf0976b7c065e2443ed691cff9ccf41c972b367548b990661def67d2980"
+    },
+    {
+      "path": "blueprint/agents/fullstack-engineer.md",
+      "sha256": "e14e98d0ed14fba6cd7f798e97133169c6b0f6f97994f5009ceb1676d4babe1a"
+    },
+    {
+      "path": "blueprint/agents/junior-engineer.md",
+      "sha256": "5f3051563f2766edd0e49f953e5fb0ea58fb40746c67dcd7bb7c1d6b2a69ad7f"
+    },
+    {
+      "path": "blueprint/agents/product-owner.md",
+      "sha256": "29fe16b8ac4ceeb9f2616cd9e549994e590827993d75ccaae2112461a6c0a349"
+    },
+    {
+      "path": "blueprint/agents/security-auditor.md",
+      "sha256": "f444ca599c53a7114c24550039fb7100a23255307e8d3cac0a3f6cbec5389836"
+    },
+    {
+      "path": "blueprint/agents/systems-architect.md",
+      "sha256": "1aacfab3a4656fd6b641ab01ed9c9b591784e50c19e4b1fec58e74a5825b15ab"
+    },
+    {
+      "path": "blueprint/agents/tech-lead.md",
+      "sha256": "23eaf896afd02375f3d8bb17c834f5647ae8972c7278bc9ace3c68bd62f87c75"
+    },
+    {
+      "path": "blueprint/agents/technical-writer.md",
+      "sha256": "fde38e9f4221cf73c575dd79eff2844518189f602ff61ad6f1f39fc345ed45f4"
+    },
+    {
+      "path": "blueprint/agents/test-engineer.md",
+      "sha256": "c210cc792fb27cc9eee5f6e61c1d8cdf7fd7b2f52c4f38cd74b2afe735d8f0e1"
+    },
+    {
+      "path": "blueprint/hooks/band-aid-patterns.toml",
+      "sha256": "2436d8423ac7cc2f31f3b63ec3fedbd2c2c0fa6ec1151ae0d9580c58082a3fb4"
+    },
+    {
+      "path": "blueprint/hooks/bash-patterns.darwin.toml",
+      "sha256": "c5d43a55652f886352586660dd7bbfa69cb821ab41b334b95de57bc7dd483aa3"
+    },
+    {
+      "path": "blueprint/hooks/bash-patterns.linux.toml",
+      "sha256": "cccb5764c73d917244592110cd06a8ab6aca854ca0c9eef68771cb434498a63e"
+    },
+    {
+      "path": "blueprint/hooks/bash-patterns.toml",
+      "sha256": "e464cd72cb480d56b702aac910557550537d754fc24f53c70fa23a157ef242d3"
+    },
+    {
+      "path": "blueprint/hooks/bash-patterns.windows.toml",
+      "sha256": "162b8cfcd3bcc37df17111fe2dd42c00c750ec59cfaae199b095915631240cdd"
+    },
+    {
+      "path": "blueprint/hooks/hook-lib.sh",
+      "sha256": "7373ea832468d3ef14902ce2e0427bbe9bddb25cb7dd7f8ff48d198c270254a1"
+    },
+    {
+      "path": "blueprint/hooks/injection-patterns.toml",
+      "sha256": "e18542d66c950b920f6741bd943359ac79a2e76bb86152a85d1b8b38fecf467f"
+    },
+    {
+      "path": "blueprint/hooks/myorg_message.py",
+      "sha256": "c705b0eb5cc7e627796ade4cf49a9c64f697beba8cb9f9361b43b6ae3cdb7ba9"
+    },
+    {
+      "path": "blueprint/hooks/post-bash.sh",
+      "sha256": "426989ff494abe4a74559336b523e38d0238534fe0a6360a8b92d939ebe5067f"
+    },
+    {
+      "path": "blueprint/hooks/session-end.sh",
+      "sha256": "38d1d538abc8bf802b36e0bd37f05f8d97f418ff2d1b890148f936408eefd229"
+    },
+    {
+      "path": "blueprint/hooks/session-stop.sh",
+      "sha256": "341b832dcf06e720188e04ae3e1d4463d02513df435d449b11a2c7cf8619e88a"
+    },
+    {
+      "path": "blueprint/hooks/validate-bash.py",
+      "sha256": "591cf13f0e242bf93203a53242c870def1f0abe9b10b375a9363d9359970fa23"
+    },
+    {
+      "path": "blueprint/hooks/validate-bash.sh",
+      "sha256": "11b00ec9754f059aa44175ca8f220941c50799c73182112dcd18129b3905fd16"
+    },
+    {
+      "path": "blueprint/hooks/validate-edit.py",
+      "sha256": "905eb345e9ca7ce907480fb990e7696f30348eefed899289821b527713f3d59f"
+    },
+    {
+      "path": "blueprint/hooks/validate-edit.sh",
+      "sha256": "2743705ff07cb724158da273a389ba6ac164c3d15adb7137d576c13b3a24358c"
+    },
+    {
+      "path": "blueprint/hooks/validate-postedit.py",
+      "sha256": "7069032d02f858edba11fe5910c8f603b3606674ef0abe86acd796b4c99f3737"
+    },
+    {
+      "path": "blueprint/hooks/validate-postedit.sh",
+      "sha256": "ac5015f6b33cf0a38783b00f44001a598d2f9c9fda20beeb4779a198e046bbaf"
+    },
+    {
+      "path": "blueprint/hooks/validate-read.py",
+      "sha256": "7fa90b2248d1be0f06489fcc60ff1b8a4f1b55fd71642f73a8e5e04a464c86a4"
+    },
+    {
+      "path": "blueprint/hooks/validate-read.sh",
+      "sha256": "79473588a19f2ad30faea6a939920a2bda975b0de1c2305bb7ba2a7cf0ea2989"
+    },
+    {
+      "path": "blueprint/skills/decompose-changeset.md",
+      "sha256": "014e05691c6701d7991bffbe338bd1b489403e63ea238b7cbfece23de1ff6f81"
+    },
+    {
+      "path": "blueprint/skills/systematic-debugging.md",
+      "sha256": "77b5195d856feba05d35336e3d679a1df86833afd1b0e5e16f4ae7b10425f47b"
+    },
+    {
+      "path": "blueprint/standards/change-discipline.md",
+      "sha256": "378a5d4a938015551a88342e9d541018d628a38a4371e3a0aab38dd35229d7c7"
+    },
+    {
+      "path": "blueprint/standards/engineering.md",
+      "sha256": "355954a230e37082e5c322509fb919e3b542cf0fcb064a7eb86f62647419e401"
+    },
+    {
+      "path": "blueprint/standards/prefer-root-cause-fixes.md",
+      "sha256": "a36f872725b45b9f6129344daf40f0fdb1ad5907cae0a37426e62a99f7deaf51"
+    },
+    {
+      "path": "blueprint/standards/silent-failure.md",
+      "sha256": "984d331da951e0f3b5a2ee603b3e3aa1731f21da8224507a1af36e5bfc48d3f9"
+    }
+  ]
+}

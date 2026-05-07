@@ -11,112 +11,19 @@ import os
 import re
 import sys
 import time
-from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import hook_log
+from bash_policy_patterns import (
+    CompiledPattern,
+    compile_patterns,
+    detect_os,
+    inject_git_root_patterns,
+    load_config,
+    merge_os_config,
+)
 from myorg_message import format_reason
-
-# Python 3.11+ has tomllib built-in
-try:
-    import tomllib
-except ImportError:
-    # Fallback for Python < 3.11
-    try:
-        import tomli as tomllib
-    except ImportError:
-        print(
-            "Error: Python 3.11+ required, or install 'tomli' package for older versions",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-
-@dataclass
-class CompiledPattern:
-    """A pre-compiled regex pattern with metadata."""
-    regex: re.Pattern
-    section: str
-    original: str
-
-
-def load_config(config_path: str) -> dict:
-    """Load and validate TOML configuration."""
-    try:
-        with open(config_path, "rb") as f:
-            return tomllib.load(f)
-    except tomllib.TOMLDecodeError as e:
-        print(f"Error: Invalid TOML in {config_path}: {e}", file=sys.stderr)
-        sys.exit(1)
-    except FileNotFoundError:
-        print(f"Error: Config file not found: {config_path}", file=sys.stderr)
-        sys.exit(1)
-
-
-def detect_os() -> str:
-    """Detect OS platform and return the suffix for OS-specific config files.
-
-    Returns 'linux', 'darwin', or 'windows'. Falls back to sys.platform value.
-    """
-    platform = sys.platform
-    if platform.startswith("linux"):
-        return "linux"
-    elif platform == "darwin":
-        return "darwin"
-    elif platform in ("win32", "cygwin", "msys"):
-        return "windows"
-    return platform
-
-
-def merge_os_config(base: dict, overlay: dict) -> dict:
-    """Merge OS-specific config into base config with additive-append semantics.
-
-    For each category (deny/ask/allow), OS patterns are appended to matching
-    base sections. New sections from the overlay are added as-is.
-    Base patterns are never removed or replaced.
-    """
-    for category in ("deny", "ask", "allow"):
-        overlay_sections = overlay.get(category, {})
-        if not overlay_sections:
-            continue
-        base.setdefault(category, {})
-        for section_name, section_data in overlay_sections.items():
-            if not isinstance(section_data, dict) or "patterns" not in section_data:
-                continue
-            if section_name in base[category] and isinstance(base[category][section_name], dict):
-                # Append OS patterns after base patterns
-                base[category][section_name]["patterns"] = (
-                    base[category][section_name].get("patterns", [])
-                    + section_data["patterns"]
-                )
-            else:
-                # New section from OS overlay
-                base[category][section_name] = section_data
-    return base
-
-
-def compile_patterns(config: dict, category: str) -> list[CompiledPattern]:
-    """Extract and compile patterns for a category (deny/ask/allow).
-
-    Pre-compiling regex patterns improves performance significantly
-    when validating many commands.
-    """
-    compiled = []
-    for section_name, section in config.get(category, {}).items():
-        if isinstance(section, dict) and "patterns" in section:
-            for pattern in section["patterns"]:
-                try:
-                    regex = re.compile(pattern)
-                    compiled.append(CompiledPattern(
-                        regex=regex,
-                        section=f"{category}.{section_name}",
-                        original=pattern
-                    ))
-                except re.error as e:
-                    print(f"Warning: Invalid regex '{pattern}' in {category}.{section_name}: {e}",
-                          file=sys.stderr)
-    return compiled
 
 
 def strip_env_vars(cmd: str) -> str:
@@ -1275,54 +1182,6 @@ def _build_shadow_row(
     }
 
 
-def _add_to_negative_lookahead(pattern: str, exclusion: str) -> str:
-    """Prepend an exclusion alternative to the first negative lookahead in a pattern.
-
-    Transforms: /(?!foo|bar) -> /(?!<exclusion>|foo|bar)
-    If no lookahead exists, returns the pattern unchanged.
-    """
-    if "(?!" not in pattern:
-        return pattern
-    return pattern.replace("(?!", f"(?!{exclusion}|", 1)
-
-
-def _inject_git_root_patterns(config: dict, git_root: str) -> None:
-    """Dynamically inject git root path into validation patterns.
-
-    When Claude runs from a git repository, rm within that repo is
-    auto-approved (lockstep: excluded from ask, added to allow).
-    The .git metadata directory itself is protected from deletion.
-
-    Must be called BEFORE compile_patterns().
-    """
-    # Lookahead exclusion: path after the leading '/' must not start with git_root
-    # E.g. /home/rrl/github/myproject -> home/rrl/github/myproject/
-    escaped_for_lookahead = re.escape(git_root.lstrip("/")) + "/"
-
-    # 1. Narrow ask.file_deletion to exclude paths within the git root.
-    #    This must be paired with the allow entry below (evaluated before allow).
-    ask_file_del = config.get("ask", {}).get("file_deletion", {})
-    if isinstance(ask_file_del, dict) and "patterns" in ask_file_del:
-        ask_file_del["patterns"] = [
-            _add_to_negative_lookahead(p, escaped_for_lookahead)
-            for p in ask_file_del["patterns"]
-        ]
-
-    # 2. Allow rm on any path within the git root (lockstep with exclusion above).
-    escaped_abs = re.escape(git_root)
-    config.setdefault("allow", {})["git_project_files"] = {
-        "description": f"File removal within git repository at {git_root}",
-        "patterns": [f"^rm\\s+(-[a-zA-Z]+\\s+)*{escaped_abs}/"],
-    }
-
-    # 3. Protect the .git directory itself from deletion (added to ask).
-    escaped_git_dir = re.escape(os.path.join(git_root, ".git"))
-    config.setdefault("ask", {})["git_metadata_protection"] = {
-        "description": "Protect .git metadata directory from deletion",
-        "patterns": [f"^rm\\b.*{escaped_git_dir}(/|$)"],
-    }
-
-
 _HELP_TEXT = """\
 Usage: validate-bash.py <config.toml> [--format claude|raw] [--help]
 
@@ -1406,7 +1265,7 @@ def main():
     if cwd:
         cwd = os.path.normpath(cwd)
         if os.path.exists(os.path.join(cwd, ".git")):
-            _inject_git_root_patterns(config, cwd)
+            inject_git_root_patterns(config, cwd)
 
     # Compile patterns (includes any git-root injections from above)
     deny_patterns = compile_patterns(config, "deny")

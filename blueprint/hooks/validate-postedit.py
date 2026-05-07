@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""
+PostToolUse output-verification probe for Edit/Write/MultiEdit.
+
+Runs two checks after an edit tool has applied a change:
+  1. Band-aid re-scan — synchronous, advisory-first (same MYORG_BANDAID_MODE
+     gating as the PreToolUse detector).  Uses the shared scan_diff() engine
+     from validate-edit.py so pattern logic is never duplicated.
+  2. Contract LLM judge — asynchronous fire-and-forget via
+     a private contract judge (when an overlay module is available).
+     Gated behind MYORG_VERIFY_LLM_JUDGE=1.
+     Judge latency NEVER blocks the PostToolUse path.
+
+PostToolUse hooks cannot block tool execution (the edit is already applied).
+Output follows Claude Code's ``hookSpecificOutput`` JSON shape for PostToolUse:
+  {"hookSpecificOutput": {"hookEventName": "PostToolUse", "suppressOutput": false}}
+
+The hook always exits 0.  Advisory reasons are surfaced in the transcript via
+the ``reason`` field without blocking the agent.
+
+Environment variables:
+  MYORG_BANDAID_MODE       — Same as PreToolUse: off / all-advise / (default normal).
+  MYORG_VERIFY_LLM_JUDGE   — Set to "1" to enable async contract judge invocation.
+  MYORG_HOOK_LOG_DIR        — Override log directory (empty string disables logging).
+
+Skip-list parity with validate-edit.py:
+  - Edits to band-aid-patterns.toml, injection-patterns.toml, bash-patterns.toml
+    are silently allowed (no scan, no judge).
+  - Paths under tests/fixtures/ are silently allowed.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import os
+import sys
+
+# ---------------------------------------------------------------------------
+# Sibling import — validate-edit.py lives in the same directory and exposes
+# the scan_diff() public API.  We add SCRIPT_DIR to sys.path so the import
+# works whether the hook is invoked from the blueprint dir, the .myorg
+# working copy, or any customer install location.
+# ---------------------------------------------------------------------------
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _load_validate_edit():
+    # Load validate-edit.py (dashes in name prevent a plain ``import``).
+    # The module must be registered in sys.modules under the chosen name
+    # BEFORE exec_module runs, so that dataclass field resolution
+    # (which looks up cls.__module__ in sys.modules) succeeds.
+    mod_name = "validate_edit"
+    if mod_name in sys.modules:
+        return sys.modules[mod_name]
+    spec = importlib.util.spec_from_file_location(
+        mod_name,
+        os.path.join(_SCRIPT_DIR, "validate-edit.py"),
+    )
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[mod_name] = mod
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    return mod
+
+
+_ve = _load_validate_edit()
+
+if _ve is None:
+    # Cannot import engine — emit silent allow and exit.
+    print(json.dumps({
+        "hookSpecificOutput": {"hookEventName": "PostToolUse", "suppressOutput": False}
+    }))
+    sys.exit(0)
+
+scan_diff = _ve.scan_diff
+_get_added_lines_for_input = _ve._get_added_lines_for_input
+_build_reason = _ve._build_reason
+_should_skip_file = _ve._should_skip_file
+
+
+# ---------------------------------------------------------------------------
+# PostToolUse output helpers
+# ---------------------------------------------------------------------------
+
+def _output_post(reason: str = "", fmt: str = "claude") -> None:
+    """Emit PostToolUse output in the requested format.
+
+    ``claude`` (default) emits Claude Code's hookSpecificOutput shape.
+    ``raw`` emits a host-neutral ``{"decision", "reason"}`` payload for
+    adapter scripts (parity with validate-edit.py --format raw).
+    """
+    if fmt == "raw":
+        payload: dict = {"decision": "allow"}
+        if reason:
+            payload["reason"] = reason
+        print(json.dumps(payload))
+        return
+    payload = {
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "suppressOutput": False,
+        }
+    }
+    if reason:
+        payload["hookSpecificOutput"]["reason"] = reason
+    print(json.dumps(payload))
+
+
+try:
+    from _verify_overlay import invoke_judge_async as _invoke_judge_async  # type: ignore[import-not-found]
+except ImportError:
+    def _invoke_judge_async(cwd: str) -> None:  # noqa: D401
+        """Public starter: judge overlay not present; no-op."""
+        return
+
+
+def main() -> None:
+    # Parse arguments: <config_path> [--format claude|raw]
+    args = sys.argv[1:]
+    fmt = "claude"
+    positional: list[str] = []
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "--format":
+            if i + 1 >= len(args):
+                sys.exit(1)
+            fmt = args[i + 1]
+            i += 2
+            continue
+        if a.startswith("--format="):
+            fmt = a.split("=", 1)[1]
+            i += 1
+            continue
+        positional.append(a)
+        i += 1
+
+    if len(positional) != 1 or fmt not in ("claude", "raw"):
+        print(
+            "Usage: validate-postedit.py <patterns.toml> [--format claude|raw]",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    config_path = positional[0]
+
+    # Kill switch — if MYORG_BANDAID_MODE=off, skip the band-aid re-scan.
+    mode = os.environ.get("MYORG_BANDAID_MODE", "").strip().lower()
+    llm_judge_enabled = os.environ.get("MYORG_VERIFY_LLM_JUDGE", "").strip() == "1"
+
+    try:
+        input_data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        _output_post(fmt=fmt)
+        sys.exit(0)
+
+    tool_name = input_data.get("tool_name", "") or ""
+    tool_input = input_data.get("tool_input", {}) or {}
+    cwd = input_data.get("cwd", "") or ""
+
+    # Only handle the three target tools.  The shell-script matcher already
+    # restricts to Edit|Write|MultiEdit, but guard here for defensiveness.
+    if tool_name.lower() not in ("edit", "write", "multiedit"):
+        _output_post(fmt=fmt)
+        sys.exit(0)
+
+    # Extract diff once (needed for both scan and skip-list check).
+    added_lines: list[str] = []
+    file_path = ""
+    new_content_lines: list[str] = []
+
+    if mode != "off":
+        added_lines, file_path, new_content_lines = _get_added_lines_for_input(
+            tool_name, tool_input
+        )
+        # Write tool in PostToolUse: the file on disk already matches the
+        # tool input, so the line-by-line diff comes back empty. Fall back to
+        # scanning the full new content so write-time band-aids still surface.
+        if tool_name.lower() == "write" and not added_lines:
+            added_lines = new_content_lines
+
+    # For the judge skip-list check we still need file_path even in off mode.
+    if not file_path:
+        file_path = tool_input.get("file_path", "") or ""
+
+    # Skip-list: parity with PreToolUse detector.
+    if _should_skip_file(file_path):
+        _output_post(fmt=fmt)
+        sys.exit(0)
+
+    # -------------------------------------------------------------------------
+    # Step 1: synchronous band-aid re-scan (advisory only — edit already applied)
+    # -------------------------------------------------------------------------
+    reason = ""
+    if mode != "off" and added_lines:
+        result = scan_diff(
+            added_lines,
+            config_path,
+            file_path=file_path,
+            new_content_lines=new_content_lines or None,
+        )
+        if result.deny_hits or result.advise_hits:
+            _decision, reason = _build_reason(result, mode)
+            # PostToolUse: advisory only regardless of pattern tier —
+            # the edit is already applied.  Prefix for transcript clarity.
+            reason = "[PostEdit] " + reason
+
+    # -------------------------------------------------------------------------
+    # Step 2: async contract LLM judge (fire-and-forget)
+    # -------------------------------------------------------------------------
+    if llm_judge_enabled:
+        _invoke_judge_async(cwd)
+
+    _output_post(reason=reason, fmt=fmt)
+
+
+if __name__ == "__main__":
+    main()

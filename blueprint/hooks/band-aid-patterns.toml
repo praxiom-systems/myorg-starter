@@ -1,0 +1,74 @@
+# band-aid-patterns.toml — Pattern catalog for the validate-edit PreToolUse hook.
+#
+# Two sections:
+#   [deny.*]   — High-confidence patterns that suppress errors across a whole file or
+#                all errors in a block. These block the edit by default unless
+#                MYORG_BANDAID_MODE=all-advise (downgrade to advisory) or =off (disable).
+#   [advise.*] — Lower-confidence patterns that warrant a justification comment but are
+#                legitimately used. These always emit an advisory (allow + reason), never
+#                block.
+#
+# Advisory-to-edit ratio target: <15% of edits in normal operation. Resist adding
+# broad patterns that would blow that budget.
+
+# ---------------------------------------------------------------------------
+# Deny — broad suppressions that hide errors across entire files or blocks
+# ---------------------------------------------------------------------------
+
+[deny.python_swallowed_errors]
+description = "Bare except clauses suppress all errors including KeyboardInterrupt"
+patterns = [
+  '^\s*except\s*:\s*',
+  '^\s*except\s+Exception\s*:\s*pass\b',
+]
+
+[deny.eslint_file_disable]
+description = "File-level eslint-disable removes safety for the whole file"
+patterns = [
+  '^\s*/\*\s*eslint-disable\s*\*/',
+]
+
+[deny.ts_ignore_naked]
+description = "@ts-ignore without justification comment silences the type checker for the next line"
+# Only flag @ts-ignore not followed by an explanation (space then non-whitespace).
+# @ts-ignore with a trailing comment like "// @ts-ignore -- reason" is legitimate and
+# is NOT caught here because the pattern requires the line to end after @ts-ignore.
+patterns = [
+  '^\s*//\s*@ts-ignore\s*$',
+]
+
+# ---------------------------------------------------------------------------
+# Advise — line-scoped suppressions and markers that warrant justification
+# ---------------------------------------------------------------------------
+
+[advise.todo_markers]
+description = "TODO/FIXME/HACK/XXX without issue link may leave problems unfindable"
+# Lines containing (#N) or (#word/N) suppress this advisory (handled in code).
+patterns = [
+  '\b(TODO|FIXME|HACK|XXX)\b',
+]
+
+[advise.suppressions]
+description = "Line-scoped lint/type suppressions warrant a justification comment"
+patterns = [
+  '//\s*eslint-disable-next-line\b',
+  '//\s*eslint-disable-line\b',
+  '//\s*@ts-expect-error\b',
+  '#\s*type:\s*ignore\b',
+  '#\s*noqa\b',
+  '#\s*pragma:\s*no\s*cover\b',
+  '#\s*pylint:\s*disable\b',
+]
+
+[advise.test_skips]
+description = "Skipped tests reduce coverage silently"
+# This section is suppressed entirely when the target file matches *.test.* or *.spec.*
+# (test files legitimately use these while iterating; skip at the section level, not per-line).
+# Non-test files still get flagged.
+patterns = [
+  '\b(it|describe|test)\.skip\b',
+  '\bxit\(',
+  '\bxdescribe\(',
+  '@pytest\.mark\.(skip|xfail|skipif)\b',
+  '@unittest\.skip\b',
+]

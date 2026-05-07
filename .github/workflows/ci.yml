@@ -1,0 +1,50 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyyaml
+      - name: LICENSE and NOTICE present
+        run: test -f LICENSE && test -f NOTICE
+      - name: Agent frontmatter parses
+        run: |
+          python3 -c "
+          import sys, pathlib, yaml
+          paths = list(pathlib.Path('blueprint/agents').glob('*.md'))
+          if not paths:
+              print('FAIL: no agent files found in blueprint/agents'); sys.exit(1)
+          fail = 0
+          for p in paths:
+              text = p.read_text()
+              if not text.startswith('---'):
+                  print(f'{p}: missing frontmatter'); fail = 1; continue
+              fm = text.split('---', 2)[1]
+              try:
+                  yaml.safe_load(fm)
+              except Exception as e:
+                  print(f'{p}: {e}'); fail = 1
+          sys.exit(fail)
+          "
+      - name: Hooks executable smoke
+        run: |
+          set -euo pipefail
+          test -f blueprint/hooks/validate-bash.sh
+          chmod +x blueprint/hooks/validate-bash.sh
+          echo '{"tool_input":{"command":"echo ok"}}' | \
+            blueprint/hooks/validate-bash.sh > /dev/null
+      - name: Doctor smoke
+        run: |
+          chmod +x bin/doctor.sh
+          bash bin/doctor.sh

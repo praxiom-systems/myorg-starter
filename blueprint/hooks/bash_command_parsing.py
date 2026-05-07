@@ -133,6 +133,13 @@ def _find_matching_paren(cmd: str, start: int) -> int:
                     i = end_pos
                     heredoc_delim = delim
                     continue
+            elif char == '`':
+                # Skip over a backtick command substitution body so a `)` inside
+                # `…` is not mistaken for the closing paren of the enclosing $()
+                # (#599: previously untracked, which truncated $() bodies that
+                # contained a nested backtick substitution with a `)` inside).
+                i = _find_matching_backtick(cmd, i + 1)
+                continue
             elif char == '(':
                 depth += 1
             elif char == ')':
@@ -270,6 +277,35 @@ def split_commands(cmd: str) -> list[str]:
                 current = ""
                 i += 2
                 continue
+            elif array_depth == 0 and char == '|':
+                # Single pipe is a split point — `cmd1 | cmd2` runs cmd2 with
+                # cmd1's stdout, so anchored deny patterns (^rm, ^reboot, …)
+                # need to fire on cmd2 independently. `|&` (bash 4 alias for
+                # `2>&1 |`) is consumed as a 2-char separator.
+                if current.strip():
+                    segments.append(current)
+                current = ""
+                i += 2 if cmd[i:i+2] == '|&' else 1
+                continue
+            elif array_depth == 0 and char == '&':
+                # `&&` is handled above. `&>` is a stdout+stderr redirect, not
+                # a separator. `>&`/`N>&M` is fd duplication — `&` follows `>`
+                # and must not split. `\&` is an escaped literal. Otherwise a
+                # bare `&` is a backgrounder and a real separator (`cmd1 &
+                # cmd2`); split so anchored deny patterns fire on cmd2 (#601).
+                if cmd[i:i+2] == '&>':
+                    current += '&>'
+                    i += 2
+                    continue
+                if current.endswith('\\') or current.rstrip().endswith('>'):
+                    current += char
+                    i += 1
+                    continue
+                if current.strip():
+                    segments.append(current)
+                current = ""
+                i += 1
+                continue
             elif array_depth == 0 and char == ';':
                 # Don't split on ;; (case statement terminator)
                 if cmd[i:i+2] == ';;':
@@ -314,12 +350,13 @@ CONTROL_FLOW_KEYWORDS = re.compile(
     re.IGNORECASE
 )
 
-# Shell control flow terminators that may have redirections attached
-# These complete control structures and are safe on their own
-# Matches: done, fi, esac — optionally followed by redirections like
-# 2>/dev/null, | sort, 2>&1 | head, etc.
+# Shell control flow terminators that may have redirections attached.
+# Matches `done`, `fi`, `esac` optionally followed by trailing redirects
+# like `2>/dev/null`, `>file`, `2>&1`. Anchored to end-of-segment so a
+# stray `done & reboot` (if `&` weren't a split point) couldn't have its
+# `reboot` swallowed by `.*` greediness. (#601 review — gemini.)
 CONTROL_FLOW_TERMINATORS = re.compile(
-    r'^(done|fi|esac)(\s+[\d<>|&].*|\s*$)',
+    r'^(done|fi|esac)(?:\s+\d*>>?&?\d*\s*/?[\w./-]*|\s*)*$',
     re.IGNORECASE
 )
 
@@ -510,19 +547,64 @@ def strip_line_continuations(cmd: str) -> str:
     return cmd.replace('\\\n', ' ')
 
 
-def _is_bare_redirect(segment: str) -> bool:
-    """Check if a segment is just a bare redirect/pipe tail with no real command.
+# Read-only / pure-filter utilities that, when used as a pipe consumer
+# (e.g. `ls | head -5`), have no security-relevant side effect on stdin.
+# Intentionally **excludes** tee/sed/awk: tee writes its argument path,
+# `sed -i` writes in place, and `awk '… > "file"'` can write via redirect
+# (#599: previously safelisted these, which let `echo x | tee /etc/cron.d/job`
+# bypass ^tee\s+.*/etc/cron).
+#
+# IMPORTANT: this set is consulted ONLY by validate-bash.py *after* deny and
+# ask patterns have been checked against the segment. clean_segment() must NOT
+# return "" for these utilities — that would bypass the deny patterns for
+# anything `cat ~/.ssh/id_rsa` style (PR #601 review). Several entries here
+# (cat, head, tail, less, more, grep, …) accept file-path operands and are
+# verbs in [deny.credential_reads]; the post-deny-check placement is what
+# keeps them safe.
+_SAFE_PIPE_CONSUMERS = (
+    'head', 'tail', 'sort', 'wc', 'uniq', 'cut', 'tr', 'column',
+    'less', 'more', 'cat', 'fmt', 'nl', 'rev', 'paste', 'comm',
+    'fold', 'expand', 'unexpand', 'pr', 'grep',
+)
+_SAFE_PIPE_CONSUMER_RE = re.compile(
+    r'^(?:' + '|'.join(_SAFE_PIPE_CONSUMERS) + r')\b'
+)
 
-    After chain splitting, residual segments like '2>/dev/null', '| head -5',
-    '2>/dev/null | head -15', or '2>&1' can appear. These are not commands
-    and should be skipped.
+
+def is_safe_pipe_consumer(segment: str) -> bool:
+    """True when a segment is exactly a read-only pipe-consumer command.
+
+    After split_commands() splits on `|`, segments like `head -5`, `grep foo`,
+    or `wc -l` appear as standalone commands. These would otherwise trip
+    default-ask noise even when no deny/ask pattern matches.
+
+    **Use only after deny+ask pattern checks.** Calling this in clean_segment()
+    would bypass deny.credential_reads for `cat ~/.ssh/id_rsa` and similar.
+
+    Conservative: requires the segment to be just `<cmd> [args]`. Any extra
+    chaining, redirect-to-file, or compound shell metacharacter falls through
+    to normal validation.
+    """
+    s = segment.strip()
+    if not _SAFE_PIPE_CONSUMER_RE.match(s):
+        return False
+    # Reject if any output redirect or shell metacharacter appears — those
+    # could write to disk or chain other commands.
+    return not re.search(r'[;&|`$()<>{}]', s)
+
+
+def _is_bare_redirect(segment: str) -> bool:
+    """Check if a segment is just a bare redirect with no real command.
+
+    After chain splitting, residual segments like '2>/dev/null', '>file',
+    or '2>&1' can appear. These are not commands and should be skipped.
+
+    Pipe-tails are no longer handled here: split_commands() splits on `|`,
+    so each pipe stage arrives as its own segment and is checked via
+    _is_safe_pipe_consumer() (read-only utilities only).
     """
     # Strip all redirections: N>/dev/null, 2>&1, >/dev/null, N>>/path, etc.
     s = re.sub(r'\d*>>?&?\d*\s*/?[\w./-]*', '', segment)
-    # Strip pipe + safe tail commands (head, tail, sort, wc, tee, grep, etc.)
-    s = re.sub(r'\|\s*(head|tail|sort|wc|uniq|tee|grep|sed|awk|cut|tr|column|less|more|cat|fmt|nl|rev|paste|comm|fold|expand|unexpand|pr)\b[^|]*', '', s)
-    # Strip remaining pipes to nothing
-    s = re.sub(r'\|', '', s)
     return not s.strip()
 
 
@@ -766,9 +848,13 @@ def clean_segment(segment: str) -> str:
     if _is_safe_bash_test_expression(segment):
         return ""
 
-    # Check for bare redirects / pipe tails (e.g. "2>/dev/null | head -5")
+    # Check for bare redirects (e.g. "2>/dev/null", ">file") with no command.
     if _is_bare_redirect(segment):
         return ""
+
+    # NOTE: do not skip safe-pipe-consumer segments here — that would bypass
+    # deny patterns for `cat ~/.ssh/id_rsa`-style reads. The validator calls
+    # is_safe_pipe_consumer() *after* deny+ask checks have run.
 
     # Unwrap bash -c / sh -c wrappers to expose the inner command
     segment = strip_bash_c_wrapper(segment)

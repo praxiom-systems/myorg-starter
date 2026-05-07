@@ -18,6 +18,7 @@ from bash_command_parsing import (
     clean_segment,
     extract_assignments,
     extract_command_substitutions,
+    is_safe_pipe_consumer,
     split_commands,
     strip_line_continuations,
     substitute_known_vars,
@@ -278,6 +279,14 @@ def validate_command(
         if matched:
             if allow_section is None:
                 allow_section = section
+            continue
+
+        # Pipe-stage noise mitigation: a read-only pipe consumer (`head -5`,
+        # `grep foo`, `wc -l`) that survived deny+ask+allow is treated as
+        # implicitly allowed so a benign `ls | head` doesn't trip default-ask.
+        # Done HERE — never in clean_segment — so deny patterns always fire
+        # first on `cat ~/.ssh/id_rsa`-style reads (PR #601 review).
+        if is_safe_pipe_consumer(cleaned):
             continue
 
         if not has_default_fallback:

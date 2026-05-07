@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "e1e271499b47d251d0a275ba199518b9ca1e6811",
-  "generated_at": "2026-05-07T02:35:05+00:00",
+  "canonical_sha": "5551d0676ab04bdaa57eceab54dddb1381c080de",
+  "generated_at": "2026-05-07T03:22:57+00:00",
   "files": [
     {
       "path": ".claude/commands/myorg-doctor.md",
@@ -95,6 +95,14 @@
       "sha256": "162b8cfcd3bcc37df17111fe2dd42c00c750ec59cfaae199b095915631240cdd"
     },
     {
+      "path": "blueprint/hooks/bash_command_parsing.py",
+      "sha256": "3dd98c0434d07ca90c1cc908f6bc48b124bd167652179fa44a6a4e8a8ba3ff4f"
+    },
+    {
+      "path": "blueprint/hooks/bash_policy_patterns.py",
+      "sha256": "c689090c7bc17d52ef9e8d10053ff0e16fe49c3f0b0283dd85524a97207b1df9"
+    },
+    {
       "path": "blueprint/hooks/hook-lib.sh",
       "sha256": "7373ea832468d3ef14902ce2e0427bbe9bddb25cb7dd7f8ff48d198c270254a1"
     },
@@ -124,7 +132,7 @@
     },
     {
       "path": "blueprint/hooks/validate-bash.py",
-      "sha256": "417f928f7065618d8a21ba53c2122c8aaeafcec30125776b76b7e06479dc1288"
+      "sha256": "24f87d83816c96165b72beb88ade43d44c9dc80b31d0402894a2d3d303ef620c"
     },
     {
       "path": "blueprint/hooks/validate-bash.sh",

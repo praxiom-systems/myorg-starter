@@ -74,6 +74,7 @@ _ISSUE_LINK_RE = re.compile(r'\(#\d+\)')
 
 # Test file extensions that trigger the test_skips section skip.
 _TEST_FILENAME_RE = re.compile(r'\.(test|spec)\.')
+_PATCH_FILE_RE = re.compile(r"^\*\*\* (?:Add|Update) File: (.+)$")
 
 
 @dataclass
@@ -93,6 +94,13 @@ class SectionHit:
 class ScanResult:
     deny_hits: list[SectionHit] = field(default_factory=list)
     advise_hits: list[SectionHit] = field(default_factory=list)
+
+
+@dataclass
+class EditScanInput:
+    added_lines: list[str]
+    file_path: str = ""
+    new_content_lines: list[str] = field(default_factory=list)
 
 
 def load_patterns(
@@ -176,6 +184,75 @@ def _extract_added_lines_diff(old: str, new: str) -> list[str]:
         if line.startswith("+") and not line.startswith("+++"):
             added.append(line[1:])
     return added
+
+
+def _extract_apply_patch_scan_inputs(command: str) -> list[EditScanInput]:
+    """Extract per-file scan inputs from Codex's apply_patch command payload.
+
+    Codex reports file edits through the canonical hook tool name
+    ``apply_patch`` with ``tool_input.command`` containing the patch text.
+    That is not Claude's Edit/Write/MultiEdit shape, so parse the patch
+    envelope directly and feed the same band-aid scanner with added lines plus
+    post-edit hunk context.
+    """
+    scans: list[EditScanInput] = []
+    file_path = ""
+    added: list[str] = []
+    new_context: list[str] = []
+
+    def flush() -> None:
+        nonlocal file_path, added, new_context
+        if added:
+            scans.append(EditScanInput(
+                added_lines=added,
+                file_path=file_path,
+                new_content_lines=new_context or added,
+            ))
+        file_path = ""
+        added = []
+        new_context = []
+
+    for line in (command or "").splitlines():
+        m = _PATCH_FILE_RE.match(line)
+        if m:
+            flush()
+            file_path = m.group(1).strip()
+            continue
+        if line == "*** End Patch":
+            flush()
+            continue
+        if not file_path:
+            continue
+        if line.startswith("*** "):
+            continue
+        if line.startswith("@@"):
+            continue
+        if line.startswith("+") and not line.startswith("+++"):
+            content = line[1:]
+            added.append(content)
+            new_context.append(content)
+            continue
+        if line.startswith("-") and not line.startswith("---"):
+            continue
+        if line.startswith(" "):
+            new_context.append(line[1:])
+    flush()
+    return scans
+
+
+def _extract_added_lines_apply_patch(command: str) -> tuple[list[str], str, list[str]]:
+    """Return combined apply_patch scan data for legacy callers/tests."""
+    scans = _extract_apply_patch_scan_inputs(command)
+    added: list[str] = []
+    file_paths: set[str] = set()
+    new_content_lines: list[str] = []
+    for scan in scans:
+        added.extend(scan.added_lines)
+        if scan.file_path:
+            file_paths.add(scan.file_path)
+        new_content_lines.extend(scan.new_content_lines)
+    file_path = next(iter(file_paths)) if len(file_paths) == 1 else ""
+    return added, file_path, new_content_lines
 
 
 # ---------------------------------------------------------------------------
@@ -428,6 +505,9 @@ def _get_added_lines_for_input(
     """
     tool_name_lower = tool_name.lower()
 
+    if tool_name_lower == "apply_patch":
+        return _extract_added_lines_apply_patch(tool_input.get("command", "") or "")
+
     if tool_name_lower == "write":
         content = tool_input.get("content", "") or ""
         file_path = tool_input.get("file_path", "") or ""
@@ -491,6 +571,16 @@ def _get_added_lines_for_input(
     return [], "", []
 
 
+def _get_scan_inputs_for_input(tool_name: str, tool_input: dict) -> list[EditScanInput]:
+    """Extract one or more per-file scan inputs from a hook tool payload."""
+    if tool_name.lower() == "apply_patch":
+        return _extract_apply_patch_scan_inputs(tool_input.get("command", "") or "")
+    added_lines, file_path, new_content_lines = _get_added_lines_for_input(
+        tool_name, tool_input
+    )
+    return [EditScanInput(added_lines, file_path, new_content_lines)]
+
+
 def main() -> None:
     # Parse arguments
     args = sys.argv[1:]
@@ -539,34 +629,45 @@ def main() -> None:
     tool_name = input_data.get("tool_name", "") or ""
     tool_input = input_data.get("tool_input", {}) or {}
 
-    # Only handle the three target tools
-    if tool_name.lower() not in ("edit", "write", "multiedit"):
+    # Only handle the target edit tools. Codex reports file edits through
+    # apply_patch; Claude reports Edit/Write/MultiEdit.
+    if tool_name.lower() not in ("edit", "write", "multiedit", "apply_patch"):
         sys.exit(0)
 
-    added_lines, file_path, new_content_lines = _get_added_lines_for_input(
+    scan_inputs = _get_scan_inputs_for_input(
         tool_name, tool_input
     )
 
-    # Skip-list: certain file paths are always silently allowed
-    if _should_skip_file(file_path):
-        sys.exit(0)
-
-    # Short-circuit if nothing was added
-    if not added_lines:
-        sys.exit(0)
-
-    # Cap total scan size
-    total_chars = sum(len(line) for line in added_lines)
-    if total_chars > MAX_SCAN_BYTES:
+    if not scan_inputs:
         sys.exit(0)
 
     deny_patterns, advise_patterns = load_patterns(config_path)
-    is_test = _is_test_file(file_path)
+    result = ScanResult()
 
-    result = _scan_lines(
-        added_lines, deny_patterns, advise_patterns, is_test,
-        new_content_lines=new_content_lines or None,
-    )
+    for scan in scan_inputs:
+        # Skip-list: certain file paths are always silently allowed
+        if _should_skip_file(scan.file_path):
+            continue
+
+        # Short-circuit if nothing was added
+        if not scan.added_lines:
+            continue
+
+        # Cap total scan size per edit/file section
+        total_chars = sum(len(line) for line in scan.added_lines)
+        if total_chars > MAX_SCAN_BYTES:
+            continue
+
+        is_test = _is_test_file(scan.file_path)
+        scan_result = _scan_lines(
+            scan.added_lines,
+            deny_patterns,
+            advise_patterns,
+            is_test,
+            new_content_lines=scan.new_content_lines or None,
+        )
+        result.deny_hits.extend(scan_result.deny_hits)
+        result.advise_hits.extend(scan_result.advise_hits)
 
     if not result.deny_hits and not result.advise_hits:
         sys.exit(0)

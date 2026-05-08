@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "a6b591dca5802093a1c4e6df9223478ae9f7140b",
-  "generated_at": "2026-05-08T17:06:59+00:00",
+  "canonical_sha": "bc3c5a8d1c51b03abdf7e757328eb020074dd937",
+  "generated_at": "2026-05-08T18:28:18+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -111,6 +111,26 @@
       "sha256": "460fa7786c685933fb805d29daa410b5716091a852170a8f3a69424590e42e41"
     },
     {
+      "path": "blueprint/hooks/codex-permission-bash.sh",
+      "sha256": "75b34f12a2fd356ad905619d8d9c8cdbedfa3efb114efcac8b85635aaff226d0"
+    },
+    {
+      "path": "blueprint/hooks/codex-session-stop.sh",
+      "sha256": "1b19325adcdb974ec768a89e7ecdf85b29b70ae841dafff846f3b59ee2221fd2"
+    },
+    {
+      "path": "blueprint/hooks/codex-validate-bash.sh",
+      "sha256": "b38180e4b6d5ee3855e123f3ab006260ee6ce29c4b3f6246bc70dc96ac76ea33"
+    },
+    {
+      "path": "blueprint/hooks/codex-validate-edit.sh",
+      "sha256": "5f1b7e04c36ce08766c93b56fa95555fc54c04ed460b3dc7d9c27da228678092"
+    },
+    {
+      "path": "blueprint/hooks/codex-validate-postedit.sh",
+      "sha256": "ec42753693619466b1726b6152c4e7e7d86774d02609322328c6c953145b2848"
+    },
+    {
       "path": "blueprint/hooks/hook-lib.sh",
       "sha256": "7373ea832468d3ef14902ce2e0427bbe9bddb25cb7dd7f8ff48d198c270254a1"
     },
@@ -148,7 +168,7 @@
     },
     {
       "path": "blueprint/hooks/validate-edit.py",
-      "sha256": "905eb345e9ca7ce907480fb990e7696f30348eefed899289821b527713f3d59f"
+      "sha256": "40cfe270c0d9c2484c378cffa8f89c2b2809575c116c5d1b2c53f23aea68c185"
     },
     {
       "path": "blueprint/hooks/validate-edit.sh",
@@ -156,7 +176,7 @@
     },
     {
       "path": "blueprint/hooks/validate-postedit.py",
-      "sha256": "7069032d02f858edba11fe5910c8f603b3606674ef0abe86acd796b4c99f3737"
+      "sha256": "be1024f9f0b3601257fffad17376999e603182490724f2e3d94f36bf93805334"
     },
     {
       "path": "blueprint/hooks/validate-postedit.sh",

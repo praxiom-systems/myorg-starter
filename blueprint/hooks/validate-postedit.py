@@ -160,9 +160,9 @@ def main() -> None:
     tool_input = input_data.get("tool_input", {}) or {}
     cwd = input_data.get("cwd", "") or ""
 
-    # Only handle the three target tools.  The shell-script matcher already
-    # restricts to Edit|Write|MultiEdit, but guard here for defensiveness.
-    if tool_name.lower() not in ("edit", "write", "multiedit"):
+    # Only handle the target edit tools. Codex reports file edits through
+    # apply_patch; Claude reports Edit/Write/MultiEdit.
+    if tool_name.lower() not in ("edit", "write", "multiedit", "apply_patch"):
         _output_post(fmt=fmt)
         sys.exit(0)
 

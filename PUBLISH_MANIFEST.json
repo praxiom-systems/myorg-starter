@@ -1,11 +1,7 @@
 {
-  "canonical_sha": "cc3b2ea8dd549bd4c5de60719c19d35ba85e619b",
-  "generated_at": "2026-05-08T00:15:02+00:00",
+  "canonical_sha": "d393bcb7751cb240bfe0389edc62ed7f74060f88",
+  "generated_at": "2026-05-08T02:13:17+00:00",
   "files": [
-    {
-      "path": ".claude/commands/myorg-doctor.md",
-      "sha256": "970229eb8e0242baa4f4318abc9313416510c3949f6183c1322671d6a2bcda1d"
-    },
     {
       "path": ".github/workflows/ci.yml",
       "sha256": "313bad4152bdcb200ab349141181a7fb0a8d759be8547f1fcace189e390bc369"

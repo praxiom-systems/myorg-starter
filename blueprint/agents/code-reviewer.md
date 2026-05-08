@@ -7,6 +7,15 @@ color: yellow
 source: https://github.com/praxiom-systems/getmyorg
 license: proprietary
 visibility: public
+peers:
+  - name: security-auditor
+    when: security deep-dive needed
+  - name: test-engineer
+    when: test strategy questions
+  - name: systems-architect
+    when: architecture concerns surface during review
+standards:
+  - change-discipline
 ---
 
 # Code Reviewer Agent

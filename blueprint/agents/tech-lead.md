@@ -8,6 +8,21 @@ color: magenta
 source: https://github.com/praxiom-systems/getmyorg
 license: proprietary
 visibility: public
+peers:
+  - name: debugger
+    when: investigating bug or test-failure root cause
+  - name: code-reviewer
+    when: ready for review checkpoint
+  - name: systems-architect
+    when: architecture or service-boundary decisions
+  - name: fullstack-engineer
+    when: implementation work follows planning
+standards:
+  - change-discipline
+  - agent-authored-changes
+skills:
+  - decompose-changeset
+  - estimate-work
 ---
 
 # Tech Lead Agent

@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "7d66d9f52ce611f04fe0ed6368d9fd842c1260de",
-  "generated_at": "2026-05-08T23:37:06+00:00",
+  "canonical_sha": "d785c1109462d901218737562aa631f3990db547",
+  "generated_at": "2026-05-09T19:43:29+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -28,7 +28,7 @@
     },
     {
       "path": "bin/doctor.sh",
-      "sha256": "5ab4d9f62025a9cab2a23b689ae072a2f85abed50a449a16223b984438568c94"
+      "sha256": "dd7ca6f7f91b8400d332da371d4a5671483c667a21300b78943f1f39a3242799"
     },
     {
       "path": "blueprint/agents/code-reviewer.md",
@@ -91,26 +91,6 @@
       "sha256": "162b8cfcd3bcc37df17111fe2dd42c00c750ec59cfaae199b095915631240cdd"
     },
     {
-      "path": "blueprint/hooks/bash_command_parsing.py",
-      "sha256": "a73404abb5fe803ad52ed78bef42cc20b8737268c3987c4a5a88e358c018f5cd"
-    },
-    {
-      "path": "blueprint/hooks/bash_policy_decide.py",
-      "sha256": "f3351b392255185f6ffcd007270cfd71b032f50d549e028a048b63a7c21e5cc5"
-    },
-    {
-      "path": "blueprint/hooks/bash_policy_evaluate.py",
-      "sha256": "95af01a83aea6932da9293959d474554eaee747a72b6db3686b78071f440d35a"
-    },
-    {
-      "path": "blueprint/hooks/bash_policy_patterns.py",
-      "sha256": "c689090c7bc17d52ef9e8d10053ff0e16fe49c3f0b0283dd85524a97207b1df9"
-    },
-    {
-      "path": "blueprint/hooks/bash_policy_shadow.py",
-      "sha256": "460fa7786c685933fb805d29daa410b5716091a852170a8f3a69424590e42e41"
-    },
-    {
       "path": "blueprint/hooks/codex-permission-bash.sh",
       "sha256": "75b34f12a2fd356ad905619d8d9c8cdbedfa3efb114efcac8b85635aaff226d0"
     },
@@ -135,16 +115,8 @@
       "sha256": "7373ea832468d3ef14902ce2e0427bbe9bddb25cb7dd7f8ff48d198c270254a1"
     },
     {
-      "path": "blueprint/hooks/hook_log.py",
-      "sha256": "3c354bbe47d31753430a43e72d81dc7ad132df27f83348bd01b6e3130cf0a098"
-    },
-    {
       "path": "blueprint/hooks/injection-patterns.toml",
       "sha256": "e18542d66c950b920f6741bd943359ac79a2e76bb86152a85d1b8b38fecf467f"
-    },
-    {
-      "path": "blueprint/hooks/myorg_message.py",
-      "sha256": "c705b0eb5cc7e627796ade4cf49a9c64f697beba8cb9f9361b43b6ae3cdb7ba9"
     },
     {
       "path": "blueprint/hooks/post-bash.sh",
@@ -159,32 +131,16 @@
       "sha256": "341b832dcf06e720188e04ae3e1d4463d02513df435d449b11a2c7cf8619e88a"
     },
     {
-      "path": "blueprint/hooks/validate-bash.py",
-      "sha256": "3e9a5caf1164b1668d349fd4029909af2224f9248ed2b71ad741a7d11491a205"
-    },
-    {
       "path": "blueprint/hooks/validate-bash.sh",
       "sha256": "11b00ec9754f059aa44175ca8f220941c50799c73182112dcd18129b3905fd16"
-    },
-    {
-      "path": "blueprint/hooks/validate-edit.py",
-      "sha256": "40cfe270c0d9c2484c378cffa8f89c2b2809575c116c5d1b2c53f23aea68c185"
     },
     {
       "path": "blueprint/hooks/validate-edit.sh",
       "sha256": "2743705ff07cb724158da273a389ba6ac164c3d15adb7137d576c13b3a24358c"
     },
     {
-      "path": "blueprint/hooks/validate-postedit.py",
-      "sha256": "be1024f9f0b3601257fffad17376999e603182490724f2e3d94f36bf93805334"
-    },
-    {
       "path": "blueprint/hooks/validate-postedit.sh",
       "sha256": "ac5015f6b33cf0a38783b00f44001a598d2f9c9fda20beeb4779a198e046bbaf"
-    },
-    {
-      "path": "blueprint/hooks/validate-read.py",
-      "sha256": "7fa90b2248d1be0f06489fcc60ff1b8a4f1b55fd71642f73a8e5e04a464c86a4"
     },
     {
       "path": "blueprint/hooks/validate-read.sh",
@@ -213,6 +169,50 @@
     {
       "path": "blueprint/standards/silent-failure.md",
       "sha256": "984d331da951e0f3b5a2ee603b3e3aa1731f21da8224507a1af36e5bfc48d3f9"
+    },
+    {
+      "path": "pylib/hooks/bash_command_parsing.py",
+      "sha256": "a73404abb5fe803ad52ed78bef42cc20b8737268c3987c4a5a88e358c018f5cd"
+    },
+    {
+      "path": "pylib/hooks/bash_policy_decide.py",
+      "sha256": "f3351b392255185f6ffcd007270cfd71b032f50d549e028a048b63a7c21e5cc5"
+    },
+    {
+      "path": "pylib/hooks/bash_policy_evaluate.py",
+      "sha256": "95af01a83aea6932da9293959d474554eaee747a72b6db3686b78071f440d35a"
+    },
+    {
+      "path": "pylib/hooks/bash_policy_patterns.py",
+      "sha256": "c689090c7bc17d52ef9e8d10053ff0e16fe49c3f0b0283dd85524a97207b1df9"
+    },
+    {
+      "path": "pylib/hooks/bash_policy_shadow.py",
+      "sha256": "460fa7786c685933fb805d29daa410b5716091a852170a8f3a69424590e42e41"
+    },
+    {
+      "path": "pylib/hooks/entries/validate_bash.py",
+      "sha256": "15e75f9915fde095fdd47c9b7509ef8fc6498b8890238adbc3d6ce945ab4be6a"
+    },
+    {
+      "path": "pylib/hooks/entries/validate_edit.py",
+      "sha256": "6176dd02c63698a100830305aa56227c58b370c2ef13b396d1522f267233ec11"
+    },
+    {
+      "path": "pylib/hooks/entries/validate_postedit.py",
+      "sha256": "8b0b244164b7fb67d057c126b9394a33675b921f877d6804811bdf57feeaff43"
+    },
+    {
+      "path": "pylib/hooks/entries/validate_read.py",
+      "sha256": "d429426ff8b17d6610023722af49052795c33c122c1001ca6250f3439610039d"
+    },
+    {
+      "path": "pylib/hooks/hook_log.py",
+      "sha256": "3c354bbe47d31753430a43e72d81dc7ad132df27f83348bd01b6e3130cf0a098"
+    },
+    {
+      "path": "pylib/hooks/myorg_message.py",
+      "sha256": "c705b0eb5cc7e627796ade4cf49a9c64f697beba8cb9f9361b43b6ae3cdb7ba9"
     }
   ]
 }

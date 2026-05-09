@@ -1,0 +1,53 @@
+# Flow definition: dispatch
+#
+# Consumed by scripts/sync_local.py to generate per-host stub workflows:
+#   .github/workflows/myorg-dispatch-claude.yml
+#   .github/workflows/myorg-dispatch-gemini.yml
+#
+# Schema: blueprint/automation/<flow>.yaml
+#   flow:     canonical flow identifier (^[a-z][a-z0-9_-]*$)
+#   name:     human-readable display name
+#   prompt:   path to host-neutral prompt (relative to repo root)
+#   triggers: GHA event/filter declarations
+#   inputs:   workflow_call inputs passed to _myorg-runner.yml
+#   defaults: default values for optional runner parameters
+
+flow: dispatch
+name: "@myorg Dispatch"
+prompt: blueprint/automation/dispatch.md
+
+triggers:
+  # Respond to @myorg mentions in issue/PR comments, reviews, and new issues.
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, reopened]
+
+# Condition: only fire when @myorg is mentioned and actor is trusted.
+# Rendered verbatim into the stub workflow's job-level `if:`.
+condition: |
+  (
+    (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@myorg')) ||
+    (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@myorg')) ||
+    (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@myorg')) ||
+    (github.event_name == 'issues' && contains(github.event.issue.body, '@myorg'))
+  ) && (
+    (github.event_name == 'issue_comment' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+    (github.event_name == 'pull_request_review_comment' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+    (github.event_name == 'pull_request_review' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
+    (github.event_name == 'issues' &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
+  ) && vars.MYORG_AUTOMATION_V2 == 'true'
+
+defaults:
+  timeout_minutes: 10
+  max_turns: 20
+  skip_drafts: true
+  skip_fork_prs: true

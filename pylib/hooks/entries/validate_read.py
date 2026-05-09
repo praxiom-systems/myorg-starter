@@ -17,10 +17,8 @@ import os
 import re
 import sys
 from dataclasses import dataclass
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from myorg_message import format_reason
+from pylib.hooks.myorg_message import format_reason
 
 try:
     import tomllib

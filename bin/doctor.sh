@@ -9,17 +9,21 @@
 set -eu
 
 HOOKS_DIR="blueprint/hooks"
+ENTRIES_DIR="pylib/hooks/entries"
 LOG_DIR="${MYORG_HOOK_LOG_DIR:-/tmp/claude-hook-logs}"
 
+# Slice 2 (#670) split: shell wrappers + TOMLs stay alongside doctor.sh
+# under blueprint/hooks; entry-script bodies live under pylib/hooks/entries
+# (hyphen → underscore filename).
 REQUIRED_HOOKS=(
-  "validate-bash.sh"
-  "validate-bash.py"
-  "post-bash.sh"
-  "hook-lib.sh"
-  "validate-read.sh"
-  "validate-read.py"
-  "validate-edit.sh"
-  "validate-edit.py"
+  "$HOOKS_DIR/validate-bash.sh"
+  "$ENTRIES_DIR/validate_bash.py"
+  "$HOOKS_DIR/post-bash.sh"
+  "$HOOKS_DIR/hook-lib.sh"
+  "$HOOKS_DIR/validate-read.sh"
+  "$ENTRIES_DIR/validate_read.py"
+  "$HOOKS_DIR/validate-edit.sh"
+  "$ENTRIES_DIR/validate_edit.py"
 )
 
 count_sections() {
@@ -56,8 +60,7 @@ print_header() {
 print_install_section() {
   local missing=0
   echo "Hook installation"
-  for hook in "${REQUIRED_HOOKS[@]}"; do
-    local path="$HOOKS_DIR/$hook"
+  for path in "${REQUIRED_HOOKS[@]}"; do
     if [ -r "$path" ]; then
       echo "  ✓ $path"
     else

@@ -5,7 +5,7 @@ PostToolUse output-verification probe for Edit/Write/MultiEdit.
 Runs two checks after an edit tool has applied a change:
   1. Band-aid re-scan — synchronous, advisory-first (same MYORG_BANDAID_MODE
      gating as the PreToolUse detector).  Uses the shared scan_diff() engine
-     from validate-edit.py so pattern logic is never duplicated.
+     from validate_edit so pattern logic is never duplicated.
   2. Contract LLM judge — asynchronous fire-and-forget via
      a private contract judge (when an overlay module is available).
      Gated behind MYORG_VERIFY_LLM_JUDGE=1.
@@ -23,7 +23,7 @@ Environment variables:
   MYORG_VERIFY_LLM_JUDGE   — Set to "1" to enable async contract judge invocation.
   MYORG_HOOK_LOG_DIR        — Override log directory (empty string disables logging).
 
-Skip-list parity with validate-edit.py:
+Skip-list parity with validate_edit.py:
   - Edits to band-aid-patterns.toml, injection-patterns.toml, bash-patterns.toml
     are silently allowed (no scan, no judge).
   - Paths under tests/fixtures/ are silently allowed.
@@ -35,49 +35,38 @@ import importlib.util
 import json
 import os
 import sys
-
-# ---------------------------------------------------------------------------
-# Sibling import — validate-edit.py lives in the same directory and exposes
-# the scan_diff() public API.  We add SCRIPT_DIR to sys.path so the import
-# works whether the hook is invoked from the blueprint dir, the .myorg
-# working copy, or any customer install location.
-# ---------------------------------------------------------------------------
-_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+from pathlib import Path
 
 
-def _load_validate_edit():
-    # Load validate-edit.py (dashes in name prevent a plain ``import``).
-    # The module must be registered in sys.modules under the chosen name
-    # BEFORE exec_module runs, so that dataclass field resolution
-    # (which looks up cls.__module__ in sys.modules) succeeds.
-    mod_name = "validate_edit"
-    if mod_name in sys.modules:
-        return sys.modules[mod_name]
-    spec = importlib.util.spec_from_file_location(
-        mod_name,
-        os.path.join(_SCRIPT_DIR, "validate-edit.py"),
-    )
-    if spec is None or spec.loader is None:
-        return None
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules[mod_name] = mod
-    spec.loader.exec_module(mod)  # type: ignore[union-attr]
-    return mod
+def _load_validate_edit_module():
+    """Load validate_edit sibling by file path.
+
+    Tries both ``validate_edit.py`` (underscore, used by direct-import and
+    bundled layouts) and ``validate-edit.py`` (hyphen, used by flat
+    projection into host hook dirs) so this module works identically across
+    every projection mode.
+    """
+    here = Path(__file__).resolve().parent
+    for name in ("validate_edit.py", "validate-edit.py"):
+        candidate = here / name
+        if candidate.is_file():
+            mod_name = "validate_edit_sibling"
+            spec = importlib.util.spec_from_file_location(mod_name, candidate)
+            if spec is None or spec.loader is None:
+                raise ImportError(f"could not load spec for {candidate}")
+            module = importlib.util.module_from_spec(spec)
+            # Register before exec so that dataclass cls.__module__ lookups work.
+            sys.modules[mod_name] = module
+            spec.loader.exec_module(module)
+            return module
+    raise ImportError(f"validate_edit sibling not found near {here}")
 
 
-_ve = _load_validate_edit()
-
-if _ve is None:
-    # Cannot import engine — emit silent allow and exit.
-    print(json.dumps({
-        "hookSpecificOutput": {"hookEventName": "PostToolUse", "suppressOutput": False}
-    }))
-    sys.exit(0)
-
-scan_diff = _ve.scan_diff
-_get_added_lines_for_input = _ve._get_added_lines_for_input
-_build_reason = _ve._build_reason
-_should_skip_file = _ve._should_skip_file
+_validate_edit = _load_validate_edit_module()
+scan_diff = _validate_edit.scan_diff
+_build_reason = _validate_edit._build_reason
+_get_added_lines_for_input = _validate_edit._get_added_lines_for_input
+_should_skip_file = _validate_edit._should_skip_file
 
 
 # ---------------------------------------------------------------------------

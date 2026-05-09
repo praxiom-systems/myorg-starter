@@ -14,23 +14,21 @@ modules (issue #584 decomposition).
 import json
 import os
 import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from bash_policy_decide import (
+from pylib.hooks.bash_policy_decide import (
     apply_policy_gate,
     compute_would_action,
     resolve_default_action,
 )
-from bash_policy_evaluate import validate_command
-from bash_policy_patterns import (
+from pylib.hooks.bash_policy_evaluate import validate_command
+from pylib.hooks.bash_policy_patterns import (
     compile_patterns,
     detect_os,
     inject_git_root_patterns,
     load_config,
     merge_os_config,
 )
-from bash_policy_shadow import build_shadow_row, write_shadow_row
+from pylib.hooks.bash_policy_shadow import build_shadow_row, write_shadow_row
 
 
 def output_decision(decision: str, reason: str, fmt: str = "claude"):

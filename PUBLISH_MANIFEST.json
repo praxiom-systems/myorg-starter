@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "a28826e07e175891d4e1cb6c98c67d261c4f1ece",
-  "generated_at": "2026-05-09T21:01:43+00:00",
+  "canonical_sha": "f107ff7acfbb0d42a69aa8c84936c488a111566f",
+  "generated_at": "2026-05-09T21:20:22+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -69,6 +69,38 @@
     {
       "path": "blueprint/agents/test-engineer.md",
       "sha256": "c210cc792fb27cc9eee5f6e61c1d8cdf7fd7b2f52c4f38cd74b2afe735d8f0e1"
+    },
+    {
+      "path": "blueprint/automation/dispatch.md",
+      "sha256": "b691e583189a2ed03c4848e57a7d2e60b61a889277746abab742a44ea3e65184"
+    },
+    {
+      "path": "blueprint/automation/dispatch.yaml",
+      "sha256": "f4807a3a41e36d5a8ac2c44923ea56b77f09eabd41de4c7995d4da3c722ffcbf"
+    },
+    {
+      "path": "blueprint/automation/review.md",
+      "sha256": "f5ea3692b5d12d9108ff7372b40d03897cbf317157b36b68db4628e452d4ee4a"
+    },
+    {
+      "path": "blueprint/automation/review.yaml",
+      "sha256": "ab8a8e7f20b0f77d92a5f11705874d263bbf38bbefd72ad43a8a226e3eb45fa2"
+    },
+    {
+      "path": "blueprint/automation/scheduled-triage.md",
+      "sha256": "e5998fd19cc617aed27c5e79c275d72427e62a38e87e3e6787ab729af2ebe558"
+    },
+    {
+      "path": "blueprint/automation/scheduled-triage.yaml",
+      "sha256": "83dc872c71aad7451b0c5491187ca3b3f394e626b71b83ef00a173ae6e6c1553"
+    },
+    {
+      "path": "blueprint/automation/triage.md",
+      "sha256": "0bb2da76b0b29c5a2a3ee0aeafcfe6a0268558f1524ddea1947521aa8008b69b"
+    },
+    {
+      "path": "blueprint/automation/triage.yaml",
+      "sha256": "ed571a87b2002ad94b72e1eb5b701d8fa2ddac2a4845db765468c19d3fafdff1"
     },
     {
       "path": "blueprint/hooks/band-aid-patterns.toml",

@@ -96,27 +96,38 @@ patterns = [
 [deny.credential_reads]
 description = "Reading private keys, cloud credentials, password stores, and browser cookies"
 # Verbs covered: read/dump/copy/archive (cat, less, bat, head, tail, more, tac,
-# xxd, od, strings, hexdump, cp, mv, tar, zip, gzip, scp, rsync, openssl,
-# base64, sqlite3 for cookie DBs). `ls ~/.ssh/` stays allowed — this only
-# blocks reading the credential contents.
+# xxd, od, strings, hexdump, grep, rg, awk, sed, jq, cp, mv, tar, zip, gzip,
+# scp, rsync, openssl, base64, sqlite3 for cookie DBs). `ls ~/.ssh/` stays
+# allowed — this only blocks reading the credential contents.
 patterns = [
     # SSH private keys (id_rsa, id_ed25519, id_dsa, id_ecdsa, …)
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.ssh/id_",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.ssh/id_",
     # AWS shared credentials and config (config can hold session tokens)
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.aws/credentials",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.aws/credentials",
     # netrc (legacy auth file used by curl/git/ftp)
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.netrc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.netrc(\\s|$)",
     # GCP application default / legacy credentials
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/gcloud/(application_default_credentials|legacy_credentials)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/gcloud/(application_default_credentials|legacy_credentials|credentials\\.db|access_tokens\\.db)",
     # kubectl config (bearer tokens / client certs)
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync)\\b.*\\.kube/config(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.kube/config(\\s|$)",
     # GPG private keyring
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync)\\b.*\\.gnupg/private-keys",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.gnupg/private-keys",
     # password-store
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync)\\b.*\\.password-store/",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.password-store/",
+    # Package manager, container, GitHub, and Git credential stores
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.npmrc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.pypirc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.docker/config\\.json(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.git-credentials(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/gh/hosts\\.yml(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/hub(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.azure/accessTokens\\.json(\\s|$)",
     # Browser cookie stores (Chrome / Firefox)
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|sqlite3)\\b.*/Cookies(\\s|$)",
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|sqlite3)\\b.*/cookies\\.sqlite",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|sqlite3)\\b.*/Cookies(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|sqlite3)\\b.*/cookies\\.sqlite",
+    # Kubernetes secret value dumps. Plain `kubectl get secret` stays allowed
+    # because it lists metadata; structured output exposes base64 secret data.
+    "^(kubectl|k3s kubectl)\\b(?=.*(^|\\s)get(\\s|$))(?=.*(^|\\s)secrets?(\\s|$|/|,))(?=.*(-o(=|\\s*)|--output(=|\\s+))(yaml|json|jsonpath|jsonpath-file|go-template|go-template-file|template|templatefile|custom-columns|custom-columns-file)[^\\s]*)",
 ]
 
 [deny.env_to_network_exfil]
@@ -131,6 +142,8 @@ patterns = [
     "^(curl|httpie|http)\\b.*(-d|--data(-binary|-raw|-urlencode)?[\\s=])\\s*@\\S*\\.aws/credentials",
     "^(curl|httpie|http)\\b.*(-d|--data(-binary|-raw|-urlencode)?[\\s=])\\s*@\\S*\\.ssh/id_",
     "^(curl|httpie|http)\\b.*(-d|--data(-binary|-raw|-urlencode)?[\\s=])\\s*@\\S*\\.netrc",
+    # Multipart upload of credential files via curl/httpie
+    "^(curl|httpie|http)\\b(?=.*(^|\\s)(-F|-f|--form)(\\s|=)).*@\\S*(\\.aws/credentials|\\.ssh/id_|\\.netrc(\\s|$)|\\.npmrc(\\s|$)|\\.pypirc(\\s|$)|\\.docker/config\\.json(\\s|$)|\\.git-credentials(\\s|$)|\\.config/gh/hosts\\.yml(\\s|$)|\\.config/hub(\\s|$)|\\.azure/accessTokens\\.json(\\s|$))",
     # POSTing a credential file via wget (uses --post-file= without @)
     "^wget\\b.*--post-file[\\s=]\\S*\\.aws/credentials",
     "^wget\\b.*--post-file[\\s=]\\S*\\.ssh/id_",

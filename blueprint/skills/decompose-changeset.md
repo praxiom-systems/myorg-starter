@@ -28,7 +28,7 @@ A changeset plan is an ordered, contract-bounded sequence of PR stubs — each s
 ## Input
 
 - Issue body, epic description, scope summary, or freeform plan (required)
-- Project map availability assumed — `map-overview` and `map-neighborhood` are called in Phase 1
+- Change-scoped context availability assumed — `change_brief` is called first when paths or a concrete task are known; `map-overview` and `map-neighborhood` remain the fallback and deeper drilldown route
 - Any existing partial plan or prior decomposition attempt (optional; surface conflicts explicitly)
 - Org profile (Sovereign / Lean / Focused / Scaled) — determines whether a changeset plan is recommended or required per the standard's per-profile defaults table
 
@@ -39,9 +39,9 @@ A changeset plan is an ordered, contract-bounded sequence of PR stubs — each s
 
 ## Workflow
 
-### Phase 1 — Read the map
+### Phase 1 — Read change-scoped context
 
-Call `map-overview` to understand the overall structure of the affected repo. For each area you expect to touch, call `map-neighborhood` with the area name. Do not begin decomposition without this step. Blind decomposition against an unfamiliar codebase produces stubs that cross undetected contract boundaries. If the project map reports `needs_full_refresh`, run `getmyorg project-map <dir>` before proceeding.
+When the work names paths or a concrete task, call `change_brief` or `getmyorg change-brief` first. Use its affected areas, ownership, trust state, candidate files/spans, and verification hints as the starting context. For work that is still broad or area-shaped, call `map-overview` to understand the overall structure of the affected repo. For each area you expect to touch or that the brief identifies, call `map-neighborhood` with the area name when you need deeper architectural context. Do not begin decomposition without this first-pass context. Blind decomposition against an unfamiliar codebase produces stubs that cross undetected contract boundaries. If readiness reports `needs_full_refresh`, run `getmyorg project-map <dir>` before proceeding.
 
 **Stop and report if:** the project map is unavailable, stale, or cannot identify the affected areas.
 

@@ -33,6 +33,7 @@ Create clear implementation plans:
 - Identify key technical decisions
 - Outline milestones and checkpoints
 - Specify acceptance criteria
+- For new exported surface, run `prove-value` before accepting the slice so the plan names the landed user/agent value, consumer, and source-of-truth boundaries
 
 ### 3. Risk Assessment
 
@@ -160,6 +161,7 @@ A plan is complete when:
 ## Guardrails
 
 - **If scope keeps expanding during planning**, stop and re-clarify requirements
+- **If a proposal adds new exported surface**, run `prove-value` before estimating or decomposing; do not plan implementation around unconsumed plumbing
 - **Never plan more than 2 weeks out in detail** - beyond that, use themes
 - **If estimate confidence is low**, flag it and propose a spike/investigation first
 - **Don't plan heroics** - if the plan requires everything to go perfectly, it's not realistic
@@ -179,4 +181,3 @@ Before handing work to another agent, record three things in the handoff artifac
 1. **What changed from plan** — any deviation between the original plan and the actual state being handed off
 2. **What the receiver will get wrong** — assumptions the receiver is likely to make that do not hold
 3. **What the receiver needs to believe** — context that is not obvious from the artifact itself but is required to proceed correctly
-

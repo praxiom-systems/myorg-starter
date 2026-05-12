@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "a0bdfa0835232e5ed5b17b6f015a6fd3724d5c1d",
-  "generated_at": "2026-05-12T20:10:35+00:00",
+  "canonical_sha": "93a5d40ce7ee6311b7e525e3e6484bb097c83f11",
+  "generated_at": "2026-05-12T20:40:40+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -48,7 +48,7 @@
     },
     {
       "path": "blueprint/agents/product-owner.md",
-      "sha256": "29fe16b8ac4ceeb9f2616cd9e549994e590827993d75ccaae2112461a6c0a349"
+      "sha256": "bcabc4159fcc5b61cd4b9be179f95e6d1137d266ceb447edaeff3ca0dcba40c8"
     },
     {
       "path": "blueprint/agents/security-auditor.md",
@@ -60,7 +60,7 @@
     },
     {
       "path": "blueprint/agents/tech-lead.md",
-      "sha256": "23eaf896afd02375f3d8bb17c834f5647ae8972c7278bc9ace3c68bd62f87c75"
+      "sha256": "49533d31d44c022b521742f1038c1a93ef145ac166b13511e5c23b1aabe55438"
     },
     {
       "path": "blueprint/agents/technical-writer.md",

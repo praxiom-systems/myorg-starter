@@ -5,6 +5,9 @@
 # Advisory-first: only high-confidence patterns block; most emit a non-blocking
 # advisory surfaced in logs and the transcript.
 
+# Record this tool invocation for the statusline stall-detector.
+"$(dirname "$0")/touch-last-tool-call.sh" || true
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

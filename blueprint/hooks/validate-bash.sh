@@ -5,6 +5,9 @@
 #
 # Originally adapted from amulya-labs/ai-dev-foundry (MIT). Modifications © praxiom-systems.
 
+# Record this tool invocation for the statusline stall-detector.
+"$(dirname "$0")/touch-last-tool-call.sh" || true
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -4,6 +4,9 @@
 # injection-patterns.toml. Advisory-first: only high-confidence signatures
 # block; medium-confidence signatures are surfaced as non-blocking warnings.
 
+# Record this tool invocation for the statusline stall-detector.
+"$(dirname "$0")/touch-last-tool-call.sh" || true
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

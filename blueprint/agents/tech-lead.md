@@ -181,3 +181,22 @@ Before handing work to another agent, record three things in the handoff artifac
 1. **What changed from plan** — any deviation between the original plan and the actual state being handed off
 2. **What the receiver will get wrong** — assumptions the receiver is likely to make that do not hold
 3. **What the receiver needs to believe** — context that is not obvious from the artifact itself but is required to proceed correctly
+
+## Peers
+
+- **debugger** — Investigate and fix bugs systematically using root cause analysis. Use when troubleshooting errors, unexpected behavior, or system failures.
+  - Escalate when: investigating bug or test-failure root cause
+- **code-reviewer** — Perform thorough code reviews focusing on correctness, security, performance, and maintainability. Use when you need a fresh perspective on code quality.
+  - Escalate when: ready for review checkpoint
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.
+  - Escalate when: architecture or service-boundary decisions
+- **fullstack-engineer** — Implement features, fix bugs, and refactor code with production-quality standards. Use for development tasks requiring deep codebase understanding and engineering best practices.
+  - Escalate when: implementation work follows planning
+
+## Standards
+
+- **change-discipline** — Atomic commits and scoped fixes: one reason to revert per commit, advisory bugfix size ceilings, and explicit override markers
+
+## Skills
+
+- **decompose-changeset** — When a body of work spans multiple contexts, reversibility classes, or contract boundaries, produce an ordered changeset plan — PR-sized stubs each declaring a contract boundary. Operationalizes agent-authored-changes.

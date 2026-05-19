@@ -157,3 +157,12 @@ Work is complete when:
 | Complex planning | tech-lead | Task decomposition and sequencing of complex work |
 | Major refactoring | fullstack-engineer | Broad refactors crossing many modules need senior judgment |
 | Significant refactoring | refactoring-engineer | Dedicated refactoring expertise for structural improvements |
+
+## Peers
+
+- **debugger** — Investigate and fix bugs systematically using root cause analysis. Use when troubleshooting errors, unexpected behavior, or system failures.
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.
+- **code-reviewer** — Perform thorough code reviews focusing on correctness, security, performance, and maintainability. Use when you need a fresh perspective on code quality.
+- **tech-lead** — Plan implementation approaches and break down complex tasks. Use for scoping work, creating implementation plans, and making technical decisions. Does not write code.
+- **fullstack-engineer** — Implement features, fix bugs, and refactor code with production-quality standards. Use for development tasks requiring deep codebase understanding and engineering best practices.

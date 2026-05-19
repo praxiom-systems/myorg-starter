@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "9d5e5162f5d428c3973b7bb1946ec7c391b46012",
-  "generated_at": "2026-05-16T16:56:00+00:00",
+  "canonical_sha": "8246b4647ddc8565c1271eb3310843c66e80e843",
+  "generated_at": "2026-05-19T21:54:39+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -32,43 +32,43 @@
     },
     {
       "path": "blueprint/agents/code-reviewer.md",
-      "sha256": "4011ef1bce7822bf14ec4b570a1425070796eb59eb26153407f3fa9dd222e7df"
+      "sha256": "e6f012bc8f89087c7b69883acc0dbfd7b063e5cbbb177fa5e4dccb2f76d2fd3f"
     },
     {
       "path": "blueprint/agents/debugger.md",
-      "sha256": "e298eaf0976b7c065e2443ed691cff9ccf41c972b367548b990661def67d2980"
+      "sha256": "1c7a921efe31ddf0255af8ad0c669e7d1789f3979c6cc4d8e8a56fc7e182c3f2"
     },
     {
       "path": "blueprint/agents/fullstack-engineer.md",
-      "sha256": "e14e98d0ed14fba6cd7f798e97133169c6b0f6f97994f5009ceb1676d4babe1a"
+      "sha256": "374a0122769c4a42d2ded64f4ccef8e68dfe2a53bc85b6a256ee25dc7fd09567"
     },
     {
       "path": "blueprint/agents/junior-engineer.md",
-      "sha256": "5f3051563f2766edd0e49f953e5fb0ea58fb40746c67dcd7bb7c1d6b2a69ad7f"
+      "sha256": "3ecbaf0a1bf5bff32771dc8a2c04090bfb3b2ae4bba28dee1ff99c76190d409c"
     },
     {
       "path": "blueprint/agents/product-owner.md",
-      "sha256": "bcabc4159fcc5b61cd4b9be179f95e6d1137d266ceb447edaeff3ca0dcba40c8"
+      "sha256": "f6785c89089c1c3e35c71fbbe3e30192364a4c6b91a2881e14823a45e6abade9"
     },
     {
       "path": "blueprint/agents/security-auditor.md",
-      "sha256": "f444ca599c53a7114c24550039fb7100a23255307e8d3cac0a3f6cbec5389836"
+      "sha256": "fae39863bf92623a69f5cc68e993bb0e5fe399fc9de3abe61159f04abb0a2c15"
     },
     {
       "path": "blueprint/agents/systems-architect.md",
-      "sha256": "1aacfab3a4656fd6b641ab01ed9c9b591784e50c19e4b1fec58e74a5825b15ab"
+      "sha256": "4dd6ca1a067d27d752368121abc765a10c36733c07fbd5b3f4bd46f67969e4cc"
     },
     {
       "path": "blueprint/agents/tech-lead.md",
-      "sha256": "49533d31d44c022b521742f1038c1a93ef145ac166b13511e5c23b1aabe55438"
+      "sha256": "7fdd5c403a5519e576143fd80ac36d156c392cac5da662a77c362f5a913c0a48"
     },
     {
       "path": "blueprint/agents/technical-writer.md",
-      "sha256": "fde38e9f4221cf73c575dd79eff2844518189f602ff61ad6f1f39fc345ed45f4"
+      "sha256": "8779153b81fdb3f1e4c3b6f898006c7b8c7e2a39058635d3f9e9af12e4539f05"
     },
     {
       "path": "blueprint/agents/test-engineer.md",
-      "sha256": "c210cc792fb27cc9eee5f6e61c1d8cdf7fd7b2f52c4f38cd74b2afe735d8f0e1"
+      "sha256": "e01aa929020d4bf78ec43c9f884c4460fb1c3f03b270db069a7adf602b9ebd86"
     },
     {
       "path": "blueprint/automation/scheduled-triage.md",
@@ -128,7 +128,7 @@
     },
     {
       "path": "blueprint/hooks/hook-lib.sh",
-      "sha256": "7373ea832468d3ef14902ce2e0427bbe9bddb25cb7dd7f8ff48d198c270254a1"
+      "sha256": "28a89ed2196d4e8d4247996ab2dcfac12de0186fa276390b015d064aec8a4f93"
     },
     {
       "path": "blueprint/hooks/injection-patterns.toml",

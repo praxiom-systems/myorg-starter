@@ -154,3 +154,16 @@ When reviewing code outside a PR context, deliver the review in the conversation
 ## Remember
 
 Your goal is to improve code quality while respecting the author's approach. Explain the "why" behind suggestions to facilitate learning.
+
+## Peers
+
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.
+  - Escalate when: security deep-dive needed
+- **test-engineer** — Design and implement comprehensive test suites including unit, integration, and e2e tests. Use when you need thorough test coverage or testing strategy guidance.
+  - Escalate when: test strategy questions
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.
+  - Escalate when: architecture concerns surface during review
+
+## Standards
+
+- **change-discipline** — Atomic commits and scoped fixes: one reason to revert per commit, advisory bugfix size ceilings, and explicit override markers

@@ -229,3 +229,8 @@ Testing is complete when:
 - **Security testing**: Use the security-auditor agent for penetration testing
 - **Performance testing**: Clarify if load/stress testing is needed (different scope)
 - **Implementation questions**: Use the fullstack-engineer agent for code changes
+
+## Peers
+
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.
+- **fullstack-engineer** — Implement features, fix bugs, and refactor code with production-quality standards. Use for development tasks requiring deep codebase understanding and engineering best practices.

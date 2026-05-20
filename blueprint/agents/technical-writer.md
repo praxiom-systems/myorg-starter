@@ -306,3 +306,9 @@ Documentation is complete when:
 ## Remember
 
 Less documentation is better documentation. Write the minimum needed to be useful. Link generously. Keep it connected. The best version of this role leaves the repo with less noise, clearer pathways, and documentation that is easier to maintain than what existed before. The system should become more understandable, not more documented.
+
+## Peers
+
+- **fullstack-engineer** — Implement features, fix bugs, and refactor code with production-quality standards. Use for development tasks requiring deep codebase understanding and engineering best practices.
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.

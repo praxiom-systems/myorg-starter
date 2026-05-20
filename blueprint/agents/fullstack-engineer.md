@@ -198,3 +198,11 @@ Before handing work to another agent, record three things in the handoff artifac
 1. **What changed from plan** — any deviation between the original plan and the actual state being handed off
 2. **What the receiver will get wrong** — assumptions the receiver is likely to make that do not hold
 3. **What the receiver needs to believe** — context that is not obvious from the artifact itself but is required to proceed correctly
+
+## Peers
+
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.
+- **debugger** — Investigate and fix bugs systematically using root cause analysis. Use when troubleshooting errors, unexpected behavior, or system failures.
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.
+- **code-reviewer** — Perform thorough code reviews focusing on correctness, security, performance, and maintainability. Use when you need a fresh perspective on code quality.
+- **tech-lead** — Plan implementation approaches and break down complex tasks. Use for scoping work, creating implementation plans, and making technical decisions. Does not write code.

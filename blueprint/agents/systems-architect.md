@@ -156,3 +156,8 @@ Analysis is complete when:
 - **Security architecture**: Use the security-auditor agent for threat modeling
 - **Planning/scoping**: Use the tech-lead agent
 
+## Peers
+
+- **fullstack-engineer** — Implement features, fix bugs, and refactor code with production-quality standards. Use for development tasks requiring deep codebase understanding and engineering best practices.
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.
+- **tech-lead** — Plan implementation approaches and break down complex tasks. Use for scoping work, creating implementation plans, and making technical decisions. Does not write code.

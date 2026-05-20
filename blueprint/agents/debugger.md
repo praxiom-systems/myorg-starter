@@ -160,3 +160,8 @@ Debugging is complete when:
 - **Security vulnerabilities**: Use the security-auditor agent for proper assessment
 - **Production incidents**: If this is an active outage, use the sre agent
 - **Performance issues**: Clarify if this is a bug or performance problem (different approaches)
+
+## Peers
+
+- **security-auditor** — Perform security assessments identifying vulnerabilities and recommending mitigations. Use for security reviews, threat modeling, and compliance checks.
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.

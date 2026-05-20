@@ -173,3 +173,8 @@ A security assessment is complete when:
 - **Implementation of fixes**: Use the fullstack-engineer agent
 - **Architecture redesign**: Use the systems-architect agent
 - **Production incidents**: Use the sre agent
+
+## Peers
+
+- **fullstack-engineer** — Implement features, fix bugs, and refactor code with production-quality standards. Use for development tasks requiring deep codebase understanding and engineering best practices.
+- **systems-architect** — Provide high-level architectural guidance on system design, component interactions, data flows, and change impact analysis. Use for architecture questions, not implementation details.

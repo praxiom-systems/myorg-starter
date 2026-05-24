@@ -18,7 +18,8 @@ import sys
 from pylib.hooks.bash_policy_decide import (
     apply_policy_gate,
     compute_would_action,
-    resolve_default_action,
+    resolve_hook_strictness,
+    strictness_to_default_action,
 )
 from pylib.hooks.bash_policy_evaluate import validate_command
 from pylib.hooks.bash_policy_patterns import (
@@ -29,10 +30,68 @@ from pylib.hooks.bash_policy_patterns import (
     merge_os_config,
 )
 from pylib.hooks.bash_policy_shadow import build_shadow_row, write_shadow_row
+from pylib.hooks.mark_registry import find_mark_for_command
+from pylib.hooks.reflect_predicate import DEFAULT_PREDICATE, evaluate as evaluate_predicate
+
+
+def _predicate_for_command(command: str, reflect_patterns, config: dict) -> str:
+    """Return the self_approve_predicate for the [reflect.*] section
+    whose pattern matches the command.
+
+    Falls back to DEFAULT_PREDICATE when no [reflect.*] pattern matches
+    (the command was unmatched at strict/balanced, but the agent
+    deliberated and marked it safe anyway — apply the conservative
+    default).
+    """
+    for pattern in reflect_patterns:
+        try:
+            if not pattern.regex.search(command):
+                continue
+        except Exception:
+            continue
+        # pattern.section looks like "reflect.<rule>".
+        section = pattern.section.split(".", 1)[1] if "." in pattern.section else pattern.section
+        entry = (config.get("reflect") or {}).get(section, {})
+        predicate = entry.get("self_approve_predicate")
+        if isinstance(predicate, str) and predicate.strip():
+            return predicate
+        return DEFAULT_PREDICATE
+    return DEFAULT_PREDICATE
+
+
+REFLECT_PROMPT_TEMPLATE = """\
+This command did not match a curated allow/deny rule (or matched a [reflect.*]
+pattern). Before re-attempting, deliberate on three axes and decide:
+
+  reversibility: low | medium | high
+  blast_radius:  local | repo | machine | external
+  confidence:    0.0..1.0
+
+If the classification satisfies the matched [reflect.*] pattern's
+self_approve_predicate (default: confidence >= 0.7), record the deliberation
+with the `mark_command_safe` MCP tool and retry — the hook will honor the
+mark on retry within this session.
+
+If you are uncertain, or the predicate is not satisfied, use AskUserQuestion
+to escalate. The org-answering layer routes to a human via the configured
+notification channels (interactive CLI, GitHub issue, or Slack).
+
+Do not retry the same command without either recording a mark or receiving
+explicit go-ahead via AskUserQuestion.
+
+----- original validator reason -----
+{reason}
+"""
 
 
 def output_decision(decision: str, reason: str, fmt: str = "claude"):
     """Emit the validator decision in a host-specific shape.
+
+    Per #923: hooks emit only ``allow`` or ``deny``. The validator's
+    internal "ask" decision (matched [reflect.*] pattern or no-match
+    fallback at strict/balanced strictness) is translated here into a
+    ``deny`` with a structured reflection prompt that keeps the LLM in
+    control of the session in every mode, including autonomous.
 
     ``claude`` (default) emits Claude Code's hookSpecificOutput JSON.
     ``raw`` emits a host-neutral ``{"decision": ..., "reason": ...}`` payload
@@ -40,6 +99,10 @@ def output_decision(decision: str, reason: str, fmt: str = "claude"):
     expects (Codex, Gemini CLI, OpenCode, …) without re-implementing the
     validator itself.
     """
+    if decision == "ask":
+        decision = "deny"
+        reason = REFLECT_PROMPT_TEMPLATE.format(reason=reason)
+
     if fmt == "raw":
         print(json.dumps({"decision": decision, "reason": reason}))
         return
@@ -55,17 +118,24 @@ def output_decision(decision: str, reason: str, fmt: str = "claude"):
 _HELP_TEXT = """\
 Usage: validate-bash.py <config.toml> [--format claude|raw] [--help]
 
-Validates a bash command (read as JSON on stdin) against the deny / ask /
-allow patterns in <config.toml> and emits a permission decision.
+Validates a bash command (read as JSON on stdin) against the deny / reflect /
+allow patterns in <config.toml> and emits a Claude Code permission decision
+(allow or deny — never the mechanical "ask", which would block the LLM).
+
+Strictness (the no-match fallback) is read from .myorg/config.yaml under
+``autonomy.hook_strictness``. When a command matches no rule, strictness
+controls the outcome:
+
+  strict   → deny + heavy reflection prompt (default failure-closed)
+  balanced → deny + light reflection prompt
+  lax      → allow
 
 Environment variables:
-  MYORG_BASH_DEFAULT=ask|allow
-        Controls the fallback decision when a command segment matches no
-        rule. Default is "allow" — deny+ask lists are the fence and
-        anything that doesn't match either is silently approved. Set to
-        "ask" to restore strict behavior (unknown commands require
-        confirmation). Per-session kill switch — `export
-        MYORG_BASH_DEFAULT=ask` restores strict behavior immediately.
+  MYORG_HOOK_STRICTNESS=strict|balanced|lax
+        Overrides the value loaded from .myorg/config.yaml. Useful for
+        tests and short-lived overrides. An invalid value falls through
+        to the config-driven resolution rather than tightening or
+        loosening silently.
 
   MYORG_HOOK_LOG_DIR=<path>
         Directory for hook logs, including the shadow log
@@ -75,6 +145,8 @@ Environment variables:
 
   MYORG_ACTIVE_AGENT, MYORG_ACTIVE_PROFILE
         Optional context labels included in shadow-log rows.
+
+Removed in #923: MYORG_BASH_DEFAULT (use hook_strictness instead).
 """
 
 
@@ -137,12 +209,19 @@ def main():
         if os.path.exists(os.path.join(cwd, ".git")):
             inject_git_root_patterns(config, cwd)
 
-    # Compile patterns (includes any git-root injections from above)
+    # Compile patterns (includes any git-root injections from above).
+    # The legacy `[ask.*]` category is renamed to `[reflect.*]` per #923:
+    # hooks no longer emit Claude Code's mechanical `ask` — they emit `deny`
+    # with a structured reflection prompt. The internal evaluator still
+    # uses the variable name `ask_patterns` for now; rename is mechanical
+    # and tracked separately to keep this change reviewable.
     deny_patterns = compile_patterns(config, "deny")
-    ask_patterns = compile_patterns(config, "ask")
+    ask_patterns = compile_patterns(config, "reflect")
     allow_patterns = compile_patterns(config, "allow")
 
-    default_action = resolve_default_action()
+    strictness = resolve_hook_strictness(cwd)
+    default_action = strictness_to_default_action(strictness)
+
     decision, reason, matched_category, matched_rule = validate_command(
         command, deny_patterns, ask_patterns, allow_patterns, default_action
     )
@@ -154,6 +233,30 @@ def main():
     decision, reason, matched_category, matched_rule = apply_policy_gate(
         decision, reason, matched_category, matched_rule, cwd
     )
+
+    # #923 (Codex review #2): mark_command_safe runs AFTER pattern eval +
+    # policy overlay. A mark can only shortcut an "ask" verdict to
+    # "allow" — it cannot launder a deny (whether from a [deny.*]
+    # pattern OR from the policy overlay upgrading a [reflect.*] match
+    # to deny because evidence is stale or authority is L3). The order
+    # matters: previously the mark was checked first, so a single
+    # successful force-push mark could persistently bypass the
+    # graduated-autonomy gate even when the journey-health evidence had
+    # gone stale. Now the gate dominates.
+    if decision == "ask":
+        mark = find_mark_for_command(command, cwd)
+        if mark:
+            predicate = _predicate_for_command(command, ask_patterns, config)
+            classification = mark.get("classification") or {}
+            if evaluate_predicate(predicate, classification):
+                decision = "allow"
+                reason = (
+                    f"[mark_command_safe] honored prior deliberation "
+                    f"(predicate={predicate!r}, "
+                    f"classification={json.dumps(classification, sort_keys=True)})"
+                )
+                matched_category = "mark"
+                matched_rule = mark.get("generalization") or matched_rule
 
     would_action = compute_would_action(decision, matched_category, default_action)
     write_shadow_row(

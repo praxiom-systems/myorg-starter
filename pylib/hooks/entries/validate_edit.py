@@ -613,7 +613,20 @@ def main() -> None:
 
     config_path = positional[0]
 
-    # Check kill switch first — before doing any work
+    # #923: replace MYORG_BANDAID_MODE with hook_strictness.
+    # lax → skip band-aid scan entirely (no-match defaults to allow);
+    # strict/balanced → run the scan.
+    try:
+        # local import: bash_policy_decide owns strictness resolution
+        from pylib.hooks.bash_policy_decide import resolve_hook_strictness
+        strictness = resolve_hook_strictness(os.getcwd())
+    except Exception:
+        strictness = "strict"  # fail closed
+    if strictness == "lax":
+        sys.exit(0)
+    # Compat: legacy MYORG_BANDAID_MODE=off honored for one cycle so that
+    # any environment-pinned setups can flip to hook_strictness=lax
+    # without an immediate breakage. Other values are ignored.
     mode = os.environ.get("MYORG_BANDAID_MODE", "").strip().lower()
     if mode == "off":
         sys.exit(0)

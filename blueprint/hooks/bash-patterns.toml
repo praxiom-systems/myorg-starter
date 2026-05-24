@@ -271,7 +271,7 @@ patterns = [
 # ASK PATTERNS - Risky but useful, prompt for confirmation
 # =============================================================================
 
-[ask.git_destructive]
+[reflect.git_destructive]
 description = "Git operations that rewrite history or are hard to undo"
 patterns = [
     # Force push: --force-with-lease is safe (won't overwrite others' work),
@@ -305,7 +305,7 @@ patterns = [
     "^git branch -D\\b",
 ]
 
-[ask.git_main_branch]
+[reflect.git_main_branch]
 description = "Pushing directly to main/master branches"
 patterns = [
     "^git push .* main$",
@@ -314,7 +314,7 @@ patterns = [
     "^git push origin master",
 ]
 
-[ask.git_bypass_hooks]
+[reflect.git_bypass_hooks]
 description = "Bypassing git hooks (band-aid pattern — see prefer-root-cause-fixes)"
 patterns = [
     "^git commit\\b.*--no-verify\\b",
@@ -324,7 +324,7 @@ patterns = [
     "^git merge\\b.*--no-verify\\b",
 ]
 
-[ask.package_publishing]
+[reflect.package_publishing]
 description = "Publishing packages to registries"
 patterns = [
     "^npm publish",
@@ -336,7 +336,7 @@ patterns = [
     "^gh release create",
 ]
 
-[ask.database_destructive]
+[reflect.database_destructive]
 description = "Database operations that destroy data"
 patterns = [
     "^psql .*DROP",
@@ -344,7 +344,7 @@ patterns = [
     "^mysql .*DROP",
 ]
 
-[ask.kubectl_exec_db_mutations]
+[reflect.kubectl_exec_db_mutations]
 description = "kubectl exec database commands with destructive SQL"
 # NOTE: These are checked BEFORE the allow.kubernetes_exec_database patterns.
 # Evaluation order (deny -> ask -> allow) provides defense-in-depth:
@@ -359,7 +359,7 @@ patterns = [
     "kubectl exec .* -- .*mysql.* < ",
 ]
 
-[ask.github_mutations]
+[reflect.github_mutations]
 description = "GitHub CLI operations that modify state (irreversible or high-impact)"
 # gh pr close is excluded: trivially reversible via 'gh pr reopen'.
 # Already allowed in allow.github_lifecycle for issues; PRs follow the same logic.
@@ -372,7 +372,7 @@ patterns = [
     "^gh run cancel",
 ]
 
-[ask.github_api_mutations]
+[reflect.github_api_mutations]
 description = "GitHub API calls that mutate state (POST, PUT, PATCH, DELETE)"
 # Two variants per flag: flag-after-path ("gh api /path -X POST")
 # and flag-before-path ("gh api -X POST /path"). The .* in the after-path
@@ -410,7 +410,7 @@ patterns = [
     "^gh api --method[= ](PUT|PATCH|DELETE)",
 ]
 
-[ask.file_permissions]
+[reflect.file_permissions]
 description = "Broad file permission changes"
 patterns = [
     "^chmod 777",
@@ -419,7 +419,7 @@ patterns = [
     "^chgrp ",
 ]
 
-[ask.docker_control]
+[reflect.docker_control]
 description = "Docker operations that stop/remove containers or clean up"
 patterns = [
     "^docker system prune",
@@ -434,7 +434,7 @@ patterns = [
     "^docker container stop",
 ]
 
-[ask.kubernetes_mutations]
+[reflect.kubernetes_mutations]
 description = "Kubernetes operations that modify cluster state"
 # NOTE: kubectl exec is NOT here - read-only exec commands are allowed,
 # and other exec commands fall through to ask-by-default
@@ -466,7 +466,7 @@ patterns = [
     "^k3s kubectl cp ",
 ]
 
-[ask.helm_mutations]
+[reflect.helm_mutations]
 description = "Helm operations that modify releases"
 patterns = [
     "^helm install",
@@ -484,7 +484,7 @@ patterns = [
     "^poetrun run k3s-helm ",
 ]
 
-[ask.infrastructure_as_code]
+[reflect.infrastructure_as_code]
 description = "IaC tools that modify infrastructure"
 patterns = [
     "^terraform apply",
@@ -498,7 +498,7 @@ patterns = [
     "^ansible-playbook",
 ]
 
-[ask.cloud_mutations]
+[reflect.cloud_mutations]
 description = "Cloud CLI operations that create/modify/delete resources"
 patterns = [
     "aws .* delete(\\s|$)",
@@ -516,7 +516,7 @@ patterns = [
     "supabase (db push|db reset|projects delete|functions delete)(\\s|$)",
 ]
 
-[ask.process_control]
+[reflect.process_control]
 description = "Killing or stopping processes"
 patterns = [
     "^kill ",
@@ -524,7 +524,7 @@ patterns = [
     "^pkill",
 ]
 
-[ask.service_management]
+[reflect.service_management]
 description = "Starting/stopping system services"
 patterns = [
     "^systemctl start",
@@ -538,7 +538,7 @@ patterns = [
     "^service .* restart",
 ]
 
-[ask.firewall]
+[reflect.firewall]
 description = "Firewall configuration"
 patterns = [
     "^iptables",
@@ -548,7 +548,7 @@ patterns = [
     "^nft ",
 ]
 
-[ask.user_management]
+[reflect.user_management]
 description = "User, group, and cron management"
 patterns = [
     "^crontab -e",
@@ -563,14 +563,14 @@ patterns = [
     "^groupdel",
 ]
 
-[ask.secrets_encryption]
+[reflect.secrets_encryption]
 description = "Encrypting secrets (decryption is allowed)"
 patterns = [
     "^sops -e",
     "^sops --encrypt",
 ]
 
-[ask.remote_access]
+[reflect.remote_access]
 description = "Remote access and file transfer"
 patterns = [
     "^ssh ",
@@ -581,7 +581,7 @@ patterns = [
     "^nc -l",
 ]
 
-[ask.file_deletion]
+[reflect.file_deletion]
 description = "File removal targeting absolute system paths (outside /tmp and current git repo)"
 # Ask when rm targets absolute paths that are NOT:
 #   /tmp/ or /var/tmp/  — temp files (covered by allow.temp_cleanup)
@@ -598,7 +598,7 @@ patterns = [
     "^rm\\s+/(?!tmp/|var/tmp/)",
 ]
 
-[ask.dangerous_pipelines]
+[reflect.dangerous_pipelines]
 description = "Dangerous command combinations"
 patterns = [
     "xargs.* rm\\b",
@@ -613,7 +613,7 @@ patterns = [
     "find.*-delete",
 ]
 
-[ask.code_execution]
+[reflect.code_execution]
 description = "Arbitrary code execution patterns"
 patterns = [
     # Pipe to shell - always ask regardless of source
@@ -632,7 +632,7 @@ patterns = [
     "\\. /var/tmp/",
 ]
 
-[ask.terminal_multiplexer_mutations]
+[reflect.terminal_multiplexer_mutations]
 description = "Terminal multiplexer operations that affect sessions or execute commands"
 patterns = [
     # tmux session/window management
@@ -657,14 +657,14 @@ patterns = [
     "^screen .*-c ",
 ]
 
-[ask.group_switching]
+[reflect.group_switching]
 description = "Commands executed with different group permissions"
 patterns = [
     "^sg ",
     "^newgrp ",
 ]
 
-[ask.package_manager_install]
+[reflect.package_manager_install]
 description = "Package installation from remote registries (supply chain risk)"
 # npm install bare (no package name) is intentionally excluded: it installs from
 # local package.json and is a routine dev operation. Only registry installs prompt.
@@ -686,7 +686,7 @@ patterns = [
     "^go install\\b",
 ]
 
-[ask.kernel_modules]
+[reflect.kernel_modules]
 description = "Kernel module load/unload operations"
 patterns = [
     "^insmod ",
@@ -699,7 +699,7 @@ patterns = [
 # that must remain user-confirmed even under default-allow.
 # -----------------------------------------------------------------------------
 
-[ask.outbound_network_connection]
+[reflect.outbound_network_connection]
 description = "Outbound non-localhost network connections (nc to remote host, rsync to remote target)"
 # scp / sftp / ssh are already covered by ask.remote_access.
 # curl / wget without explicit POST/PUT are intentionally NOT here — too noisy;
@@ -711,7 +711,7 @@ patterns = [
     "^rsync\\b.*\\s\\S+:\\S",
 ]
 
-[ask.git_force_with_lease]
+[reflect.git_force_with_lease]
 description = "git push --force-with-lease — safer than bare --force but still rewrites remote history"
 # Supersedes the previous allow.git_force_with_lease entry. Even with lease
 # protection, force-push is a destructive remote op that warrants confirmation
@@ -720,7 +720,7 @@ patterns = [
     "^git push\\b.*\\s--force-with-lease\\b",
 ]
 
-[ask.git_config_rewrites]
+[reflect.git_config_rewrites]
 description = "Git config writes that can intercept normal git commands (alias hijack, URL rewrite)"
 # core.hooksPath / core.fsmonitor are deny (unambiguous hook hijack).
 # Aliases and url.<base>.insteadOf are legitimate user customizations that
@@ -730,7 +730,7 @@ patterns = [
     "^git\\s+config\\b.*\\burl\\..*\\.insteadOf\\b",
 ]
 
-[ask.git_remote_mutations]
+[reflect.git_remote_mutations]
 description = "Adding or rewriting git remotes (exfil pivot when paired with push)"
 patterns = [
     "^git\\s+remote\\s+add\\b",
@@ -738,7 +738,7 @@ patterns = [
     "^git\\s+remote\\s+rename\\b",
 ]
 
-[ask.system_path_writes]
+[reflect.system_path_writes]
 description = "Writing under /etc, /usr, or non-cache /var (system configuration changes)"
 # Reads of these paths stay allowed; only writes prompt.
 # /var carve-outs: tmp, cache, log, folders (macOS) remain allow-by-default.
@@ -767,7 +767,7 @@ patterns = [
     "^mkdir\\s+(-p\\s+)?/usr(?!/local)(\\s|$)",
 ]
 
-[ask.process_substitution_from_network]
+[reflect.process_substitution_from_network]
 description = "Process substitution feeding network downloads to interpreters"
 # Catches: source <(curl ...), bash <(curl ...), . <(wget ...).
 # Distinct from ask.code_execution which catches the pipe form (curl ... | bash).
@@ -776,7 +776,7 @@ patterns = [
     "^(bash|sh|zsh|python|perl|ruby|node)\\s+<\\(\\s*(curl|wget|http|httpie|fetch)\\b",
 ]
 
-[ask.mcp_server_registration]
+[reflect.mcp_server_registration]
 description = "Adding/configuring MCP servers — risk surface for data exfil and tool injection"
 # Catches CLI commands plus direct writes to MCP config files. Reads of the
 # config files stay allowed.
@@ -789,7 +789,7 @@ patterns = [
     "^tee\\s+(.*\\s)?~/?\\.claude\\.json",
 ]
 
-[ask.macos_metadata]
+[reflect.macos_metadata]
 description = "macOS quarantine bypass and `defaults write` (changes system/app behavior)"
 patterns = [
     "^defaults\\s+write\\b",
@@ -1203,7 +1203,7 @@ patterns = [
     "^gh label edit ",
 ]
 
-[ask.github_label_delete]
+[reflect.github_label_delete]
 description = "GitHub CLI label deletion"
 patterns = [
     "^gh label delete ",

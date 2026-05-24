@@ -1,11 +1,11 @@
 #!/bin/bash
 # Codex PreToolUse adapter for Bash command validation.
 #
-# Codex currently supports blocking via permissionDecision=deny, but
-# permissionDecision=ask fails open. Ask-pattern handling is split:
-#   - PreToolUse emits an advisory systemMessage for ask decisions.
-#   - PermissionRequest lets Codex's native approval prompt continue when
-#     the host was already going to ask.
+# Codex supports blocking via permissionDecision=deny. Per #923, the
+# upstream validator never emits the old "ask" verdict — it translates
+# matched [reflect.*] patterns and no-match-at-strict/balanced into
+# `deny` + reflection prompt itself. So this adapter only has to handle
+# `allow` and `deny` raw decisions; no host-specific fallback is needed.
 
 set -e
 
@@ -34,6 +34,4 @@ if decision == "deny":
             "permissionDecisionReason": reason,
         }
     }))
-elif decision == "ask" and reason:
-    print(json.dumps({"systemMessage": reason}))
 PY

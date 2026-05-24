@@ -15,7 +15,7 @@
 # ASK PATTERNS - Linux-specific risky operations
 # =============================================================================
 
-[ask.network_config]
+[reflect.network_config]
 description = "Linux network configuration (persistent changes)"
 patterns = [
     "^ip link set",
@@ -26,7 +26,7 @@ patterns = [
     "^brctl ",
 ]
 
-[ask.disk_management]
+[reflect.disk_management]
 description = "Linux disk/volume management"
 patterns = [
     "^mount ",
@@ -42,7 +42,7 @@ patterns = [
     "^mkswap",
 ]
 
-[ask.apparmor_selinux]
+[reflect.apparmor_selinux]
 description = "Linux mandatory access control"
 patterns = [
     "^aa-enforce",

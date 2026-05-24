@@ -2,8 +2,9 @@
 #
 # Two sections:
 #   [deny.*]   — High-confidence patterns that suppress errors across a whole file or
-#                all errors in a block. These block the edit by default unless
-#                MYORG_BANDAID_MODE=all-advise (downgrade to advisory) or =off (disable).
+#                all errors in a block. These block the edit by default;
+#                set `autonomy.hook_strictness: lax` in .myorg/config.yaml to disable
+#                the scan entirely. `strict`/`balanced` keep current deny+advise behavior.
 #   [advise.*] — Lower-confidence patterns that warrant a justification comment but are
 #                legitimately used. These always emit an advisory (allow + reason), never
 #                block.

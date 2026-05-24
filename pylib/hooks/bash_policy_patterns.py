@@ -68,11 +68,18 @@ def detect_os() -> str:
 def merge_os_config(base: dict, overlay: dict) -> dict:
     """Merge OS-specific config into base config with additive-append semantics.
 
-    For each category (deny/ask/allow), OS patterns are appended to matching
-    base sections. New sections from the overlay are added as-is.
+    For each pattern category (deny/reflect/allow), OS patterns are appended
+    to matching base sections. New sections from the overlay are added as-is.
     Base patterns are never removed or replaced.
+
+    #923: `reflect` joined the category set when [ask.*] was renamed to
+    [reflect.*]. Without it, OS-specific reflect sections (e.g. Linux
+    network/disk changes) silently dropped during overlay merge — so under
+    hook_strictness=lax they became silent allows. `ask` is retained as a
+    backward-compatible alias for any user pattern files that haven't been
+    migrated by scripts/migrate-ask-to-reflect.py yet.
     """
-    for category in ("deny", "ask", "allow"):
+    for category in ("deny", "reflect", "ask", "allow"):
         overlay_sections = overlay.get(category, {})
         if not overlay_sections:
             continue
@@ -139,13 +146,13 @@ def inject_git_root_patterns(config: dict, git_root: str) -> None:
     # E.g. /home/rrl/github/myproject -> home/rrl/github/myproject/
     escaped_for_lookahead = re.escape(git_root.lstrip("/")) + "/"
 
-    # 1. Narrow ask.file_deletion to exclude paths within the git root.
+    # 1. Narrow reflect.file_deletion to exclude paths within the git root.
     #    This must be paired with the allow entry below (evaluated before allow).
-    ask_file_del = config.get("ask", {}).get("file_deletion", {})
-    if isinstance(ask_file_del, dict) and "patterns" in ask_file_del:
-        ask_file_del["patterns"] = [
+    reflect_file_del = config.get("reflect", {}).get("file_deletion", {})
+    if isinstance(reflect_file_del, dict) and "patterns" in reflect_file_del:
+        reflect_file_del["patterns"] = [
             _add_to_negative_lookahead(p, escaped_for_lookahead)
-            for p in ask_file_del["patterns"]
+            for p in reflect_file_del["patterns"]
         ]
 
     # 2. Allow rm on any path within the git root (lockstep with exclusion above).
@@ -155,9 +162,9 @@ def inject_git_root_patterns(config: dict, git_root: str) -> None:
         "patterns": [f"^rm\\s+(-[a-zA-Z]+\\s+)*{escaped_abs}/"],
     }
 
-    # 3. Protect the .git directory itself from deletion (added to ask).
+    # 3. Protect the .git directory itself from deletion (added to reflect).
     escaped_git_dir = re.escape(os.path.join(git_root, ".git"))
-    config.setdefault("ask", {})["git_metadata_protection"] = {
+    config.setdefault("reflect", {})["git_metadata_protection"] = {
         "description": "Protect .git metadata directory from deletion",
         "patterns": [f"^rm\\b.*{escaped_git_dir}(/|$)"],
     }

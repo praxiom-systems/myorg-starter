@@ -19,7 +19,9 @@ The hook always exits 0.  Advisory reasons are surfaced in the transcript via
 the ``reason`` field without blocking the agent.
 
 Environment variables:
-  MYORG_BANDAID_MODE       — Same as PreToolUse: off / all-advise / (default normal).
+  Strictness               — Read from .myorg/config.yaml autonomy.hook_strictness
+                              (lax skips the band-aid re-scan; strict/balanced run it).
+                              Legacy MYORG_BANDAID_MODE=off compat-honored for one cycle.
   MYORG_VERIFY_LLM_JUDGE   — Set to "1" to enable async contract judge invocation.
   MYORG_HOOK_LOG_DIR        — Override log directory (empty string disables logging).
 
@@ -135,7 +137,16 @@ def main() -> None:
 
     config_path = positional[0]
 
-    # Kill switch — if MYORG_BANDAID_MODE=off, skip the band-aid re-scan.
+    # #923: hook_strictness=lax → skip the band-aid re-scan entirely.
+    # Legacy MYORG_BANDAID_MODE=off honored for one cycle for compat.
+    try:
+        from pylib.hooks.bash_policy_decide import resolve_hook_strictness
+        strictness = resolve_hook_strictness(os.getcwd())
+    except Exception:
+        strictness = "strict"
+    if strictness == "lax":
+        _output_post(fmt=fmt)
+        sys.exit(0)
     mode = os.environ.get("MYORG_BANDAID_MODE", "").strip().lower()
     llm_judge_enabled = os.environ.get("MYORG_VERIFY_LLM_JUDGE", "").strip() == "1"
 

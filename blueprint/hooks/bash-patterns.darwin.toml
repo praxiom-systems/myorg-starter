@@ -22,20 +22,20 @@ patterns = [
 # ASK PATTERNS - macOS-specific risky operations
 # =============================================================================
 
-[ask.service_management]
+[reflect.service_management]
 description = "macOS service management (extends base)"
 patterns = [
     "^launchctl (load|unload|bootstrap|bootout|enable|disable|kickstart|kill)",
 ]
 
-[ask.firewall]
+[reflect.firewall]
 description = "macOS firewall configuration (extends base)"
 patterns = [
     "^pfctl ",
     "^/usr/libexec/ApplicationFirewall/socketfilterfw",
 ]
 
-[ask.user_management]
+[reflect.user_management]
 description = "macOS user management (extends base)"
 patterns = [
     "^dscl \\. -(create|delete|merge|change|append)",
@@ -43,7 +43,7 @@ patterns = [
     "^dseditgroup ",
 ]
 
-[ask.package_manager_install]
+[reflect.package_manager_install]
 description = "macOS package installation (extends base)"
 patterns = [
     "^brew cask install",
@@ -51,7 +51,7 @@ patterns = [
     "^mas install",
 ]
 
-[ask.macos_system_config]
+[reflect.macos_system_config]
 description = "macOS system configuration changes"
 patterns = [
     "^defaults write",
@@ -64,7 +64,7 @@ patterns = [
     "^fdesetup ",
 ]
 
-[ask.macos_disk_management]
+[reflect.macos_disk_management]
 description = "macOS disk management"
 patterns = [
     "^diskutil (erase|partition|mount|unmount|rename|resize|apfs)",

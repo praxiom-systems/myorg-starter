@@ -186,7 +186,7 @@ def validate_command(
                         body_lines=[
                             f"command: {substitution_body[:100]}",
                             f"why:     {substitution_reason}",
-                            "override: MYORG_BASH_DEFAULT=allow to bypass interactive ask",
+                            "override: set `autonomy.hook_strictness: lax` in .myorg/config.yaml to silence this on no-match",
                         ],
                     )
             elif substitution_category == "default" and not has_default_fallback:
@@ -228,7 +228,7 @@ def validate_command(
                     body_lines=[
                         f"command: {cleaned[:100]}",
                         f"why:     matches {section}",
-                        "override: MYORG_BASH_DEFAULT=allow to bypass interactive ask",
+                        "override: set `autonomy.hook_strictness: lax` in .myorg/config.yaml to silence this on no-match",
                     ],
                 )
             continue
@@ -262,7 +262,7 @@ def validate_command(
                 body_lines=[
                     f"command: {ask_segment[:100]}",
                     f"why:     matches {ask_section}",
-                    "override: MYORG_BASH_DEFAULT=allow to bypass interactive ask",
+                    "override: set `autonomy.hook_strictness: lax` in .myorg/config.yaml to silence this on no-match",
                 ],
             ),
             "ask",

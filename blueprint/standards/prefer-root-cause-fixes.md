@@ -97,7 +97,7 @@ Two narrow controls are enforced at the diff boundary, aligned with this standar
    - **Deny** (blocks by default): bare `except:`, `except Exception: pass`, file-level `/* eslint-disable */`, naked `// @ts-ignore` without a justification comment.
    - **Advise** (non-blocking, surfaces in transcript): unlinked `TODO`/`FIXME`/`HACK`/`XXX`, line-scoped suppressions (`# noqa`, `# type: ignore`, `// eslint-disable-next-line`, `# pylint: disable`, `# pragma: no cover`), skipped tests (`it.skip`, `@pytest.mark.skip`, etc.).
    - Legitimate uses are accommodated: `@ts-ignore` with a trailing explanation, `TODO(#NNN)` with an issue link, `it.skip` in test files while iterating. The hook gates the *unjustified* form, not the justified one.
-   - Override via `MYORG_BANDAID_MODE=all-advise` (downgrade denies to advisories) or `=off` (disable entirely).
+   - Set `autonomy.hook_strictness: lax` in `.myorg/config.yaml` to disable the scan; `strict`/`balanced` keep deny+advise.
 
 Most band-aid patterns require judgment to distinguish from legitimate uses. Mechanical enforcement is intentionally narrow — the patterns above are the highest-signal, lowest-false-positive subset. Broader detection (JS empty `catch {}`, semantic type-coercion, hardcoded fallbacks) relies on review and self-discipline.
 

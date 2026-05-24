@@ -24,7 +24,7 @@ patterns = [
 # ASK PATTERNS - Windows-specific risky operations
 # =============================================================================
 
-[ask.windows_service_management]
+[reflect.windows_service_management]
 description = "Windows service management"
 patterns = [
     "^sc\\.exe (start|stop|delete|create|config)",
@@ -33,7 +33,7 @@ patterns = [
     "^cmd\\.exe.*/[cC].*sc (start|stop|delete|create)",
 ]
 
-[ask.windows_system_config]
+[reflect.windows_system_config]
 description = "Windows system configuration"
 patterns = [
     "^reg (add|delete|import)",
@@ -46,7 +46,7 @@ patterns = [
     "^icacls .* /deny",
 ]
 
-[ask.windows_package_install]
+[reflect.windows_package_install]
 description = "Windows package installation"
 patterns = [
     "^winget install",

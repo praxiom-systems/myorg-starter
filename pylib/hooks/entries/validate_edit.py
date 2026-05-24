@@ -9,11 +9,11 @@ emit ``deny``.
 
 Pattern catalog: blueprint/hooks/band-aid-patterns.toml.
 
-Environment variables:
-  MYORG_BANDAID_MODE  — Controls hook behaviour.
-                        (unset or empty) normal mode: deny fires on [deny.*] hits.
-                        all-advise: downgrades deny hits to advisory.
-                        off: disables scanning entirely (exit 0 silent).
+Scan gating:
+  Read from .myorg/config.yaml ``autonomy.hook_strictness`` via
+  bash_policy_decide.resolve_hook_strictness. ``lax`` skips the scan
+  entirely; ``strict`` and ``balanced`` run the same scan and emit the
+  same outputs (no intermediate "downgrade denies to advisories" mode).
 
 Public API (importable by sibling hooks):
   scan_diff(added_lines, config_path, file_path="", new_content_lines=None)
@@ -23,7 +23,7 @@ Public API (importable by sibling hooks):
   _is_test_file(file_path) → bool
   _extract_added_lines_diff(old, new) → list[str]
   _get_added_lines_for_input(tool_name, tool_input) → (added_lines, file_path, new_content_lines)
-  _build_reason(result, mode) → (decision, reason)
+  _build_reason(result) → (decision, reason)
   output_decision(decision, reason, fmt) → None
   ScanResult, SectionHit, CompiledPattern  — dataclasses
 """
@@ -418,18 +418,22 @@ def scan_diff(
     )
 
 
-def _build_reason(result: ScanResult, mode: str) -> tuple[str, str]:
+def _build_reason(result: ScanResult) -> tuple[str, str]:
     """
     Return (decision, reason) from a ScanResult.
     decision is 'deny' or 'allow'.
     reason is a structured string produced by format_reason.
+
+    Operators suppress band-aid denies by setting
+    ``autonomy.hook_strictness: lax`` in .myorg/config.yaml, which
+    causes the caller to skip the scan entirely before reaching
+    _build_reason. No per-call downgrade mode exists.
     """
     all_hits = result.deny_hits + result.advise_hits
     if not all_hits:
         return "allow", ""
 
-    # In all-advise mode, deny hits are treated as advisories.
-    is_deny = bool(result.deny_hits) and mode not in ("all-advise",)
+    is_deny = bool(result.deny_hits)
 
     first_hit = all_hits[0]
     section = first_hit.section
@@ -451,7 +455,7 @@ def _build_reason(result: ScanResult, mode: str) -> tuple[str, str]:
             body_lines=[
                 f"matched: {snippet}",
                 sections_line,
-                "override: MYORG_BANDAID_MODE=all-advise (downgrade denies to advisories) or =off (disable)",
+                "override: set autonomy.hook_strictness: lax in .myorg/config.yaml (skips the band-aid scan entirely)",
             ],
         )
         decision = "deny"
@@ -463,7 +467,7 @@ def _build_reason(result: ScanResult, mode: str) -> tuple[str, str]:
             body_lines=[
                 f"matched: {snippet}",
                 sections_line,
-                "override: MYORG_BANDAID_MODE=off (session) or =all-advise (downgrade denies)",
+                "override: set autonomy.hook_strictness: lax in .myorg/config.yaml to silence band-aid advisories",
             ],
         )
         decision = "allow"
@@ -613,9 +617,10 @@ def main() -> None:
 
     config_path = positional[0]
 
-    # #923: replace MYORG_BANDAID_MODE with hook_strictness.
+    # Hook gating reads .myorg/config.yaml autonomy.hook_strictness:
     # lax → skip band-aid scan entirely (no-match defaults to allow);
-    # strict/balanced → run the scan.
+    # strict/balanced → run the scan. There is no other operator lever
+    # for this — env-var overrides do not exist.
     try:
         # local import: bash_policy_decide owns strictness resolution
         from pylib.hooks.bash_policy_decide import resolve_hook_strictness
@@ -623,12 +628,6 @@ def main() -> None:
     except Exception:
         strictness = "strict"  # fail closed
     if strictness == "lax":
-        sys.exit(0)
-    # Compat: legacy MYORG_BANDAID_MODE=off honored for one cycle so that
-    # any environment-pinned setups can flip to hook_strictness=lax
-    # without an immediate breakage. Other values are ignored.
-    mode = os.environ.get("MYORG_BANDAID_MODE", "").strip().lower()
-    if mode == "off":
         sys.exit(0)
 
     try:
@@ -683,7 +682,7 @@ def main() -> None:
     if not result.deny_hits and not result.advise_hits:
         sys.exit(0)
 
-    decision, reason = _build_reason(result, mode)
+    decision, reason = _build_reason(result)
 
     if not reason:
         sys.exit(0)

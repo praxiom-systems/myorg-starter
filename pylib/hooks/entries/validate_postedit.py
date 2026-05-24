@@ -3,7 +3,7 @@
 PostToolUse output-verification probe for Edit/Write/MultiEdit.
 
 Runs two checks after an edit tool has applied a change:
-  1. Band-aid re-scan — synchronous, advisory-first (same MYORG_BANDAID_MODE
+  1. Band-aid re-scan — synchronous, advisory-first (same hook_strictness
      gating as the PreToolUse detector).  Uses the shared scan_diff() engine
      from validate_edit so pattern logic is never duplicated.
   2. Contract LLM judge — asynchronous fire-and-forget via
@@ -21,7 +21,9 @@ the ``reason`` field without blocking the agent.
 Environment variables:
   Strictness               — Read from .myorg/config.yaml autonomy.hook_strictness
                               (lax skips the band-aid re-scan; strict/balanced run it).
-                              Legacy MYORG_BANDAID_MODE=off compat-honored for one cycle.
+                              The legacy MYORG_BANDAID_MODE env var is no longer
+                              honored — operators must use hook_strictness in
+                              config.yaml.
   MYORG_VERIFY_LLM_JUDGE   — Set to "1" to enable async contract judge invocation.
   MYORG_HOOK_LOG_DIR        — Override log directory (empty string disables logging).
 
@@ -137,8 +139,8 @@ def main() -> None:
 
     config_path = positional[0]
 
-    # #923: hook_strictness=lax → skip the band-aid re-scan entirely.
-    # Legacy MYORG_BANDAID_MODE=off honored for one cycle for compat.
+    # hook_strictness=lax skips the band-aid re-scan entirely; lax is
+    # the only operator-facing way to disable it (no env-var override).
     try:
         from pylib.hooks.bash_policy_decide import resolve_hook_strictness
         strictness = resolve_hook_strictness(os.getcwd())
@@ -147,7 +149,6 @@ def main() -> None:
     if strictness == "lax":
         _output_post(fmt=fmt)
         sys.exit(0)
-    mode = os.environ.get("MYORG_BANDAID_MODE", "").strip().lower()
     llm_judge_enabled = os.environ.get("MYORG_VERIFY_LLM_JUDGE", "").strip() == "1"
 
     try:
@@ -167,21 +168,15 @@ def main() -> None:
         sys.exit(0)
 
     # Extract diff once (needed for both scan and skip-list check).
-    added_lines: list[str] = []
-    file_path = ""
-    new_content_lines: list[str] = []
+    added_lines, file_path, new_content_lines = _get_added_lines_for_input(
+        tool_name, tool_input
+    )
+    # Write tool in PostToolUse: the file on disk already matches the
+    # tool input, so the line-by-line diff comes back empty. Fall back to
+    # scanning the full new content so write-time band-aids still surface.
+    if tool_name.lower() == "write" and not added_lines:
+        added_lines = new_content_lines
 
-    if mode != "off":
-        added_lines, file_path, new_content_lines = _get_added_lines_for_input(
-            tool_name, tool_input
-        )
-        # Write tool in PostToolUse: the file on disk already matches the
-        # tool input, so the line-by-line diff comes back empty. Fall back to
-        # scanning the full new content so write-time band-aids still surface.
-        if tool_name.lower() == "write" and not added_lines:
-            added_lines = new_content_lines
-
-    # For the judge skip-list check we still need file_path even in off mode.
     if not file_path:
         file_path = tool_input.get("file_path", "") or ""
 
@@ -194,7 +189,7 @@ def main() -> None:
     # Step 1: synchronous band-aid re-scan (advisory only — edit already applied)
     # -------------------------------------------------------------------------
     reason = ""
-    if mode != "off" and added_lines:
+    if added_lines:
         result = scan_diff(
             added_lines,
             config_path,
@@ -202,7 +197,7 @@ def main() -> None:
             new_content_lines=new_content_lines or None,
         )
         if result.deny_hits or result.advise_hits:
-            _decision, reason = _build_reason(result, mode)
+            _decision, reason = _build_reason(result)
             # PostToolUse: advisory only regardless of pattern tier —
             # the edit is already applied.  Prefix for transcript clarity.
             reason = "[PostEdit] " + reason

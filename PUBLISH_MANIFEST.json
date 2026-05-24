@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "04d3f060c96a0119e58c8501b5c94fd743f3b5c9",
-  "generated_at": "2026-05-24T22:33:55+00:00",
+  "canonical_sha": "30170840b7e59e6587075bd300899e23a3ccbe15",
+  "generated_at": "2026-05-24T23:12:05+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -116,7 +116,7 @@
     },
     {
       "path": "blueprint/hooks/codex-session-stop.sh",
-      "sha256": "1b19325adcdb974ec768a89e7ecdf85b29b70ae841dafff846f3b59ee2221fd2"
+      "sha256": "7522c5b0d39dc133896a10ae0dd2f8729e17fcd072bd177b0fa6b126c3640a35"
     },
     {
       "path": "blueprint/hooks/codex-validate-bash.sh",
@@ -148,7 +148,7 @@
     },
     {
       "path": "blueprint/hooks/session-stop.sh",
-      "sha256": "341b832dcf06e720188e04ae3e1d4463d02513df435d449b11a2c7cf8619e88a"
+      "sha256": "fe4645690e8525d1b6734c4f225cbeac342c20b5caae4b03756772825e65acff"
     },
     {
       "path": "blueprint/hooks/validate-bash.sh",
@@ -216,11 +216,11 @@
     },
     {
       "path": "pylib/hooks/entries/validate_edit.py",
-      "sha256": "8945c0f552f731363cc060871a7f16a3152df9434c3e78a9a8f8a6b6ac6259de"
+      "sha256": "53859388181ee8fb6d16e8559cf858762b73f2bb6fa1f29b19e697988d5ba86a"
     },
     {
       "path": "pylib/hooks/entries/validate_postedit.py",
-      "sha256": "555c8454d07826c73f6379067aaf9b0e6ee570d24a579538e394b85a54ebe228"
+      "sha256": "a9d3695287ec54322652af319e29c3ea788d0a6e6033260a0c6ab48830941f01"
     },
     {
       "path": "pylib/hooks/entries/validate_read.py",

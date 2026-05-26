@@ -18,6 +18,11 @@
 #                                  — detached, debounced authored-doc
 #                                    freshness-sidecar refresh; never
 #                                    commits/writes-worktree/writes-db.
+#   hooklib_emit_semantic_refresh_nudge <repo_root>
+#                                  — foreground, DB-read-only nudge to
+#                                    stdout when the semantic map is stale
+#                                    relative to HEAD; silent otherwise.
+#                                    Never auto-runs a refresh.
 #
 # Environment:
 #   MYORG_HOOK_LOG_DIR             — log directory; empty disables logging.
@@ -180,6 +185,42 @@ hooklib_orchestrate_semantic_refresh() {
         fi
     ) </dev/null >/dev/null 2>&1 &
     disown 2>/dev/null || true
+    return 0
+}
+
+# hooklib_emit_semantic_refresh_nudge <repo_root> — single-line nudge to
+# stdout when the semantic map is stale relative to HEAD and the diff
+# carries semantic impact. SessionStart hook calls this in the foreground
+# so Claude Code captures the line as session context; pure read of the
+# project-map DB, no model, no commit, no worktree write. Silent in three
+# cases the operator does not need to act on (and so the line never adds
+# noise to a healthy session):
+#
+#   - getmyorg is not on PATH (cannot evaluate)
+#   - the nudge subcommand evaluates the map as not stale OR no semantic impact
+#   - a transient failure (git, db) — short-circuit silent rather than wedge
+#
+# Non-blocking: returns 0 on every path. Timeout-capped so a slow git op
+# does not stall session bring-up.
+hooklib_emit_semantic_refresh_nudge() {
+    local target="${1:-}"
+    [ -n "$target" ] || return 0
+    [ -d "$target/.myorg" ] || return 0
+
+    local bin
+    bin="$(hooklib_find_getmyorg)"
+    [ -n "$bin" ] || return 0
+
+    local secs="${MYORG_NUDGE_TIMEOUT:-10}"
+    [ "$secs" -gt 0 ] 2>/dev/null || secs=10
+
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "$secs" "$bin" semantic-refresh nudge --repo "$target" 2>/dev/null || true
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout "$secs" "$bin" semantic-refresh nudge --repo "$target" 2>/dev/null || true
+    else
+        "$bin" semantic-refresh nudge --repo "$target" 2>/dev/null || true
+    fi
     return 0
 }
 

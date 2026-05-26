@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "30170840b7e59e6587075bd300899e23a3ccbe15",
-  "generated_at": "2026-05-24T23:12:05+00:00",
+  "canonical_sha": "d83d165f08552a5dcf66ac430bfe3ff1a604952f",
+  "generated_at": "2026-05-26T17:08:21+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -132,7 +132,7 @@
     },
     {
       "path": "blueprint/hooks/hook-lib.sh",
-      "sha256": "182fa2cc656a5eac3e121a4b20cf8fe9345eb77590ad99de25d7a30932b7b597"
+      "sha256": "b7c139642353ad0a6ad7cda11d8b4e6ac3367e705f913dda0fa1435c6bd83760"
     },
     {
       "path": "blueprint/hooks/injection-patterns.toml",

@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "371e9721b79d06d8fc24512447dabd0ebd002d09",
-  "generated_at": "2026-05-27T23:07:47+00:00",
+  "canonical_sha": "6d3f869036f97a5219886aff56addf43523fd37d",
+  "generated_at": "2026-06-03T02:43:32+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -104,7 +104,7 @@
     },
     {
       "path": "blueprint/hooks/bash-patterns.toml",
-      "sha256": "4432a7ac3447fa8195245b240c7cf6178465062d47639cee020f4de4f16cb0eb"
+      "sha256": "638c27c3789332f89002cdfc438e01090fc9e582e894398e6a081d845465e5da"
     },
     {
       "path": "blueprint/hooks/bash-patterns.windows.toml",

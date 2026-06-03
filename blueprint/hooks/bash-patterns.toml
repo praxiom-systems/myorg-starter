@@ -2017,8 +2017,21 @@ description = "getmyorg CLI subcommands — read-only or scoped to .myorg/ artif
 # by skills that probe via `GETMYORG=$(command -v getmyorg)`.
 # Subcommands listed are either pure reads or operate only on .myorg/ in the
 # current repo (project-map regen, doctor --fix to .git/hooks markers, etc.).
+#
+# #953: the original list pre-dated epic-934 and was missing many of the
+# read-only inspection subcommands the /myorg:* slash skills now invoke
+# (pending, refresh, render, goal, verify, evidence, readiness, change-brief,
+# change-review, docs-reconcile, why, semantic-*, audit-docs, synthesis,
+# extensions, route-preview, review-bundle, dispatch, proposals,
+# semantic-telemetry, map-* helpers, setup, statusline, install). Every
+# subcommand here either prints to stdout or writes only to .myorg/ (the
+# engine-maintained directory) or .git/hooks/ (via getmyorg doctor --fix).
+#
+# anchor-writer plan/apply: plan emits a bounded JSON worklist to stdout
+# (read-only); apply writes only the working-tree anchor + sidecar, which
+# is local and git-reversible. Both are safe to allow.
 patterns = [
-    "^getmyorg (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|hq|brief|init|retrospective|--help|-h|--version)\\b",
-    "^/[\\w./-]+/getmyorg (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|hq|brief|init|retrospective|--help|-h|--version)\\b",
-    "^\"\\$GETMYORG\" (doctor|install-freshness|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|hq|brief|init|retrospective|--help|-h|--version)\\b",
+    "^getmyorg (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)\\b",
+    "^/[\\w./-]+/getmyorg (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)\\b",
+    "^\"\\$GETMYORG\" (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)\\b",
 ]

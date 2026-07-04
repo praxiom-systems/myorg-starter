@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "6d3f869036f97a5219886aff56addf43523fd37d",
-  "generated_at": "2026-06-03T02:43:32+00:00",
+  "canonical_sha": "ae6d43f0b90042baf61d099684f12e6d9344fc1c",
+  "generated_at": "2026-07-04T00:55:18+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -132,7 +132,7 @@
     },
     {
       "path": "blueprint/hooks/hook-lib.sh",
-      "sha256": "b7c139642353ad0a6ad7cda11d8b4e6ac3367e705f913dda0fa1435c6bd83760"
+      "sha256": "5dea9563d1b0e8da382c60ac3a4f998ff0f6f2429af17d79fdb116aba2939cfe"
     },
     {
       "path": "blueprint/hooks/injection-patterns.toml",
@@ -152,11 +152,11 @@
     },
     {
       "path": "blueprint/hooks/validate-bash.sh",
-      "sha256": "258e52b7b6f221aba3ebc4e0b9c699988f7f5ce2270ebc2fc609ec97a06ab0c5"
+      "sha256": "ef81cd5ab4224f16b6fae616fe4a218392056640e8215559dec49e32940191e4"
     },
     {
       "path": "blueprint/hooks/validate-edit.sh",
-      "sha256": "019a1dd7aa06f440e09e50554eadf1076b6a49cf8a85d5446608500cf4597e60"
+      "sha256": "0889cd9872c3635c2ee03f7127f074ccebecaf9ccfa8d5fd89644001a082af3b"
     },
     {
       "path": "blueprint/hooks/validate-postedit.sh",
@@ -164,7 +164,7 @@
     },
     {
       "path": "blueprint/hooks/validate-read.sh",
-      "sha256": "7ad72351dbad72fab80a82760dfc4a3eb7e761452d54fecb03cf86a815e5a07d"
+      "sha256": "b58c70b5911992656c5d4823ed5c3e26e4eddf29f0b07e65d14ca2dd3f02b5fa"
     },
     {
       "path": "blueprint/skills/decompose-changeset.md",

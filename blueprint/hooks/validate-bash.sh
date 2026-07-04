@@ -21,14 +21,17 @@ CONFIG_FILE="$SCRIPT_DIR/bash-patterns.toml"
 hooklib_init_log_dir
 hooklib_cleanup_old_logs
 
-# Check config file exists
+# Check config file exists. If it is missing the gate cannot evaluate anything;
+# fail OPEN (exit 0, abstain) rather than blocking every bash command on the
+# hook's own misconfiguration. A deliberate deny still blocks via the JSON
+# decision emitted on the exit-0 path below. (#958)
 if [[ ! -f "$CONFIG_FILE" ]]; then
     if [[ -n "$HOOKLIB_LOG_DIR" ]]; then
         ERROR_LOG=$(hooklib_log_file_for "error")
-        hooklib_log_event "$ERROR_LOG" "ConfigMissing" "validate-bash" "$CONFIG_FILE"
+        hooklib_log_event "$ERROR_LOG" "ConfigMissing" "validate-bash" "$CONFIG_FILE (failing open)"
     fi
-    echo "Error: Configuration file not found: $CONFIG_FILE" >&2
-    exit 1
+    echo "validate-bash: config not found, failing open: $CONFIG_FILE" >&2
+    exit 0
 fi
 
 # Capture stdin
@@ -53,9 +56,12 @@ OUTPUT=$(echo "$INPUT" | python3 "$SCRIPT_DIR/validate-bash.py" "$CONFIG_FILE" 2
     STDERR_CONTENT=$(cat "$STDERR_FILE" 2>/dev/null || true)
     rm -f "$STDERR_FILE"
     if [[ -n "$LOG_FILE" ]]; then
-        hooklib_log_event "$LOG_FILE" "PythonError" "$COMMAND" "stdout=$OUTPUT stderr=$STDERR_CONTENT"
+        hooklib_log_event "$LOG_FILE" "PythonError" "$COMMAND" "failing open; stdout=$OUTPUT stderr=$STDERR_CONTENT"
     fi
-    exit 1
+    # The validator itself crashed (not a deliberate deny) — fail OPEN so a
+    # broken Python env or transient parse error cannot brick every bash command
+    # for an unattended agent. (#958)
+    exit 0
 }
 rm -f "$STDERR_FILE"
 

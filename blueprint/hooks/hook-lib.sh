@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # hook-lib.sh — shared bash helpers for getmyorg hooks.
 #
 # Source, don't execute. Provides:

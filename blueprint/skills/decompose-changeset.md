@@ -28,7 +28,7 @@ A changeset plan is an ordered, contract-bounded sequence of PR stubs — each s
 ## Input
 
 - Issue body, epic description, scope summary, or freeform plan (required)
-- Change-scoped context availability assumed — `change_brief` is called first when paths or a concrete task are known; `map-overview` and `map-neighborhood` remain the fallback and deeper drilldown route
+- Change-scoped context availability assumed — `change_brief` is called first when paths or a concrete task are known; `map_overview` and `map_neighborhood` remain the fallback and deeper drilldown route
 - Any existing partial plan or prior decomposition attempt (optional; surface conflicts explicitly)
 - Org profile (Sovereign / Lean / Focused / Scaled) — determines whether a changeset plan is recommended or required per the standard's per-profile defaults table
 
@@ -41,7 +41,7 @@ A changeset plan is an ordered, contract-bounded sequence of PR stubs — each s
 
 ### Phase 1 — Read change-scoped context
 
-When the work names paths or a concrete task, call `change_brief` or `getmyorg change-brief` first. Use its affected areas, ownership, trust state, candidate files/spans, and verification hints as the starting context. For work that is still broad or area-shaped, call `map-overview` to understand the overall structure of the affected repo. For each area you expect to touch or that the brief identifies, call `map-neighborhood` with the area name when you need deeper architectural context. Do not begin decomposition without this first-pass context. Blind decomposition against an unfamiliar codebase produces stubs that cross undetected contract boundaries. If readiness reports `needs_full_refresh`, run `getmyorg project-map <dir>` before proceeding.
+When the work names paths or a concrete task, call `change_brief` or `getmyorg change-brief` first. Use its affected areas, ownership, trust state, candidate files/spans, and verification hints as the starting context. For work that is still broad or area-shaped, call `map_overview` to understand the overall structure of the affected repo. For each area you expect to touch or that the brief identifies, call `map_neighborhood` with the area name when you need deeper architectural context. Do not begin decomposition without this first-pass context. Blind decomposition against an unfamiliar codebase produces stubs that cross undetected contract boundaries. If readiness reports `needs_full_refresh`, run `getmyorg project-map <dir>` before proceeding.
 
 **Stop and report if:** the project map is unavailable, stale, or cannot identify the affected areas.
 
@@ -177,7 +177,7 @@ A plan with `validation: unverified` is provisional. It must be size-validated b
 
 **Body of work:** Add the `agent-authored-changes` org-wide standard and the `decompose-changeset` skill that operationalizes it. Filed as a single epic; required decomposition before any code was written.
 
-**Phase 1 — map check:** `map-overview` shows the repo has a `blueprint/` plane (distributable assets) and separate agent registry files. `map-neighborhood` for the standards and skills areas confirms they are independent planes with separate contract boundaries (the `standards:` registry key and the `skills:` registry key).
+**Phase 1 — map check:** `map_overview` shows the repo has a `blueprint/` plane (distributable assets) and separate agent registry files. `map_neighborhood` for the standards and skills areas confirms they are independent planes with separate contract boundaries (the `standards:` registry key and the `skills:` registry key).
 
 **Phase 2 — contexts:** Two contexts surface immediately:
 
@@ -218,7 +218,7 @@ stubs:
 
 **Body of work:** Add cross-host delegation support — peer CLI subprocess delegation, API fallback when the CLI is absent, and org-map tooling to surface the peer graph. Modelled on #328's actual decomposition.
 
-**Phase 1 — map check:** `map-overview` shows the repo spans a Go MCP server, skill definitions, and a Python compiler. `map-neighborhood` for the server internals surfaces the `delegate-to-peer` skill path and the org-map package as distinct modules with their own interfaces.
+**Phase 1 — map check:** `map_overview` shows the repo spans a Go MCP server, skill definitions, and a Python compiler. `map_neighborhood` for the server internals surfaces the `delegate-to-peer` skill path and the org-map package as distinct modules with their own interfaces.
 
 **Phase 2 — contexts:** Three contexts:
 

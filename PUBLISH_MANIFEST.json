@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "8c6220a8f15bc80a37382ffc61e64ed442111e94",
-  "generated_at": "2026-10-27T19:13:47+00:00",
+  "canonical_sha": "92cacc4d8638a85ff04236347cd61900be3149f2",
+  "generated_at": "2026-10-27T22:30:04+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -168,7 +168,7 @@
     },
     {
       "path": "blueprint/skills/decompose-changeset.md",
-      "sha256": "006dcffabb885b0f749a13a5676ab558e532b75c0984503a34b80633c34e03d9"
+      "sha256": "d5f03c34332073ea82f755a815345234005dd948587cd429e3d4f1ca3e2e8d62"
     },
     {
       "path": "blueprint/skills/systematic-debugging.md",

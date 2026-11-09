@@ -2,8 +2,9 @@
 # Claude Code PreToolUse hook for Edit/Write/MultiEdit band-aid detection.
 # Scans added lines for band-aid patterns (bare excepts, lint/type suppressions,
 # skipped tests, unlinked TODOs) against band-aid-patterns.toml.
-# Advisory-first: only high-confidence patterns block; most emit a non-blocking
-# advisory surfaced in logs and the transcript.
+# A match is a note to the agent; only at the strict guard level do the
+# high-confidence patterns stop the edit. Also stops edits that change the guard
+# level itself (only the user's /myorg:guards does that).
 
 # Record this tool invocation for the statusline stall-detector.
 "$(dirname "$0")/touch-last-tool-call.sh" || true
@@ -15,6 +16,7 @@ CONFIG_FILE="$SCRIPT_DIR/band-aid-patterns.toml"
 
 # shellcheck source=hook-lib.sh
 . "$SCRIPT_DIR/hook-lib.sh"
+hooklib_plugin_guard "$SCRIPT_DIR"
 
 hooklib_init_log_dir
 hooklib_cleanup_old_logs
@@ -62,9 +64,9 @@ if [[ -n "$LOG_FILE" && -n "$OUTPUT" ]]; then
         TOOL=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_name',''))" 2>/dev/null)
         REASON=$(echo "$OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('hookSpecificOutput',{}).get('permissionDecisionReason',''))" 2>/dev/null)
         hooklib_log_event "$LOG_FILE" "EditDeny" "$TOOL" "$REASON"
-    elif echo "$OUTPUT" | grep -q 'ADVISORY'; then
+    elif echo "$OUTPUT" | grep -q '"additionalContext"'; then
         TOOL=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_name',''))" 2>/dev/null)
-        REASON=$(echo "$OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('hookSpecificOutput',{}).get('permissionDecisionReason',''))" 2>/dev/null)
+        REASON=$(echo "$OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('hookSpecificOutput',{}).get('additionalContext',''))" 2>/dev/null)
         hooklib_log_event "$LOG_FILE" "EditAdvise" "$TOOL" "$REASON"
     fi
 fi

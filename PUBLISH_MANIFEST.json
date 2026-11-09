@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "92cacc4d8638a85ff04236347cd61900be3149f2",
-  "generated_at": "2026-10-27T22:30:04+00:00",
+  "canonical_sha": "128d8fb67d4bea3cd9dfd64a24f92557f97d1288",
+  "generated_at": "2026-11-09T20:41:04+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -32,7 +32,7 @@
     },
     {
       "path": "bin/doctor.sh",
-      "sha256": "7baee1ca4fd6e6aeed401619477e038c5b614a7c569a3f1b2cf71e0930cc9ff5"
+      "sha256": "be5768ef42dff3bfc7b23bae84659eeb72fdbd7a5e54de31abdbd3bf02e7d288"
     },
     {
       "path": "blueprint/agents/code-reviewer.md",
@@ -92,7 +92,7 @@
     },
     {
       "path": "blueprint/hooks/band-aid-patterns.toml",
-      "sha256": "5011f0d8afd2058704cecd58ff85b7f5265870ef85a73c3e53fc36c0c9806b80"
+      "sha256": "61efc987940dd452396050d18cd1b5ed778de2cc31c984048e0fca0fb07934a8"
     },
     {
       "path": "blueprint/hooks/bash-patterns.darwin.toml",
@@ -104,11 +104,11 @@
     },
     {
       "path": "blueprint/hooks/bash-patterns.toml",
-      "sha256": "d66de97d03383a36cfe053dbc5982c1d67eb67c383af965c47979fa03c38c613"
+      "sha256": "0178dba890e1c8516e8fb977974fa6970f031b62345f5f4f187d7da599fa0b99"
     },
     {
       "path": "blueprint/hooks/bash-patterns.windows.toml",
-      "sha256": "e6a500b97015094f386ae9917c7f8af0439318315a8ef50517262b4c7b6c5f76"
+      "sha256": "161ccdaf920abcd06166c042c2020143604e2a145f1e20ad451bedd1ca378db5"
     },
     {
       "path": "blueprint/hooks/codex-permission-bash.sh",
@@ -132,11 +132,11 @@
     },
     {
       "path": "blueprint/hooks/hook-lib.sh",
-      "sha256": "5dea9563d1b0e8da382c60ac3a4f998ff0f6f2429af17d79fdb116aba2939cfe"
+      "sha256": "d669e7510a2ccd55950fd995af988513d50ff0b98d2904c4912048e909c891aa"
     },
     {
       "path": "blueprint/hooks/injection-patterns.toml",
-      "sha256": "e18542d66c950b920f6741bd943359ac79a2e76bb86152a85d1b8b38fecf467f"
+      "sha256": "67dd9a89257ebb77dd30809aad85908b68b38ae0e519930b2ec8800d60e48f5e"
     },
     {
       "path": "blueprint/hooks/post-bash.sh",
@@ -152,11 +152,11 @@
     },
     {
       "path": "blueprint/hooks/validate-bash.sh",
-      "sha256": "ef81cd5ab4224f16b6fae616fe4a218392056640e8215559dec49e32940191e4"
+      "sha256": "11734bf8a7a030a7ad837acc9ffaf03953b128bbf66838be180f776a8a7c9ab4"
     },
     {
       "path": "blueprint/hooks/validate-edit.sh",
-      "sha256": "0889cd9872c3635c2ee03f7127f074ccebecaf9ccfa8d5fd89644001a082af3b"
+      "sha256": "025341e2946f88e772c4887722cc4598e6b950b17ad874aafc18d0f92499735e"
     },
     {
       "path": "blueprint/hooks/validate-postedit.sh",
@@ -164,7 +164,7 @@
     },
     {
       "path": "blueprint/hooks/validate-read.sh",
-      "sha256": "b58c70b5911992656c5d4823ed5c3e26e4eddf29f0b07e65d14ca2dd3f02b5fa"
+      "sha256": "e95bb04b3620da1057d5ddc58339d290482311dd563a0c3e3e92c6193853a11c"
     },
     {
       "path": "blueprint/skills/decompose-changeset.md",
@@ -184,7 +184,7 @@
     },
     {
       "path": "blueprint/standards/prefer-root-cause-fixes.md",
-      "sha256": "176105a83c35a81dce1559685d0576bd07d47d1b22dcec60c10556d4574ace61"
+      "sha256": "0fd05a3be90004baa0021d1b9f65df834af8c99e0b3cd3196a491931f90bac33"
     },
     {
       "path": "blueprint/standards/silent-failure.md",
@@ -192,39 +192,43 @@
     },
     {
       "path": "pylib/hooks/bash_command_parsing.py",
-      "sha256": "a73404abb5fe803ad52ed78bef42cc20b8737268c3987c4a5a88e358c018f5cd"
+      "sha256": "64a235758539fecc1ae2a85c94c0cda96a02428d40fc0f4ab86c54d36df157b7"
     },
     {
       "path": "pylib/hooks/bash_policy_decide.py",
-      "sha256": "6180c602e14b85715e734a09b9fdbefac50122decdf95c96a4d3a69509ee5952"
+      "sha256": "18fe8ac8e2a6e298fb8d37f270ba37ffb53c99596774e6a68335f256b9765868"
     },
     {
       "path": "pylib/hooks/bash_policy_evaluate.py",
-      "sha256": "521b92b30a91eca8e708977e9df13c92d53fface76e465574c2bf3f5ef74276d"
+      "sha256": "71e4ab684615d116327a3d7d0d8457a23e72a1ff24b1ae15ea2a8e6ec3f8b02e"
     },
     {
       "path": "pylib/hooks/bash_policy_patterns.py",
-      "sha256": "1b10802e970c00dc92ff99bec6bd6af686626b68cd0e01a6bf61bc34eee0af07"
+      "sha256": "6f1e9cf583ef5b9b731327140ab06a4f3007613082993e264b2d69e1cc21bb7e"
     },
     {
       "path": "pylib/hooks/bash_policy_shadow.py",
-      "sha256": "460fa7786c685933fb805d29daa410b5716091a852170a8f3a69424590e42e41"
+      "sha256": "5d805c37c71dee28fdebbb405f71ca8ad48c2b0b94bceaf98763e52ee073f579"
     },
     {
       "path": "pylib/hooks/entries/validate_bash.py",
-      "sha256": "a9fb10f30dabb72819c7977a427a8215aa1e743bdbf9fbecc4676eca2b1acff0"
+      "sha256": "0c26eb20714c22c3ed98682eb17c6fe76d51f4029b6ecc638832a4c9af972e51"
     },
     {
       "path": "pylib/hooks/entries/validate_edit.py",
-      "sha256": "53859388181ee8fb6d16e8559cf858762b73f2bb6fa1f29b19e697988d5ba86a"
+      "sha256": "49e804794682c9b7025989659b554990ea8961173f60181bf145d61362c78f6f"
     },
     {
       "path": "pylib/hooks/entries/validate_postedit.py",
-      "sha256": "a9d3695287ec54322652af319e29c3ea788d0a6e6033260a0c6ab48830941f01"
+      "sha256": "498612eeada8953cc309656c5ec50df9aad9fc215d27e6c99ae0ea5bcb324af8"
     },
     {
       "path": "pylib/hooks/entries/validate_read.py",
-      "sha256": "d429426ff8b17d6610023722af49052795c33c122c1001ca6250f3439610039d"
+      "sha256": "0673e317e4147cf5687aa04f1376ddaf79356493202ac74fc8d60eeeb47d87ec"
+    },
+    {
+      "path": "pylib/hooks/force_push.py",
+      "sha256": "3d922df4b82383fa096be9b7642d642cfa8b5b3804a987171ff89670a3206aaf"
     },
     {
       "path": "pylib/hooks/hook_log.py",
@@ -236,7 +240,11 @@
     },
     {
       "path": "pylib/hooks/myorg_message.py",
-      "sha256": "c705b0eb5cc7e627796ade4cf49a9c64f697beba8cb9f9361b43b6ae3cdb7ba9"
+      "sha256": "c50a822517beef323ab1a53fc1b4df4665d06d4ccae7d2e6ba273ef13f04ae77"
+    },
+    {
+      "path": "pylib/hooks/pattern_files.py",
+      "sha256": "1f76df87423fccfe6f07beae660ab542facfbec81985f43c45f663eb2f8c6c61"
     },
     {
       "path": "pylib/hooks/reflect_predicate.py",

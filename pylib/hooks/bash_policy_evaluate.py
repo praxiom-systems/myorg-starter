@@ -21,6 +21,7 @@ from bash_command_parsing import (
     split_commands,
     strip_line_continuations,
     substitute_known_vars,
+    unwrap_command,
 )
 from bash_policy_patterns import CompiledPattern
 from myorg_message import format_reason
@@ -30,15 +31,41 @@ _MAX_SUBSTITUTION_DEPTH = 8
 __all__ = ["check_patterns", "validate_command"]
 
 
-def check_patterns(segment: str, patterns: list[CompiledPattern]) -> tuple[bool, str]:
-    """Check if segment matches any compiled pattern.
+def check_patterns(
+    segment: str, patterns: list[CompiledPattern], skip: frozenset[str] = frozenset()
+) -> tuple[bool, str]:
+    """Check if segment matches any compiled pattern outside ``skip``.
 
     Returns (matched, section_name).
     """
     for pattern in patterns:
+        if pattern.section in skip:
+            continue
         if pattern.regex.search(segment):
             return True, pattern.section
     return False, ""
+
+
+def _match(
+    subjects: list[str], patterns: list[CompiledPattern], soft: frozenset[str]
+) -> tuple[str | None, str | None]:
+    """Return (hard_section, soft_section) across all subjects.
+
+    A hard (non-soft) match anywhere wins: a soft rule that happens to come
+    first in the catalog must not hide it (#1089 review). The soft section
+    is the first soft rule that matched, or None.
+    """
+    hard = soft_hit = None
+    for subject in subjects:
+        matched, section = check_patterns(subject, patterns, skip=soft)
+        if matched:
+            hard = hard or section
+        if soft_hit is None and soft:
+            only_soft = [pat for pat in patterns if pat.section in soft]
+            matched, section = check_patterns(subject, only_soft)
+            if matched:
+                soft_hit = section
+    return hard, soft_hit
 
 
 def _validate_command_substitutions(
@@ -48,6 +75,7 @@ def _validate_command_substitutions(
     allow_patterns: list[CompiledPattern],
     default_action: str,
     substitution_depth: int,
+    soft_sections: frozenset[str] = frozenset(),
 ) -> list[tuple[str, str, str, str, str | None]]:
     """Validate commands embedded in command/process substitutions.
 
@@ -76,6 +104,7 @@ def _validate_command_substitutions(
             allow_patterns,
             default_action,
             substitution_depth + 1,
+            soft_sections,
         )
         results.append((body, decision, reason, matched_category, matched_rule))
         if decision == "deny":
@@ -90,6 +119,7 @@ def validate_command(
     allow_patterns: list[CompiledPattern],
     default_action: str = "allow",
     substitution_depth: int = 0,
+    soft_sections: frozenset[str] = frozenset(),
 ) -> tuple[str, str, str, str | None]:
     """Validate a command against patterns.
 
@@ -104,10 +134,35 @@ def validate_command(
     ``default_action`` controls the fallback when a segment matches no
     rule. "ask" preserves the historical behavior; "allow" makes the
     deny+ask lists the fence and silently approves anything else.
+
+    ``soft_sections`` names deny/reflect sections that only earn a note at
+    the caller's guard level (#1089). A match there doesn't stop the scan:
+    a harder match later in the command still wins. When the only matches
+    are soft, decision is "note" and matched_category is the soft rule's
+    own category.
     """
     command = strip_line_continuations(command)
 
-    matched, section = check_patterns(command, deny_patterns)
+    note: tuple[str, str, str] | None = None  # (reason, category, rule)
+
+    def soft_note(category: str, rule: str, subject: str) -> None:
+        nonlocal note
+        if note is None:
+            note = (
+                format_reason(
+                    kind="BASH",
+                    state="NOTE",
+                    rule=rule,
+                    body_lines=[f"command: {subject[:100]}", f"why:     matches {rule}"],
+                ),
+                category,
+                rule,
+            )
+
+    hard, soft = _match([command], deny_patterns, soft_sections)
+    if soft:
+        soft_note("deny", soft, command)
+    matched, section = hard is not None, hard
     if matched:
         reason = format_reason(
             kind="BASH",
@@ -116,8 +171,6 @@ def validate_command(
             body_lines=[
                 f"command: {command[:100]}",
                 f"why:     matches {section}",
-                "override: this rule cannot be overridden via env; "
-                "edit blueprint/hooks/bash-patterns.toml under your user override",
             ],
         )
         return "deny", reason, "deny", section
@@ -151,6 +204,7 @@ def validate_command(
             allow_patterns,
             default_action,
             substitution_depth,
+            soft_sections,
         ):
             if substitution_decision == "deny":
                 reason = format_reason(
@@ -160,7 +214,6 @@ def validate_command(
                     body_lines=[
                         f"command substitution: {substitution_body[:100]}",
                         f"why:     {substitution_reason}",
-                        "override: edit blueprint/hooks/bash-patterns.toml",
                     ],
                 )
                 return (
@@ -169,6 +222,10 @@ def validate_command(
                     substitution_category,
                     substitution_rule,
                 )
+            if substitution_decision == "note":
+                if note is None:
+                    note = (substitution_reason, substitution_category, substitution_rule)
+                continue
             if substitution_decision == "ask":
                 if substitution_category == "default":
                     if not has_default_fallback:
@@ -186,7 +243,6 @@ def validate_command(
                         body_lines=[
                             f"command: {substitution_body[:100]}",
                             f"why:     {substitution_reason}",
-                            "override: set `autonomy.hook_strictness: lax` in .myorg/config.yaml to silence this on no-match",
                         ],
                     )
             elif substitution_category == "default" and not has_default_fallback:
@@ -199,8 +255,15 @@ def validate_command(
             continue
 
         cleaned = substitute_known_vars(cleaned, env_context)
+        # Check what a wrapper runs too: `sudo dd of=/dev/sda` must hit the
+        # disk rule even where sudo alone is only a note.
+        unwrapped = unwrap_command(cleaned)
+        subjects = [cleaned] if unwrapped == cleaned else [cleaned, unwrapped]
 
-        matched, section = check_patterns(cleaned, deny_patterns)
+        hard, soft = _match(subjects, deny_patterns, soft_sections)
+        if soft:
+            soft_note("deny", soft, cleaned)
+        matched, section = hard is not None, hard
         if matched:
             reason = format_reason(
                 kind="BASH",
@@ -209,13 +272,15 @@ def validate_command(
                 body_lines=[
                     f"command: {cleaned[:100]}",
                     f"why:     matches {section}",
-                    "override: this rule cannot be overridden via env; "
-                    "edit blueprint/hooks/bash-patterns.toml under your user override",
                 ],
             )
             return "deny", reason, "deny", section
 
-        matched, section = check_patterns(cleaned, ask_patterns)
+        hard, soft = _match(subjects, ask_patterns, soft_sections)
+        if hard is None and soft:
+            soft_note("ask", soft, cleaned)
+            continue
+        matched, section = hard is not None, hard
         if matched:
             if not has_real_ask:
                 has_real_ask = True
@@ -228,7 +293,6 @@ def validate_command(
                     body_lines=[
                         f"command: {cleaned[:100]}",
                         f"why:     matches {section}",
-                        "override: set `autonomy.hook_strictness: lax` in .myorg/config.yaml to silence this on no-match",
                     ],
                 )
             continue
@@ -262,12 +326,14 @@ def validate_command(
                 body_lines=[
                     f"command: {ask_segment[:100]}",
                     f"why:     matches {ask_section}",
-                    "override: set `autonomy.hook_strictness: lax` in .myorg/config.yaml to silence this on no-match",
                 ],
             ),
             "ask",
             ask_section,
         )
+
+    if note is not None:
+        return "note", note[0], note[1], note[2]
 
     if has_default_fallback:
         if default_action == "allow":

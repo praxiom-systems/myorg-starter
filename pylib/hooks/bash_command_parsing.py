@@ -877,3 +877,60 @@ def clean_segment(segment: str) -> str:
         return ""
 
     return segment
+
+
+# Commands that run the rest of their arguments as another command. Each maps
+# to the options that take a separate value, so `timeout -s KILL 30 git push`
+# unwraps to `git push`.
+_WRAPPERS: dict[str, frozenset[str]] = {
+    "sudo": frozenset({"-u", "-g", "-h", "-p", "-C", "-D", "-r", "-t", "-U", "-T"}),
+    "doas": frozenset({"-u", "-C"}),
+    "env": frozenset({"-u", "-C", "-S"}),
+    "command": frozenset(),
+    "exec": frozenset({"-a"}),
+    "nohup": frozenset(),
+    "nice": frozenset({"-n"}),
+    "time": frozenset({"-f", "-o"}),
+    "timeout": frozenset({"-s", "-k", "--signal", "--kill-after"}),
+}
+_WRAPPER_TOKEN = re.compile(r"""\s*(?:"[^"]*"|'[^']*'|\S+)""")
+_ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+
+
+def unwrap_command(segment: str) -> str:
+    """Strip leading wrapper commands (sudo, env, timeout, nohup, …).
+
+    `sudo dd if=/dev/zero of=/dev/sda` and `env X=1 git push -f origin main`
+    unwrap to the command that actually runs, so its own rules apply (#1089).
+    Returns the segment unchanged when it doesn't start with a wrapper.
+    """
+    rest = segment.strip()
+    for _ in range(8):
+        m = _WRAPPER_TOKEN.match(rest)
+        if not m:
+            break
+        word = m.group(0).strip().rsplit("/", 1)[-1]
+        if word not in _WRAPPERS:
+            break
+        value_opts = _WRAPPERS[word]
+        rest = rest[m.end():].lstrip()
+        while True:
+            m = _WRAPPER_TOKEN.match(rest)
+            if not m:
+                break
+            tok = m.group(0).strip()
+            if tok.startswith("-") and tok != "-":
+                rest = rest[m.end():].lstrip()
+                if tok in value_opts:
+                    v = _WRAPPER_TOKEN.match(rest)
+                    rest = rest[v.end():].lstrip() if v else rest
+                continue
+            if word == "env" and _ASSIGNMENT.match(tok):
+                rest = rest[m.end():].lstrip()
+                continue
+            if (word == "timeout" and re.match(r"^\d+(\.\d+)?[smhd]?$", tok)) or (
+                word == "nice" and re.match(r"^-?\d+$", tok)
+            ):
+                rest = rest[m.end():].lstrip()
+            break
+    return rest

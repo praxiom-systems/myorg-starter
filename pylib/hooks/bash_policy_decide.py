@@ -7,15 +7,14 @@ raw verdict through the optional ``_policy_overlay`` (graduated-
 autonomy gate). Kept distinct from ``bash_policy_evaluate`` so the
 pure pattern-matching code has no env-var or overlay coupling.
 
-Per #923 the legacy ``MYORG_BASH_DEFAULT`` env var is removed. The
-strictness lever is now ``hook_strictness`` — read from
-``.myorg/config.yaml`` under ``autonomy.hook_strictness`` (with
-``MYORG_HOOK_STRICTNESS`` available as an explicit override for tests).
+The lever is the guard level, ``autonomy.hook_strictness`` in
+``.myorg/config.yaml`` (``MYORG_HOOK_STRICTNESS`` overrides it for tests).
 """
 
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -35,144 +34,122 @@ except ImportError:
         return decision, reason, matched_category, matched_rule
 
 
-_VALID_STRICTNESS = {"strict", "balanced", "lax"}
-_VALID_PROFILES = {"assisted", "structured", "directed", "autonomous"}
-_STRICTNESS_RANK = {"strict": 0, "balanced": 1, "lax": 2}
+# Guard levels, strictest first (#1089). Any preset may pick any level; there
+# is no price ceiling. ``guarded`` is the default whenever nothing valid is
+# configured: no .myorg/config.yaml, an unreadable one, an unknown value, or a
+# folder that never ran /myorg:init.
+LEVELS = ("strict", "guarded", "relaxed", "off")
+DEFAULT_LEVEL = "guarded"
 
-# Per-preset hook_strictness ceiling. Kept in lockstep with the
-# `orgs[*].hook_strictness_ceiling` declarations in the org-blueprint
-# (single source of truth in the model layer) and the design table in
-# #923. Duplicated here so the hook can clamp WITHOUT loading the full
-# blueprint at hook time — the hook is a child process and cold-loading
-# the blueprint on every command would add real latency to every Bash
-# invocation. lint-blueprint.py catches drift between this table and
-# the blueprint via the ceiling enum check; the runtime resolver here
-# is the gate that actually fires when commands run.
-_PRESET_HOOK_STRICTNESS_CEILING = {
-    "sovereign": "balanced",
-    "lean":      "balanced",
-    "focused":   "lax",
-    "scaled":    "lax",
-}
+__all__ = [
+    "DEFAULT_LEVEL",
+    "LEVELS",
+    "apply_policy_gate",
+    "compute_would_action",
+    "read_level_from_text",
+    "resolve_hook_strictness",
+    "strictness_to_default_action",
+]
+
+_TOP_KEY = re.compile(r"^([A-Za-z_][\w-]*)\s*:(.*)$")
+_LEVEL_KEY = re.compile(r"^\s+hook_strictness\s*:\s*(.*)$")
+_FLOW_LEVEL = re.compile(r"[{,]\s*hook_strictness\s*:\s*([^,}]*)")
 
 
-def _read_config(cwd: str) -> dict:
-    """Walk up from cwd looking for .myorg/config.yaml and return the
-    parsed mapping. Returns an empty dict when no config is found, the
-    YAML is malformed, or PyYAML is unavailable.
+def _scalar(raw: str) -> str:
+    value = raw.split(" #", 1)[0].strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        value = value[1:-1]
+    return value.strip().lower()
 
-    Best-effort: any IO or parse error returns {} and lets callers fall
-    back to defaults rather than crashing the hook on a corrupt file.
+
+def read_level_from_text(text: str) -> str | None:
+    """Return ``autonomy.hook_strictness`` from config.yaml text, or None.
+
+    A small line reader instead of PyYAML: a user's python3 often doesn't
+    have it, and a missing module must not silently change the level. It
+    understands the block form (``autonomy:`` then an indented key) and the
+    flow form (``autonomy: {hook_strictness: x}``).
     """
-    if not cwd:
-        return {}
-    try:
-        import yaml  # local import — keep startup lean
-    except Exception:
-        return {}
-    cur = Path(cwd).resolve()
-    for parent in [cur, *cur.parents]:
-        cfg = parent / ".myorg" / "config.yaml"
-        if not cfg.is_file():
+    in_autonomy = False
+    for line in text.splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
             continue
-        try:
-            data = yaml.safe_load(cfg.read_text()) or {}
-        except Exception:
-            return {}
-        return data if isinstance(data, dict) else {}
-    return {}
+        top = _TOP_KEY.match(line)
+        if top:
+            in_autonomy = top.group(1) == "autonomy"
+            rest = top.group(2).strip()
+            if in_autonomy and rest.startswith("{"):
+                flow = _FLOW_LEVEL.search(rest)
+                return _scalar(flow.group(1)) if flow else None
+            continue
+        if in_autonomy:
+            key = _LEVEL_KEY.match(line)
+            if key:
+                return _scalar(key.group(1))
+    return None
 
 
-def _ceiling_for_preset(preset: str | None) -> str:
-    """Return the hook_strictness ceiling for a preset slug.
+def _config_path(cwd: str) -> Path | None:
+    """The .myorg/config.yaml that governs cwd, or None.
 
-    Unknown / missing preset falls back to ``balanced`` — the safest
-    ceiling that doesn't unnecessarily widen on a typo, but also doesn't
-    deny everything by clamping to ``strict`` and forcing reflection
-    on every Bash call.
+    Inside a git repo, only the repo root's counts — the same anchor the Go
+    side uses — so a nested .myorg/ can't shadow the level. Outside git, the
+    nearest one at or above cwd.
     """
-    if not preset:
-        return "balanced"
-    return _PRESET_HOOK_STRICTNESS_CEILING.get(preset.strip().lower(), "balanced")
+    try:
+        cur = Path(cwd).resolve()
+    except OSError:
+        return None
+    chain = [cur, *cur.parents]
+    for parent in chain:
+        if (parent / ".git").exists():
+            cfg = parent / ".myorg" / "config.yaml"
+            return cfg if cfg.is_file() else None
+    for parent in chain:
+        cfg = parent / ".myorg" / "config.yaml"
+        if cfg.is_file():
+            return cfg
+    return None
 
 
-def _clamp_strictness(selected: str, ceiling: str) -> str:
-    """Clamp `selected` so it is no looser (higher rank) than `ceiling`.
-
-    Strictness ranks low-to-high (looser = higher rank): strict < balanced < lax.
-    Clamping picks the stricter (lower-rank) of the two values, never
-    the looser. So `lax` selected with a `balanced` ceiling → `balanced`.
-    """
-    s = _STRICTNESS_RANK.get(selected, _STRICTNESS_RANK["strict"])
-    c = _STRICTNESS_RANK.get(ceiling, _STRICTNESS_RANK["balanced"])
-    if s > c:
-        return ceiling
-    return selected
+def _config_level(cwd: str) -> str | None:
+    """Level from the .myorg/config.yaml that governs cwd, or None."""
+    if not cwd:
+        return None
+    cfg = _config_path(cwd)
+    if cfg is None:
+        return None
+    try:
+        return read_level_from_text(cfg.read_text(encoding="utf-8", errors="replace"))
+    except OSError:
+        return None
 
 
 def resolve_hook_strictness(cwd: str | None = None) -> str:
-    """Resolve the operator-selected hook strictness, clamped to the
-    preset's ceiling (#923 review #1).
+    """Resolve the guard level for a hook running in ``cwd``.
 
-    Order:
-      1. ``MYORG_HOOK_STRICTNESS`` env var (testing override). Still
-         clamped — the env var cannot widen past the preset ceiling.
-      2. ``autonomy.hook_strictness`` in ``.myorg/config.yaml``.
-      3. Inferred from ``autonomy.profile`` in the same config.
-      4. Failure-closed default: ``strict``.
-
-    The clamp is the bug-fix: previously a sovereign repo could set
-    ``autonomy.hook_strictness: lax`` and bypass the design's ceiling
-    table because the hook did not consult the preset. Now the hook
-    walks the same config-resolution path the Go side uses and applies
-    the same ceiling. Invalid values (typos) still fall through to the
-    next source rather than silently widening the fence.
+    Order: ``MYORG_HOOK_STRICTNESS`` (tests and short-lived overrides), then
+    ``autonomy.hook_strictness`` in the nearest .myorg/config.yaml, then
+    ``guarded``. An invalid value at either source falls through to the
+    next one rather than tightening or loosening silently.
     """
-    data = _read_config(cwd or os.getcwd())
-    preset = ""
-    if isinstance(data, dict):
-        preset_val = data.get("preset")
-        if isinstance(preset_val, str):
-            preset = preset_val.strip().lower()
-    ceiling = _ceiling_for_preset(preset)
-
     env_val = os.environ.get("MYORG_HOOK_STRICTNESS", "").strip().lower()
-    if env_val in _VALID_STRICTNESS:
-        return _clamp_strictness(env_val, ceiling)
-
-    autonomy = (data.get("autonomy") or {}) if isinstance(data, dict) else {}
-    explicit = (autonomy.get("hook_strictness") or "").strip().lower()
-    if explicit in _VALID_STRICTNESS:
-        return _clamp_strictness(explicit, ceiling)
-
-    profile = (autonomy.get("profile") or "").strip().lower()
-    if profile in _VALID_PROFILES:
-        inferred = "strict" if profile == "assisted" else "balanced"
-        return _clamp_strictness(inferred, ceiling)
-
-    return "strict"
+    if env_val in LEVELS:
+        return env_val
+    configured = _config_level(cwd or os.getcwd())
+    if configured in LEVELS:
+        return configured
+    return DEFAULT_LEVEL
 
 
 def strictness_to_default_action(strictness: str) -> str:
-    """Map a resolved hook strictness to the evaluator's internal
-    ``default_action`` parameter.
+    """Map a guard level to the evaluator's no-match ``default_action``.
 
-    The evaluator's contract still uses the legacy "ask"/"allow"
-    vocabulary internally; the boundary translates "ask" verdicts to
-    Claude Code's ``deny`` with a reflection prompt (see
-    ``entries/validate_bash.py:output_decision``). So strict and
-    balanced both map to "ask"; only lax maps to "allow".
+    Only ``strict`` bounces commands that match no rule; every other level
+    lets them through to Claude Code's own permission rules.
     """
-    if strictness == "lax":
-        return "allow"
-    return "ask"
-
-
-# Compatibility shim — older call sites may still reach for this name.
-# Resolves to the same value the new pipeline emits.
-def resolve_default_action(cwd: str | None = None) -> str:
-    """Deprecated: use ``resolve_hook_strictness`` + ``strictness_to_default_action``."""
-    return strictness_to_default_action(resolve_hook_strictness(cwd))
+    return "ask" if strictness == "strict" else "allow"
 
 
 def compute_would_action(
@@ -186,12 +163,3 @@ def compute_would_action(
     if matched_category != "default":
         return actual_decision
     return "ask" if default_action == "allow" else "allow"
-
-
-__all__ = [
-    "apply_policy_gate",
-    "resolve_hook_strictness",
-    "resolve_default_action",
-    "strictness_to_default_action",
-    "compute_would_action",
-]

@@ -12,6 +12,8 @@
 #                                  — append a structured block matching the
 #                                    format agent-teams-common.py writes.
 #   hooklib_find_getmyorg          — echo the getmyorg binary path or "".
+#   hooklib_plugin_guard <dir>     — for the copy shipped in the myorg plugin:
+#                                    turn off the shadow log.
 #   hooklib_orchestrate_semantic_refresh <repo_root>
 #                                  — detached, debounced semantic-refresh
 #                                    queue; never commits/writes/models.
@@ -37,6 +39,13 @@
 HOOKLIB_LOG_DIR_DEFAULT="/tmp/claude-hook-logs"
 HOOKLIB_LOG_RETENTION_DAYS_DEFAULT=15
 HOOKLIB_LOG_CLEANUP_SECONDS_DEFAULT=$((24 * 60 * 60))
+
+hooklib_plugin_guard() {
+    # The plugin's copies live in <plugin>/hooks/, next to .claude-plugin/.
+    local dir="$1"
+    [[ -f "$dir/../.claude-plugin/plugin.json" ]] || return 0
+    export MYORG_SHADOW_LOG=0
+}
 
 hooklib_init_log_dir() {
     # Respect explicit disable: MYORG_HOOK_LOG_DIR set to empty string.

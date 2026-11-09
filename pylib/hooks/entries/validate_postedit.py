@@ -3,7 +3,7 @@
 PostToolUse output-verification probe for Edit/Write/MultiEdit.
 
 Runs two checks after an edit tool has applied a change:
-  1. Band-aid re-scan — synchronous, advisory-first (same hook_strictness
+  1. Band-aid re-scan — synchronous, advisory-only (same guard-level
      gating as the PreToolUse detector).  Uses the shared scan_diff() engine
      from validate_edit so pattern logic is never duplicated.
   2. Contract LLM judge — asynchronous fire-and-forget via
@@ -15,15 +15,12 @@ PostToolUse hooks cannot block tool execution (the edit is already applied).
 Output follows Claude Code's ``hookSpecificOutput`` JSON shape for PostToolUse:
   {"hookSpecificOutput": {"hookEventName": "PostToolUse", "suppressOutput": false}}
 
-The hook always exits 0.  Advisory reasons are surfaced in the transcript via
-the ``reason`` field without blocking the agent.
+The hook always exits 0.  Advisory reasons reach the agent as
+``additionalContext`` without blocking it.
 
 Environment variables:
-  Strictness               — Read from .myorg/config.yaml autonomy.hook_strictness
-                              (lax skips the band-aid re-scan; strict/balanced run it).
-                              The legacy MYORG_BANDAID_MODE env var is no longer
-                              honored — operators must use hook_strictness in
-                              config.yaml.
+  Guard level              — Read from .myorg/config.yaml autonomy.hook_strictness
+                              (relaxed/off skip the band-aid re-scan; strict/guarded run it).
   MYORG_VERIFY_LLM_JUDGE   — Set to "1" to enable async contract judge invocation.
   MYORG_HOOK_LOG_DIR        — Override log directory (empty string disables logging).
 
@@ -97,7 +94,7 @@ def _output_post(reason: str = "", fmt: str = "claude") -> None:
         }
     }
     if reason:
-        payload["hookSpecificOutput"]["reason"] = reason
+        payload["hookSpecificOutput"]["additionalContext"] = reason
     print(json.dumps(payload))
 
 
@@ -139,14 +136,14 @@ def main() -> None:
 
     config_path = positional[0]
 
-    # hook_strictness=lax skips the band-aid re-scan entirely; lax is
-    # the only operator-facing way to disable it (no env-var override).
+    # The relaxed and off guard levels skip the band-aid re-scan, the same
+    # as the PreToolUse detector.
     try:
         from pylib.hooks.bash_policy_decide import resolve_hook_strictness
         strictness = resolve_hook_strictness(os.getcwd())
     except Exception:
-        strictness = "strict"
-    if strictness == "lax":
+        strictness = "guarded"
+    if strictness in ("relaxed", "off"):
         _output_post(fmt=fmt)
         sys.exit(0)
     llm_judge_enabled = os.environ.get("MYORG_VERIFY_LLM_JUDGE", "").strip() == "1"

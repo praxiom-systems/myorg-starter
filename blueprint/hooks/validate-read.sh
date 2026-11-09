@@ -1,8 +1,8 @@
 #!/bin/bash
 # Claude Code PreToolUse hook for Read content validation.
 # Scans file content for prompt-injection signatures against
-# injection-patterns.toml. Advisory-first: only high-confidence signatures
-# block; medium-confidence signatures are surfaced as non-blocking warnings.
+# injection-patterns.toml. A match is a note to the agent; only at the strict
+# guard level does a high-confidence signature stop the read.
 
 # Record this tool invocation for the statusline stall-detector.
 "$(dirname "$0")/touch-last-tool-call.sh" || true
@@ -14,6 +14,7 @@ CONFIG_FILE="$SCRIPT_DIR/injection-patterns.toml"
 
 # shellcheck source=hook-lib.sh
 . "$SCRIPT_DIR/hook-lib.sh"
+hooklib_plugin_guard "$SCRIPT_DIR"
 
 hooklib_init_log_dir
 hooklib_cleanup_old_logs
@@ -61,10 +62,6 @@ if [[ -n "$LOG_FILE" && -n "$OUTPUT" ]]; then
         FILE=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))" 2>/dev/null)
         REASON=$(echo "$OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('hookSpecificOutput',{}).get('permissionDecisionReason',''))" 2>/dev/null)
         hooklib_log_event "$LOG_FILE" "ReadDeny" "$FILE" "$REASON"
-    elif echo "$OUTPUT" | grep -q 'ADVISORY'; then
-        FILE=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))" 2>/dev/null)
-        REASON=$(echo "$OUTPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('hookSpecificOutput',{}).get('permissionDecisionReason',''))" 2>/dev/null)
-        hooklib_log_event "$LOG_FILE" "ReadAdvise" "$FILE" "$REASON"
     fi
 fi
 

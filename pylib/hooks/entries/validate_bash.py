@@ -11,6 +11,8 @@ shadow-log construction live in their respective ``bash_policy_*``
 modules (issue #584 decomposition).
 """
 
+from __future__ import annotations
+
 import json
 import os
 import sys
@@ -30,7 +32,9 @@ from pylib.hooks.bash_policy_patterns import (
     merge_os_config,
 )
 from pylib.hooks.bash_policy_shadow import build_shadow_row, write_shadow_row
+from pylib.hooks.force_push import protected_force_push
 from pylib.hooks.mark_registry import find_mark_for_command
+from pylib.hooks.myorg_message import format_reason
 from pylib.hooks.reflect_predicate import DEFAULT_PREDICATE, evaluate as evaluate_predicate
 
 
@@ -39,7 +43,7 @@ def _predicate_for_command(command: str, reflect_patterns, config: dict) -> str:
     whose pattern matches the command.
 
     Falls back to DEFAULT_PREDICATE when no [reflect.*] pattern matches
-    (the command was unmatched at strict/balanced, but the agent
+    (the command was unmatched at strict, but the agent
     deliberated and marked it safe anyway — apply the conservative
     default).
     """
@@ -60,57 +64,103 @@ def _predicate_for_command(command: str, reflect_patterns, config: dict) -> str:
 
 
 REFLECT_PROMPT_TEMPLATE = """\
-This command did not match a curated allow/deny rule (or matched a [reflect.*]
-pattern). Before re-attempting, deliberate on three axes and decide:
+getmyorg's guard bounced this command so you can think it through first.
+
+{reason}
+
+Before retrying, rate it on three axes:
 
   reversibility: low | medium | high
   blast_radius:  local | repo | machine | external
   confidence:    0.0..1.0
 
-If the classification satisfies the matched [reflect.*] pattern's
-self_approve_predicate (default: confidence >= 0.7), record the deliberation
-with the `mark_command_safe` MCP tool and retry — the hook will honor the
-mark on retry within this session.
+If the rating clears the rule's bar (by default, confidence >= 0.7), record it
+with the `mark_command_safe` tool and retry once; the guard honors the mark for
+the rest of this session. Otherwise, ask the user before going further.
 
-If you are uncertain, or the predicate is not satisfied, use AskUserQuestion
-to escalate. The org-answering layer routes to a human via the configured
-notification channels (interactive CLI, GitHub issue, or Slack).
+Don't change the guard level yourself. The user can type /myorg:guards to see
+or change it ({level} now), or run the command themselves with `! <command>`.
+"""
 
-Do not retry the same command without either recording a mark or receiving
-explicit go-ahead via AskUserQuestion.
+STOP_TEMPLATE = """\
+getmyorg's guard stopped this command.
 
------ original validator reason -----
+{reason}
+
+You can't clear this stop yourself, and retrying won't help. If the command is
+really needed, explain why to the user. They can run it themselves with
+`! <command>`, or change the guard level with /myorg:guards ({level} now).
+Don't change the guard level yourself.
+"""
+
+NOTE_TEMPLATE = """\
+getmyorg guard note ({level} level): this command runs, but double-check it's
+what you mean.
+
 {reason}
 """
 
 
-def output_decision(decision: str, reason: str, fmt: str = "claude"):
+def soft_sections_for(config: dict, level: str) -> frozenset[str]:
+    """Rules that earn only a note at ``level`` (#1089).
+
+    relaxed: every [reflect.*] rule, and [deny.*] rules marked
+    ``note_from = "relaxed"``. guarded: [reflect.*] rules marked
+    ``note_from = "guarded"``. strict: none.
+    """
+    soft: set[str] = set()
+    for name, entry in (config.get("reflect") or {}).items():
+        if not isinstance(entry, dict):
+            continue
+        note_from = entry.get("note_from", "")
+        if level == "relaxed" or (level == "guarded" and note_from == "guarded"):
+            soft.add(f"reflect.{name}")
+    if level == "relaxed":
+        for name, entry in (config.get("deny") or {}).items():
+            if isinstance(entry, dict) and entry.get("note_from") == "relaxed":
+                soft.add(f"deny.{name}")
+    return frozenset(soft)
+
+
+def output_decision(decision: str, reason: str, fmt: str = "claude", level: str = "guarded"):
     """Emit the validator decision in a host-specific shape.
 
-    Per #923: hooks emit only ``allow`` or ``deny``. The validator's
-    internal "ask" decision (matched [reflect.*] pattern or no-match
-    fallback at strict/balanced strictness) is translated here into a
-    ``deny`` with a structured reflection prompt that keeps the LLM in
-    control of the session in every mode, including autonomous.
+    The guard only ever stops a command or stays out of the way (#1089). It
+    never emits ``allow``: a plugin's hooks run in every project, and an
+    allow would skip the user's own permission prompts.
 
-    ``claude`` (default) emits Claude Code's hookSpecificOutput JSON.
-    ``raw`` emits a host-neutral ``{"decision": ..., "reason": ...}`` payload
-    that per-host adapter scripts can wrap into whatever JSON their runtime
-    expects (Codex, Gemini CLI, OpenCode, …) without re-implementing the
-    validator itself.
+    - ``deny``: a stop the agent can't clear.
+    - ``ask``: a bounce, sent as ``deny`` plus a prompt to think it through;
+      ``mark_command_safe`` can clear it.
+    - ``note``: no decision, plus ``additionalContext`` for the agent.
+    - ``allow``: no output; Claude Code's permission rules decide.
+
+    ``raw`` emits ``{"decision": ..., "reason": ...}`` for per-host adapter
+    scripts: ``deny`` (a stop or a bounce, with the full message), ``note``
+    or ``allow``.
     """
-    if decision == "ask":
-        decision = "deny"
-        reason = REFLECT_PROMPT_TEMPLATE.format(reason=reason)
-
     if fmt == "raw":
+        if decision in ("ask", "deny"):
+            template = REFLECT_PROMPT_TEMPLATE if decision == "ask" else STOP_TEMPLATE
+            decision, reason = "deny", template.format(level=level, reason=reason)
         print(json.dumps({"decision": decision, "reason": reason}))
         return
+    if decision == "allow":
+        return
+    if decision == "note":
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "additionalContext": NOTE_TEMPLATE.format(level=level, reason=reason),
+            }
+        }))
+        return
+    template = REFLECT_PROMPT_TEMPLATE if decision == "ask" else STOP_TEMPLATE
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "permissionDecision": decision,
-            "permissionDecisionReason": reason
+            "permissionDecision": "deny",
+            "permissionDecisionReason": template.format(level=level, reason=reason),
         }
     }))
 
@@ -119,19 +169,22 @@ _HELP_TEXT = """\
 Usage: validate-bash.py <config.toml> [--format claude|raw] [--help]
 
 Validates a bash command (read as JSON on stdin) against the deny / reflect /
-allow patterns in <config.toml> and emits a Claude Code permission decision
-(allow or deny — never the mechanical "ask", which would block the LLM).
+allow patterns in <config.toml>. It stops the command, bounces it back to the
+agent, adds a note, or says nothing. It never emits "allow".
 
-Strictness (the no-match fallback) is read from .myorg/config.yaml under
-``autonomy.hook_strictness``. When a command matches no rule, strictness
-controls the outcome:
+The guard level is read from .myorg/config.yaml under
+``autonomy.hook_strictness`` (default guarded):
 
-  strict   → deny + heavy reflection prompt (default failure-closed)
-  balanced → deny + light reflection prompt
-  lax      → allow
+  strict   → commands that match no allow rule bounce
+  guarded  → risky [reflect.*] commands bounce; routine ones get a note
+  relaxed  → only never-OK [deny.*] rules stop; the rest get a note
+  off      → the guard does nothing
+
+Force-pushing or deleting main, master or the remote's default branch is
+stopped at every level except off.
 
 Environment variables:
-  MYORG_HOOK_STRICTNESS=strict|balanced|lax
+  MYORG_HOOK_STRICTNESS=strict|guarded|relaxed|off
         Overrides the value loaded from .myorg/config.yaml. Useful for
         tests and short-lived overrides. An invalid value falls through
         to the config-driven resolution rather than tightening or
@@ -146,7 +199,8 @@ Environment variables:
   MYORG_ACTIVE_AGENT, MYORG_ACTIVE_PROFILE
         Optional context labels included in shadow-log rows.
 
-Removed in #923: MYORG_BASH_DEFAULT (use hook_strictness instead).
+  MYORG_SHADOW_LOG=0
+        Don't write the shadow log (the plugin's hooks set this).
 """
 
 
@@ -179,6 +233,25 @@ def main():
         sys.exit(1)
 
     config_path = positional[0]
+
+    # Read JSON input first — cwd decides the level and the git-root patterns.
+    try:
+        input_data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        # Invalid input, let it pass
+        sys.exit(0)
+
+    command = input_data.get("tool_input", {}).get("command", "")
+    if not command:
+        sys.exit(0)
+
+    cwd = input_data.get("cwd", "")
+    if cwd:
+        cwd = os.path.normpath(cwd)
+    strictness = resolve_hook_strictness(cwd)
+    if strictness == "off":
+        sys.exit(0)
+
     config = load_config(config_path)
 
     # Load and merge OS-specific patterns (e.g. bash-patterns.linux.toml)
@@ -190,24 +263,28 @@ def main():
         os_config = load_config(os_config_path)
         config = merge_os_config(config, os_config)
 
-    # Read JSON input first — cwd is needed for dynamic pattern injection
-    try:
-        input_data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        # Invalid input, let it pass
-        sys.exit(0)
-
-    command = input_data.get("tool_input", {}).get("command", "")
-    if not command:
-        sys.exit(0)
-
     # If running inside a git repository, inject git-root-aware patterns before
     # compiling so that rm within the repo is auto-approved and .git is protected.
-    cwd = input_data.get("cwd", "")
-    if cwd:
-        cwd = os.path.normpath(cwd)
-        if os.path.exists(os.path.join(cwd, ".git")):
-            inject_git_root_patterns(config, cwd)
+    if cwd and os.path.exists(os.path.join(cwd, ".git")):
+        inject_git_root_patterns(config, cwd)
+
+    protected = protected_force_push(command, cwd)
+    if protected:
+        output_decision(
+            "deny",
+            format_reason(
+                kind="BASH",
+                state="STOPPED",
+                rule="force_push.protected_branch",
+                body_lines=[
+                    f"command: {command[:100]}",
+                    f"why:     force-pushes or deletes {protected}, which other people's work builds on",
+                ],
+            ),
+            fmt=fmt,
+            level=strictness,
+        )
+        return
 
     # Compile patterns (includes any git-root injections from above).
     # The legacy `[ask.*]` category is renamed to `[reflect.*]` per #923:
@@ -219,11 +296,11 @@ def main():
     ask_patterns = compile_patterns(config, "reflect")
     allow_patterns = compile_patterns(config, "allow")
 
-    strictness = resolve_hook_strictness(cwd)
     default_action = strictness_to_default_action(strictness)
 
     decision, reason, matched_category, matched_rule = validate_command(
-        command, deny_patterns, ask_patterns, allow_patterns, default_action
+        command, deny_patterns, ask_patterns, allow_patterns, default_action,
+        soft_sections=soft_sections_for(config, strictness),
     )
 
     # For force-push patterns, apply the graduated-autonomy policy gate.
@@ -272,7 +349,7 @@ def main():
         )
     )
 
-    output_decision(decision, reason, fmt=fmt)
+    output_decision(decision, reason, fmt=fmt, level=strictness)
 
 
 if __name__ == "__main__":

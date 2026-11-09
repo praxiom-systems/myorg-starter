@@ -12,6 +12,10 @@
 #                                  — append a structured block matching the
 #                                    format agent-teams-common.py writes.
 #   hooklib_find_getmyorg          — echo the getmyorg binary path or "".
+#   hooklib_plugin_guard <dir>     — for the copy shipped in the myorg plugin:
+#                                    turn off the shadow log, and exit 0 when
+#                                    the repo runs its own copies
+#                                    (MYORG_HOOKS_SOURCE=project).
 #   hooklib_orchestrate_semantic_refresh <repo_root>
 #                                  — detached, debounced semantic-refresh
 #                                    queue; never commits/writes/models.
@@ -31,12 +35,25 @@
 #   MYORG_HOOK_LOG_RETENTION_DAYS  — how long to keep logs. Default: 15
 #   MYORG_HOOK_LOG_CLEANUP_SECONDS — minimum seconds between cleanup runs.
 #                                    Default: 86400 (one day)
+#   MYORG_HOOKS_SOURCE=project     — this repo registers its own hook copies
+#                                    (getmyorg's dev checkout, via .envrc), so
+#                                    the plugin's copies step aside.
 #
 # Originally adapted from amulya-labs/ai-dev-foundry (MIT). Modifications © praxiom-systems.
 
 HOOKLIB_LOG_DIR_DEFAULT="/tmp/claude-hook-logs"
 HOOKLIB_LOG_RETENTION_DAYS_DEFAULT=15
 HOOKLIB_LOG_CLEANUP_SECONDS_DEFAULT=$((24 * 60 * 60))
+
+hooklib_plugin_guard() {
+    # The plugin's copies live in <plugin>/hooks/, next to .claude-plugin/.
+    local dir="$1"
+    [[ -f "$dir/../.claude-plugin/plugin.json" ]] || return 0
+    export MYORG_SHADOW_LOG=0
+    if [[ "${MYORG_HOOKS_SOURCE:-}" == "project" ]]; then
+        exit 0
+    fi
+}
 
 hooklib_init_log_dir() {
     # Respect explicit disable: MYORG_HOOK_LOG_DIR set to empty string.

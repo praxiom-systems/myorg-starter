@@ -15,18 +15,10 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 
-try:
-    import tomllib
-except ImportError:
-    try:
-        import tomli as tomllib  # type: ignore[no-redef]
-    except ImportError:
-        print(
-            "Error: Python 3.11+ required, or install 'tomli' package for older versions",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pattern_files import PatternFileError, load_pattern_file
 
 
 @dataclass
@@ -38,12 +30,11 @@ class CompiledPattern:
 
 
 def load_config(config_path: str) -> dict:
-    """Load and validate TOML configuration."""
+    """Load and validate the pattern catalog."""
     try:
-        with open(config_path, "rb") as f:
-            return tomllib.load(f)
-    except tomllib.TOMLDecodeError as e:
-        print(f"Error: Invalid TOML in {config_path}: {e}", file=sys.stderr)
+        return load_pattern_file(config_path)
+    except PatternFileError as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
     except FileNotFoundError:
         print(f"Error: Config file not found: {config_path}", file=sys.stderr)
@@ -75,7 +66,7 @@ def merge_os_config(base: dict, overlay: dict) -> dict:
     #923: `reflect` joined the category set when [ask.*] was renamed to
     [reflect.*]. Without it, OS-specific reflect sections (e.g. Linux
     network/disk changes) silently dropped during overlay merge — so under
-    hook_strictness=lax they became silent allows. `ask` is retained as a
+    the loosest guard level they became silent allows. `ask` is retained as a
     backward-compatible alias for any user pattern files that haven't been
     migrated by scripts/migrate-ask-to-reflect.py yet.
     """

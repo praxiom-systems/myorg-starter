@@ -3,17 +3,19 @@
 Edit/Write/MultiEdit band-aid pattern detector for Claude Code PreToolUse hook.
 
 Scans added lines for band-aid patterns before the edit tool applies a change.
-Advisory-first: most patterns emit ``allow`` with a reason (visible in
-logs/transcript, non-blocking); only high-confidence broad-suppression patterns
-emit ``deny``.
+A match becomes a note to the agent (``additionalContext``); it never emits
+``allow`` (#1089). Only at the ``strict`` guard level do the high-confidence
+broad-suppression [deny.*] patterns stop the edit.
 
 Pattern catalog: blueprint/hooks/band-aid-patterns.toml.
 
-Scan gating:
-  Read from .myorg/config.yaml ``autonomy.hook_strictness`` via
-  bash_policy_decide.resolve_hook_strictness. ``lax`` skips the scan
-  entirely; ``strict`` and ``balanced`` run the same scan and emit the
-  same outputs (no intermediate "downgrade denies to advisories" mode).
+Guard level (.myorg/config.yaml ``autonomy.hook_strictness``):
+  strict  — [deny.*] hits stop the edit; [advise.*] hits are notes
+  guarded — every hit is a note (the default)
+  relaxed — no band-aid scan
+  off     — nothing at all
+At every level but off, an edit that loosens the guard level itself is
+stopped: only the user's /myorg:guards does that.
 
 Public API (importable by sibling hooks):
   scan_diff(added_lines, config_path, file_path="", new_content_lines=None)
@@ -23,8 +25,9 @@ Public API (importable by sibling hooks):
   _is_test_file(file_path) → bool
   _extract_added_lines_diff(old, new) → list[str]
   _get_added_lines_for_input(tool_name, tool_input) → (added_lines, file_path, new_content_lines)
-  _build_reason(result) → (decision, reason)
-  output_decision(decision, reason, fmt) → None
+  _build_reason(result, level) → (decision, reason)
+  output_decision(decision, reason, fmt, why) → None
+  changes_guard_level(tool_name, tool_input, cwd) → bool  (loosens the guard level?)
   ScanResult, SectionHit, CompiledPattern  — dataclasses
 """
 
@@ -39,19 +42,7 @@ import sys
 from dataclasses import dataclass, field
 
 from pylib.hooks.myorg_message import format_reason
-
-try:
-    import tomllib
-except ImportError:
-    try:
-        import tomli as tomllib  # type: ignore[no-redef]
-    except ImportError:
-        print(
-            "Error: Python 3.11+ required, or install 'tomli' for older versions",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
+from pylib.hooks.pattern_files import PatternFileError, load_pattern_file
 
 # Cap combined added content to avoid spending time on huge generated files.
 MAX_SCAN_BYTES = 256 * 1024
@@ -106,17 +97,16 @@ def load_patterns(
 ) -> tuple[list[CompiledPattern], list[CompiledPattern]]:
     """Load [deny.*] and [advise.*] sections, returning (deny, advise)."""
     try:
-        with open(config_path, "rb") as f:
-            config = tomllib.load(f)
+        config = load_pattern_file(config_path)
     except FileNotFoundError:
         print(
             f"Warning: Config file not found: {config_path} — skipping scan",
             file=sys.stderr,
         )
         sys.exit(0)
-    except tomllib.TOMLDecodeError as e:
+    except PatternFileError as e:
         print(
-            f"Warning: Invalid TOML in {config_path}: {e} — skipping scan",
+            f"Warning: {e} — skipping scan",
             file=sys.stderr,
         )
         sys.exit(0)
@@ -418,22 +408,21 @@ def scan_diff(
     )
 
 
-def _build_reason(result: ScanResult) -> tuple[str, str]:
+def _build_reason(result: ScanResult, level: str = "guarded") -> tuple[str, str]:
     """
     Return (decision, reason) from a ScanResult.
-    decision is 'deny' or 'allow'.
+    decision is 'deny' (a [deny.*] hit at the strict level) or 'note'.
     reason is a structured string produced by format_reason.
 
-    Operators suppress band-aid denies by setting
-    ``autonomy.hook_strictness: lax`` in .myorg/config.yaml, which
-    causes the caller to skip the scan entirely before reaching
-    _build_reason. No per-call downgrade mode exists.
+    Only ``strict`` stops an edit (#1089); at ``guarded`` a [deny.*] hit is
+    a note like any advisory. ``relaxed`` and ``off`` skip the scan before
+    reaching here.
     """
     all_hits = result.deny_hits + result.advise_hits
     if not all_hits:
-        return "allow", ""
+        return "note", ""
 
-    is_deny = bool(result.deny_hits)
+    stop = bool(result.deny_hits) and level == "strict"
 
     first_hit = all_hits[0]
     section = first_hit.section
@@ -447,49 +436,136 @@ def _build_reason(result: ScanResult) -> tuple[str, str]:
             sections.append(hit.section)
     sections_line = f"sections: {', '.join(sections)}"
 
-    if is_deny:
-        reason = format_reason(
-            kind="EDIT",
-            state="DENIED",
-            rule=section,
-            body_lines=[
-                f"matched: {snippet}",
-                sections_line,
-                "override: set autonomy.hook_strictness: lax in .myorg/config.yaml (skips the band-aid scan entirely)",
-            ],
-        )
-        decision = "deny"
-    else:
-        reason = format_reason(
-            kind="EDIT",
-            state="ADVISORY",
-            rule=section,
-            body_lines=[
-                f"matched: {snippet}",
-                sections_line,
-                "override: set autonomy.hook_strictness: lax in .myorg/config.yaml to silence band-aid advisories",
-            ],
-        )
-        decision = "allow"
-
-    return decision, reason
+    reason = format_reason(
+        kind="EDIT",
+        state="STOPPED" if stop else "NOTE",
+        rule=section,
+        body_lines=[f"matched: {snippet}", sections_line],
+    )
+    return ("deny" if stop else "note"), reason
 
 
-def output_decision(decision: str, reason: str, fmt: str = "claude") -> None:
+NOTE_TEMPLATE = """\
+getmyorg guard note: this edit adds a pattern that often hides a problem
+instead of fixing it. If it's deliberate, add a short comment saying why
+(and an issue link for a TODO). Otherwise, fix the cause.
+
+{reason}
+"""
+
+STOP_TEMPLATE = """\
+getmyorg's guard stopped this edit.
+
+{reason}
+
+{why}
+"""
+
+_STOP_WHY = {
+    "band-aid": (
+        "At the strict level, edits that suppress errors for a whole file or "
+        "block are stopped. Fix the cause, or narrow the suppression and say "
+        "why in a comment. The user can change the level with /myorg:guards."
+    ),
+    "guard-level": (
+        "Only the user changes the guard level, by typing /myorg:guards. "
+        "Don't edit it yourself; ask the user if you think it should change."
+    ),
+}
+
+
+def output_decision(decision: str, reason: str, fmt: str = "claude", why: str = "band-aid") -> None:
+    """Emit ``deny`` (a stop) or ``note`` (``additionalContext``); never ``allow``."""
     if fmt == "raw":
         print(json.dumps({"decision": decision, "reason": reason}))
         return
-    print(
-        json.dumps(
-            {
-                "hookSpecificOutput": {
-                    "hookEventName": "PreToolUse",
-                    "permissionDecision": decision,
-                    "permissionDecisionReason": reason,
-                }
-            }
-        )
-    )
+    if decision == "deny":
+        out = {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": STOP_TEMPLATE.format(reason=reason, why=_STOP_WHY[why]),
+        }
+    else:
+        out = {
+            "hookEventName": "PreToolUse",
+            "additionalContext": NOTE_TEMPLATE.format(reason=reason),
+        }
+    print(json.dumps({"hookSpecificOutput": out}))
+
+
+def _is_myorg_config(file_path: str) -> bool:
+    return file_path.replace("\\", "/").endswith(".myorg/config.yaml")
+
+
+def _read_text(file_path: str) -> str:
+    try:
+        with open(file_path, encoding="utf-8", errors="replace") as f:
+            return f.read()
+    except OSError:
+        return ""
+
+
+_PATCH_FILE_OP_RE = re.compile(r"^\*\*\* (Add|Update|Delete) File: (.+)$")
+
+
+def _patch_touches_guard_level(patch: str) -> bool:
+    """True when an apply_patch deletes a .myorg/config.yaml or changes a
+    hook_strictness line in one. Context lines don't count."""
+    in_config = False
+    for line in patch.splitlines():
+        op = _PATCH_FILE_OP_RE.match(line)
+        if op:
+            in_config = _is_myorg_config(op.group(2).strip())
+            if in_config and op.group(1) == "Delete":
+                return True
+            continue
+        if in_config and line[:1] in "+-" and "hook_strictness" in line:
+            return True
+    return False
+
+
+def changes_guard_level(tool_name: str, tool_input: dict, cwd: str = "") -> bool:
+    """True when an edit would loosen ``autonomy.hook_strictness`` (#1089).
+
+    The agent mustn't lower its own guard level; only the user's
+    /myorg:guards does that. Compares the level before and after the edit,
+    with no level meaning the default; tightening it is fine.
+    """
+    from pylib.hooks.bash_policy_decide import DEFAULT_LEVEL, LEVELS, read_level_from_text
+
+    name = tool_name.lower()
+    if name == "apply_patch":
+        patch = tool_input.get("command") or tool_input.get("input") or ""
+        if isinstance(patch, list):
+            patch = "\n".join(str(p) for p in patch)
+        return _patch_touches_guard_level(patch)
+
+    file_path = tool_input.get("file_path", "") or ""
+    if not _is_myorg_config(file_path):
+        return False
+    if cwd and not os.path.isabs(file_path):
+        file_path = os.path.join(cwd, file_path)
+    before = _read_text(file_path)
+    if name == "write":
+        after = tool_input.get("content", "") or ""
+    else:
+        edits = tool_input.get("edits") if name == "multiedit" else [tool_input]
+        after = before
+        for edit in edits or []:
+            old = edit.get("old_string", "") or ""
+            new = edit.get("new_string", "") or ""
+            if not old:
+                after = new + after
+            elif edit.get("replace_all"):
+                after = after.replace(old, new)
+            else:
+                after = after.replace(old, new, 1)
+
+    def rank(text: str) -> int:
+        level = read_level_from_text(text)
+        return LEVELS.index(level if level in LEVELS else DEFAULT_LEVEL)
+
+    return rank(after) > rank(before)
 
 
 def _get_added_lines_for_input(
@@ -617,19 +693,6 @@ def main() -> None:
 
     config_path = positional[0]
 
-    # Hook gating reads .myorg/config.yaml autonomy.hook_strictness:
-    # lax → skip band-aid scan entirely (no-match defaults to allow);
-    # strict/balanced → run the scan. There is no other operator lever
-    # for this — env-var overrides do not exist.
-    try:
-        # local import: bash_policy_decide owns strictness resolution
-        from pylib.hooks.bash_policy_decide import resolve_hook_strictness
-        strictness = resolve_hook_strictness(os.getcwd())
-    except Exception:
-        strictness = "strict"  # fail closed
-    if strictness == "lax":
-        sys.exit(0)
-
     try:
         input_data = json.load(sys.stdin)
     except json.JSONDecodeError:
@@ -638,10 +701,39 @@ def main() -> None:
 
     tool_name = input_data.get("tool_name", "") or ""
     tool_input = input_data.get("tool_input", {}) or {}
+    cwd = input_data.get("cwd", "") or os.getcwd()
 
     # Only handle the target edit tools. Codex reports file edits through
     # apply_patch; Claude reports Edit/Write/MultiEdit.
     if tool_name.lower() not in ("edit", "write", "multiedit", "apply_patch"):
+        sys.exit(0)
+
+    # Guard level (#1089): off → nothing; relaxed → only the guard-level
+    # check below; strict → band-aid [deny.*] hits stop the edit;
+    # guarded → they're notes.
+    try:
+        from pylib.hooks.bash_policy_decide import resolve_hook_strictness
+        level = resolve_hook_strictness(cwd)
+    except Exception:
+        level = "guarded"
+    if level == "off":
+        sys.exit(0)
+
+    if changes_guard_level(tool_name, tool_input, cwd):
+        output_decision(
+            "deny",
+            format_reason(
+                kind="EDIT",
+                state="STOPPED",
+                rule="guard_level",
+                body_lines=["file:    .myorg/config.yaml", "why:     changes autonomy.hook_strictness"],
+            ),
+            fmt=fmt,
+            why="guard-level",
+        )
+        return
+
+    if level == "relaxed":
         sys.exit(0)
 
     scan_inputs = _get_scan_inputs_for_input(
@@ -682,7 +774,7 @@ def main() -> None:
     if not result.deny_hits and not result.advise_hits:
         sys.exit(0)
 
-    decision, reason = _build_reason(result)
+    decision, reason = _build_reason(result, level)
 
     if not reason:
         sys.exit(0)

@@ -17,6 +17,7 @@ CONFIG_FILE="$SCRIPT_DIR/bash-patterns.toml"
 # Respects MYORG_HOOK_LOG_DIR / MYORG_HOOK_LOG_RETENTION_DAYS env vars.
 # shellcheck source=hook-lib.sh
 . "$SCRIPT_DIR/hook-lib.sh"
+hooklib_plugin_guard "$SCRIPT_DIR"
 
 hooklib_init_log_dir
 hooklib_cleanup_old_logs

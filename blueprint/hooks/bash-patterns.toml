@@ -4,11 +4,21 @@
 # Originally adapted from amulya-labs/ai-dev-foundry (MIT). Modifications © praxiom-systems.
 #
 # Categories:
-#   [deny.*]  - Always block, no user override (catastrophic/irreversible)
-#   [ask.*]   - Prompt user for confirmation (risky but sometimes needed)
-#   [allow.*] - Auto-approve (safe operations)
+#   [deny.*]    - Stop the command; the agent can't clear it
+#   [reflect.*] - Bounce it back to the agent to think through; the agent can
+#                 clear it with mark_command_safe
+#   [allow.*]   - Known safe; only matters at the strict level, where
+#                 commands matching no rule bounce
 #
-# Evaluation order: deny -> ask -> allow -> ask (if no match)
+# Evaluation order: deny -> reflect -> allow -> no-match default.
+#
+# Guard levels (autonomy.hook_strictness, #1089) loosen rules with `note_from`:
+#   note_from = "relaxed" on a [deny.*] rule: needs a reason, but at the
+#                         relaxed level it runs with a note to the agent.
+#   note_from = "guarded" on a [reflect.*] rule: routine work; at the guarded
+#                         level (the default) it runs with a note.
+# At relaxed every [reflect.*] rule is a note. A [deny.*] rule without
+# note_from is never OK and stops at every level except off.
 
 # =============================================================================
 # DENY PATTERNS - Truly catastrophic, never allow
@@ -16,6 +26,7 @@
 
 [deny.privilege_escalation]
 description = "Commands that escalate privileges"
+note_from = "relaxed"
 patterns = [
     "^sudo ",
     "^su ",
@@ -28,12 +39,15 @@ patterns = [
 [deny.catastrophic_deletion]
 description = "File deletion that could destroy system or all user data"
 patterns = [
-    "^rm -rf /$",
+    # The operand ends at whitespace or end of string, so `rm -rf ~ /tmp/x`
+    # still matches while `rm -rf ~/.cache/x` (a subpath) doesn't.
+    "^rm -rf /(\\s|$)",
     "^rm -rf /\\*",
-    "^rm -rf ~",
+    "^rm -rf ~/?(\\s|$)",
+    "^rm -rf ~/?\\*",
     "^rm -rf \\.$",
     "^rm -rf \\*$",
-    " rm -rf /$",
+    " rm -rf /(\\s|$)",
     " rm -rf /\\*",
 ]
 
@@ -49,6 +63,7 @@ patterns = [
 
 [deny.system_shutdown]
 description = "System shutdown/reboot commands"
+note_from = "relaxed"
 patterns = [
     "^reboot",
     "^shutdown",
@@ -76,13 +91,19 @@ patterns = [
     ";\\s*rm -rf /$",
     "&&\\s*rm -rf /$",
     "\\|\\|\\s*rm -rf /$",
-    ";\\s*rm -rf ~",
-    "&&\\s*rm -rf ~",
-    "\\|\\|\\s*rm -rf ~",
+    ";\\s*rm -rf ~/?(\\*|\\s|$)",
+    "&&\\s*rm -rf ~/?(\\*|\\s|$)",
+    "\\|\\|\\s*rm -rf ~/?(\\*|\\s|$)",
     ";\\s*rm -rf /\\*",
     "&&\\s*rm -rf /\\*",
     "\\|\\|\\s*rm -rf /\\*",
-    # Chained privilege escalation - catches "safe_cmd && sudo dangerous"
+]
+
+[deny.chained_privilege_escalation]
+description = "Privilege escalation chained after another command"
+note_from = "relaxed"
+# Catches "safe_cmd && sudo dangerous" on the full command, before splitting.
+patterns = [
     ";\\s*sudo ",
     "&&\\s*sudo ",
     "\\|\\|\\s*sudo ",
@@ -114,10 +135,12 @@ patterns = [
     "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.gnupg/private-keys",
     # password-store
     "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.password-store/",
-    # Package manager, container, GitHub, and Git credential stores
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.npmrc(\\s|$)",
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.pypirc(\\s|$)",
-    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.docker/config\\.json(\\s|$)",
+    # Package manager, container, GitHub, and Git credential stores. The
+    # .npmrc / .pypirc / docker config reads only count under the home
+    # directory: a project's own .npmrc is ordinary config.
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*(~|\\$HOME|\\$\\{HOME\\}|/home/[^/\\s]+|/Users/[^/\\s]+|/root)/\\.npmrc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*(~|\\$HOME|\\$\\{HOME\\}|/home/[^/\\s]+|/Users/[^/\\s]+|/root)/\\.pypirc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*(~|\\$HOME|\\$\\{HOME\\}|/home/[^/\\s]+|/Users/[^/\\s]+|/root)/\\.docker/config\\.json(\\s|$)",
     "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.git-credentials(\\s|$)",
     "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/gh/hosts\\.yml(\\s|$)",
     "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/hub(\\s|$)",
@@ -156,6 +179,7 @@ patterns = [
 
 [deny.persistence_writes]
 description = "Writing to shell rc files, cron, systemd, or launchd (persistence vectors)"
+note_from = "relaxed"
 # Catches both redirect (`>>`/`>`) and `tee` writers targeting persistence
 # paths. Read access to these files stays allowed.
 patterns = [
@@ -205,6 +229,7 @@ patterns = [
 
 [deny.dangerous_chmod]
 description = "Recursive chmod targeting HOME or filesystem root, or world-writable on system paths"
+note_from = "relaxed"
 patterns = [
     # Recursive chmod on / or HOME
     "^chmod\\s+-R\\b.*\\s/$",
@@ -216,6 +241,7 @@ patterns = [
 
 [deny.git_config_hijack]
 description = "Git config writes that hijack hook execution (alias/url rewrites are ask, not deny)"
+note_from = "relaxed"
 patterns = [
     "^git\\s+config\\b.*\\bcore\\.hooksPath\\b",
     "^git\\s+config\\b.*\\bcore\\.fsmonitor\\b",
@@ -223,6 +249,7 @@ patterns = [
 
 [deny.library_injection]
 description = "LD_PRELOAD / DYLD_INSERT_LIBRARIES injection (hijacks subsequent process exec)"
+note_from = "relaxed"
 patterns = [
     "\\bLD_PRELOAD=\\S",
     "\\bDYLD_INSERT_LIBRARIES=\\S",
@@ -230,6 +257,7 @@ patterns = [
 
 [deny.debugger_attach]
 description = "Attaching debuggers / tracers to running processes (privilege bypass / secret extraction)"
+note_from = "relaxed"
 # Use \S (any non-whitespace) rather than \d (digit-only) so variable PIDs like
 # $PID or $$ are caught, not just literal digit strings.
 patterns = [
@@ -238,6 +266,28 @@ patterns = [
     "^lldb\\s+(.*\\s)?--attach-pid\\s+\\S",
     "^strace\\s+(.*\\s)?-p\\s+\\S",
     "^ltrace\\s+(.*\\s)?-p\\s+\\S",
+]
+
+[deny.guard_level_change]
+description = "Changing the getmyorg guard level (only the user changes it, with /myorg:guards)"
+# A speed bump, not a security boundary: it catches the obvious ways an agent
+# would change the level, and leaves commands that only mention it alone.
+patterns = [
+    # The CLI, however it's spelled or quoted, in command position.
+    "^\\S*getmyorg[\"')]*\\s+guards\\s+set\\s+[a-zA-Z]",
+    # The user's slash command typed into a nested session, or fed to the hook.
+    "^\\S*(claude|codex)\\b.*[/$]myorg:guards\\s+[a-zA-Z]",
+    "\\|\\s*(\\S+\\s+)?\\S*guards-prompt\\.(sh|py)\\b",
+    "^(bash|sh|python3?)\\s+\\S*guards-prompt\\.(sh|py)\\b",
+    # Writing, replacing or deleting .myorg/config.yaml from the shell.
+    "^(sed|gsed|perl)\\b(?=.*\\s-[a-zA-Z]*i).*\\.myorg/config\\.yaml",
+    "^yq\\b(?=.*\\s(-i|--inplace)\\b).*\\.myorg/config\\.yaml",
+    ">>?\\s*\\S*\\.myorg/config\\.yaml",
+    "\\|\\s*tee\\b.*\\.myorg/config\\.yaml",
+    "^(rm|unlink|truncate|shred)\\b.*\\.myorg(/config\\.yaml|/?(\\s|$))",
+    "^mv\\b.*\\.myorg(/config\\.yaml|/?(\\s|$))",
+    "^(cp|install|ln)\\b.*\\s\\S*\\.myorg/config\\.yaml\\s*$",
+    "^git\\s+(checkout|restore|rm|mv)\\b.*\\.myorg/config\\.yaml",
 ]
 
 [deny.key_extraction]
@@ -252,6 +302,7 @@ patterns = [
 
 [deny.container_escape]
 description = "Container run flags that grant host escape or full-host filesystem access"
+note_from = "relaxed"
 # --cap-add accepts both = and space forms: --cap-add=SYS_ADMIN and --cap-add SYS_ADMIN.
 # Both docker and podman support --cap-add, so both runtimes need the pattern.
 patterns = [
@@ -284,25 +335,28 @@ patterns = [
     # only prompt for interactive rebase (rewrites history in complex ways) and
     # --exec (runs arbitrary shell commands per-commit during rebase)
     "^git rebase .*(-i |--interactive |--exec\\b|-i$|--interactive$)",
-    # Use negative lookahead to avoid matching 'git merge-base' (read-only),
-    # any merge that includes 'origin/' anywhere in its arguments,
-    # and safe merge forms (--ff-only, --abort, --no-edit, worktree- branches).
-    # Destructive merge strategies (-X theirs/ours) always prompt even with origin/:
-    # they silently discard local conflict resolutions, which is hard to undo.
-    "^git merge(?!-base\\b)(?!.* origin/)(?!\\s+--ff-only\\b)(?!\\s+--abort)(?!\\s+--no-edit\\b)(?!\\s+worktree-)",
+    # Destructive merge strategies (-X theirs/ours) silently discard local
+    # conflict resolutions, which is hard to undo.
     "^git merge.* -X (theirs|ours)",
     "^git merge.* --strategy-option[= ](theirs|ours)",
-    "^git merge.* --squash",
-    # Cherry-pick: standard workflow, locally reversible via git reset.
-    # Only prompt for --no-commit (keeps changes staged without committing,
-    # which can be confusing if unexpected).
-    "^git cherry-pick.*--no-commit",
-    "^git revert",
     # Stash clear wipes ALL stashes; stash drop removes one (low risk).
     "^git stash clear",
     # Branch -D (uppercase) force-deletes even unmerged branches.
     # Branch -d (lowercase) is safe: refuses to delete unmerged branches.
     "^git branch -D\\b",
+]
+
+[reflect.git_routine]
+description = "Everyday history operations that are easy to undo (merge, revert, squash)"
+note_from = "guarded"
+patterns = [
+    # Negative lookaheads skip 'git merge-base' (read-only), merges from
+    # origin/, and safe forms (--ff-only, --abort, --no-edit, worktree- branches).
+    "^git merge(?!-base\\b)(?!.* origin/)(?!\\s+--ff-only\\b)(?!\\s+--abort)(?!\\s+--no-edit\\b)(?!\\s+worktree-)",
+    "^git merge.* --squash",
+    # --no-commit keeps changes staged without committing.
+    "^git cherry-pick.*--no-commit",
+    "^git revert",
 ]
 
 [reflect.git_main_branch]
@@ -364,11 +418,17 @@ description = "GitHub CLI operations that modify state (irreversible or high-imp
 # gh pr close is excluded: trivially reversible via 'gh pr reopen'.
 # Already allowed in allow.github_lifecycle for issues; PRs follow the same logic.
 patterns = [
-    "^gh pr merge",
-    "^gh pr ready",
     "^gh repo delete",
     "^gh repo archive",
     "^gh release delete",
+]
+
+[reflect.github_routine]
+description = "GitHub CLI operations that are part of normal PR work"
+note_from = "guarded"
+patterns = [
+    "^gh pr merge",
+    "^gh pr ready",
     "^gh run cancel",
 ]
 
@@ -415,12 +475,19 @@ description = "Broad file permission changes"
 patterns = [
     "^chmod 777",
     "^chmod -R 777",
+]
+
+[reflect.file_ownership]
+description = "Changing file ownership"
+note_from = "guarded"
+patterns = [
     "^chown ",
     "^chgrp ",
 ]
 
 [reflect.docker_control]
 description = "Docker operations that stop/remove containers or clean up"
+note_from = "guarded"
 patterns = [
     "^docker system prune",
     "^docker volume prune",
@@ -518,6 +585,7 @@ patterns = [
 
 [reflect.process_control]
 description = "Killing or stopping processes"
+note_from = "guarded"
 patterns = [
     "^kill ",
     "^killall",
@@ -572,6 +640,7 @@ patterns = [
 
 [reflect.remote_access]
 description = "Remote access and file transfer"
+note_from = "guarded"
 patterns = [
     "^ssh ",
     "^scp ",
@@ -666,6 +735,7 @@ patterns = [
 
 [reflect.package_manager_install]
 description = "Package installation from remote registries (supply chain risk)"
+note_from = "guarded"
 # npm install bare (no package name) is intentionally excluded: it installs from
 # local package.json and is a routine dev operation. Only registry installs prompt.
 # Local-path installs (npm install ./pkg) and flag-only forms (npm install --save-dev)

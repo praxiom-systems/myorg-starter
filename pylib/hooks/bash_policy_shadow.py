@@ -79,7 +79,13 @@ def build_shadow_row(
 
 
 def write_shadow_row(row: dict) -> None:
-    """Append one JSONL row to the shadow log. Failures are silent."""
+    """Append one JSONL row to the shadow log. Failures are silent.
+
+    ``MYORG_SHADOW_LOG=0`` turns it off; the plugin's hooks set that, since
+    the shadow log is a calibration tool for this repo, not for users.
+    """
+    if os.environ.get("MYORG_SHADOW_LOG", "").strip() == "0":
+        return
     log_dir = hook_log.resolve_log_dir()
     if log_dir is None:
         return

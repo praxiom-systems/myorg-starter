@@ -2,15 +2,13 @@
 #
 # Scanned against file content read via the Read tool. Two tiers:
 #
-#   [deny.*]    high-confidence instruction-override signatures — emit a
-#               blocking "deny" decision. Keep this list small; false
-#               positives are costly because they prevent the agent from
-#               reading otherwise-legitimate content.
+#   [deny.*]    high-confidence instruction-override signatures. They stop
+#               the read only at the `strict` guard level; at every other
+#               level they're a note to the agent. Keep this list small:
+#               under strict, a false positive stops a legitimate read.
 #
-#   [advise.*]  medium-confidence signatures — emit an "allow" decision
-#               with a reason so the flag is visible in logs/transcript
-#               without interrupting the workflow. False positives here
-#               are annoying but non-blocking.
+#   [advise.*]  medium-confidence signatures — always a note to the agent
+#               (additionalContext), never a stop.
 #
 # Patterns are Python regex, matched case-insensitively by validate-read.py.
 # Anchor thoughtfully — loose patterns like `\bact as\b` will match docs.

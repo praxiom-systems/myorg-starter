@@ -48,6 +48,7 @@ patterns = [
 
 [reflect.windows_package_install]
 description = "Windows package installation"
+note_from = "guarded"
 patterns = [
     "^winget install",
     "^choco install",

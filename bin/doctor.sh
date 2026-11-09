@@ -76,7 +76,7 @@ print_bash_policy() {
   echo "Bash policy"
   local toml="$HOOKS_DIR/bash-patterns.toml"
   echo "  patterns: $(count_sections "$toml" deny) deny / $(count_sections "$toml" reflect) reflect / $(count_sections "$toml" allow) allow   ($toml)"
-  echo "  strictness: ${MYORG_HOOK_STRICTNESS:-from .myorg/config.yaml autonomy.hook_strictness} (env override: MYORG_HOOK_STRICTNESS=strict|balanced|lax)"
+  echo "  strictness: ${MYORG_HOOK_STRICTNESS:-from .myorg/config.yaml autonomy.hook_strictness} (env override: MYORG_HOOK_STRICTNESS=strict|guarded|relaxed|off)"
   echo "  recent denies (last 24h): $(count_recent_log_entries BashDeny)"
   echo
 }
@@ -93,7 +93,7 @@ print_edit_guard() {
   echo "Edit band-aid detector"
   local toml="$HOOKS_DIR/band-aid-patterns.toml"
   echo "  patterns: $(count_sections "$toml" deny) deny / $(count_sections "$toml" advise) advise   ($toml)"
-  echo "  mode: gated by hook_strictness (lax → off, strict/balanced → deny+advise)"
+  echo "  mode: gated by hook_strictness (strict → deny+note, guarded → notes, relaxed/off → off)"
   echo "  recent advisories: $(count_recent_log_entries EditAdvise)"
   echo
 }

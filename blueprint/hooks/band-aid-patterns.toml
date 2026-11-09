@@ -2,12 +2,12 @@
 #
 # Two sections:
 #   [deny.*]   — High-confidence patterns that suppress errors across a whole file or
-#                all errors in a block. These block the edit by default;
-#                set `autonomy.hook_strictness: lax` in .myorg/config.yaml to disable
-#                the scan entirely. `strict`/`balanced` keep current deny+advise behavior.
+#                all errors in a block. They stop the edit only at the `strict` guard
+#                level; at `guarded` (the default) they're a note to the agent.
 #   [advise.*] — Lower-confidence patterns that warrant a justification comment but are
-#                legitimately used. These always emit an advisory (allow + reason), never
-#                block.
+#                legitimately used. Always a note to the agent, never a stop.
+# The `relaxed` and `off` levels (autonomy.hook_strictness in .myorg/config.yaml)
+# skip the scan.
 #
 # Advisory-to-edit ratio target: <15% of edits in normal operation. Resist adding
 # broad patterns that would blow that budget.

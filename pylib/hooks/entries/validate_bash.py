@@ -34,7 +34,7 @@ from pylib.hooks.bash_policy_patterns import (
 from pylib.hooks.bash_policy_shadow import build_shadow_row, write_shadow_row
 from pylib.hooks.force_push import protected_force_push
 from pylib.hooks.mark_registry import find_mark_for_command
-from pylib.hooks.myorg_message import format_reason
+from pylib.hooks.myorg_message import GUARDS_COMMAND, format_reason
 from pylib.hooks.reflect_predicate import DEFAULT_PREDICATE, evaluate as evaluate_predicate
 
 
@@ -78,8 +78,9 @@ If the rating clears the rule's bar (by default, confidence >= 0.7), record it
 with the `mark_command_safe` tool and retry once; the guard honors the mark for
 the rest of this session. Otherwise, ask the user before going further.
 
-Don't change the guard level yourself. The user can type /myorg:guards to see
-or change it ({level} now), or run the command themselves with `! <command>`.
+Don't change the guard level yourself. The user can type {guards}
+to see or change it ({level} now), or run the command themselves with
+`! <command>`.
 """
 
 STOP_TEMPLATE = """\
@@ -89,8 +90,8 @@ getmyorg's guard stopped this command.
 
 You can't clear this stop yourself, and retrying won't help. If the command is
 really needed, explain why to the user. They can run it themselves with
-`! <command>`, or change the guard level with /myorg:guards ({level} now).
-Don't change the guard level yourself.
+`! <command>`, or change the guard level with {guards}
+({level} now). Don't change the guard level yourself.
 """
 
 NOTE_TEMPLATE = """\
@@ -142,7 +143,7 @@ def output_decision(decision: str, reason: str, fmt: str = "claude", level: str 
     if fmt == "raw":
         if decision in ("ask", "deny"):
             template = REFLECT_PROMPT_TEMPLATE if decision == "ask" else STOP_TEMPLATE
-            decision, reason = "deny", template.format(level=level, reason=reason)
+            decision, reason = "deny", template.format(level=level, reason=reason, guards=GUARDS_COMMAND)
         print(json.dumps({"decision": decision, "reason": reason}))
         return
     if decision == "allow":
@@ -151,7 +152,7 @@ def output_decision(decision: str, reason: str, fmt: str = "claude", level: str 
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "additionalContext": NOTE_TEMPLATE.format(level=level, reason=reason),
+                "additionalContext": NOTE_TEMPLATE.format(level=level, reason=reason, guards=GUARDS_COMMAND),
             }
         }))
         return
@@ -160,7 +161,7 @@ def output_decision(decision: str, reason: str, fmt: str = "claude", level: str 
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
-            "permissionDecisionReason": template.format(level=level, reason=reason),
+            "permissionDecisionReason": template.format(level=level, reason=reason, guards=GUARDS_COMMAND),
         }
     }))
 

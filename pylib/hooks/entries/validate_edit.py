@@ -41,7 +41,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 
-from pylib.hooks.myorg_message import format_reason
+from pylib.hooks.myorg_message import GUARDS_COMMAND, format_reason
 from pylib.hooks.pattern_files import PatternFileError, load_pattern_file
 
 # Cap combined added content to avoid spending time on huge generated files.
@@ -465,10 +465,10 @@ _STOP_WHY = {
     "band-aid": (
         "At the strict level, edits that suppress errors for a whole file or "
         "block are stopped. Fix the cause, or narrow the suppression and say "
-        "why in a comment. The user can change the level with /myorg:guards."
+        f"why in a comment. The user can change the level with {GUARDS_COMMAND}."
     ),
     "guard-level": (
-        "Only the user changes the guard level, by typing /myorg:guards. "
+        f"Only the user changes the guard level, by typing {GUARDS_COMMAND}. "
         "Don't edit it yourself; ask the user if you think it should change."
     ),
 }

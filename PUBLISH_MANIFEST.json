@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "eedfc13e7ca20b4dc5d3605bbe9fe7734ed72e2d",
-  "generated_at": "2026-11-11T23:37:32+00:00",
+  "canonical_sha": "18bfd3ba8d3d8d8d43479ec50ce9a3ef8db0c921",
+  "generated_at": "2026-11-13T18:23:09+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -152,11 +152,11 @@
     },
     {
       "path": "blueprint/hooks/validate-bash.sh",
-      "sha256": "11734bf8a7a030a7ad837acc9ffaf03953b128bbf66838be180f776a8a7c9ab4"
+      "sha256": "1f66334c2c38bdd086f4dba74b1e193188df8f697d4ff605b08c871336ef38d7"
     },
     {
       "path": "blueprint/hooks/validate-edit.sh",
-      "sha256": "025341e2946f88e772c4887722cc4598e6b950b17ad874aafc18d0f92499735e"
+      "sha256": "8149011d4aa182e3b45b4b1acfa42ba98b33f71fc0469d73806ad337d263a7bd"
     },
     {
       "path": "blueprint/hooks/validate-postedit.sh",
@@ -164,7 +164,7 @@
     },
     {
       "path": "blueprint/hooks/validate-read.sh",
-      "sha256": "e95bb04b3620da1057d5ddc58339d290482311dd563a0c3e3e92c6193853a11c"
+      "sha256": "08d0f7968fe3ae8a5b2565539d8777575cc9b9848827e68ba2674e8ace9cb6d4"
     },
     {
       "path": "blueprint/skills/decompose-changeset.md",

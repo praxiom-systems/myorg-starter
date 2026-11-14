@@ -1,7 +1,10 @@
 ---
 name: systematic-debugging
 description: When a bug, test failure, or unexpected behavior appears, diagnose root cause before proposing or implementing fixes.
-agents: []
+agents:
+  - debugger
+  - fullstack-engineer
+  - sre
 source: https://github.com/obra/superpowers
 license: MIT
 visibility: public

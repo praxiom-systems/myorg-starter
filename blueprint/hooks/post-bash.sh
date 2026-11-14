@@ -1,6 +1,7 @@
 #!/bin/bash
 # Claude Code PostToolUse hook for Bash commands
-# Logs ASK command outcomes (approved)
+# Records that a command ran (for the status bar's guard-stop alert) and logs
+# ASK command outcomes (approved)
 #
 # Originally adapted from amulya-labs/ai-dev-foundry (MIT). Modifications © praxiom-systems.
 
@@ -11,9 +12,6 @@ CONFIG_FILE="$SCRIPT_DIR/bash-patterns.toml"
 # Respects MYORG_HOOK_LOG_DIR / MYORG_HOOK_LOG_RETENTION_DAYS env vars.
 # shellcheck source=hook-lib.sh
 . "$SCRIPT_DIR/hook-lib.sh"
-
-hooklib_init_log_dir
-[[ -z "$HOOKLIB_LOG_DIR" ]] && exit 0
 
 # Capture stdin
 INPUT=$(cat)
@@ -34,6 +32,17 @@ CWD=$(echo "$PARSED" | sed -n '1p')
 COMMAND=$(echo "$PARSED" | sed -n '2p')
 
 [[ -z "$COMMAND" ]] && exit 0
+
+# The command ran, so the agent got past any guard stop: the status bar
+# clears its "guard stopped the agent" alert once this marker is newer than
+# the stop. Only repos set up with /myorg:init have a status bar to feed.
+REPO_ROOT=$(git -C "${CWD:-.}" rev-parse --show-toplevel 2>/dev/null)
+if [[ -n "$REPO_ROOT" && -d "$REPO_ROOT/.myorg" ]]; then
+    mkdir -p "$REPO_ROOT/.myorg/statusline" 2>/dev/null && touch "$REPO_ROOT/.myorg/statusline/last-through" 2>/dev/null
+fi
+
+hooklib_init_log_dir
+[[ -z "$HOOKLIB_LOG_DIR" ]] && exit 0
 
 PROJECT=$(hooklib_project_from_cwd "$CWD")
 LOG_FILE=$(hooklib_log_file_for "$PROJECT")

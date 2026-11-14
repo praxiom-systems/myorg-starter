@@ -6,9 +6,6 @@
 # high-confidence patterns stop the edit. Also stops edits that change the guard
 # level itself (only the user's /myorg:guards does that).
 
-# Record this tool invocation for the statusline stall-detector.
-"$(dirname "$0")/touch-last-tool-call.sh" || true
-
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

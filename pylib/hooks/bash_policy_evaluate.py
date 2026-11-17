@@ -18,6 +18,8 @@ from bash_command_parsing import (
     extract_assignments,
     extract_command_substitutions,
     is_safe_pipe_consumer,
+    mask_literal_pipes,
+    runs_shell_code,
     split_commands,
     strip_line_continuations,
     substitute_known_vars,
@@ -28,7 +30,21 @@ from myorg_message import format_reason
 
 _MAX_SUBSTITUTION_DEPTH = 8
 
+# The one rule about what a pipe feeds into (`curl ... | sh`). It sees the
+# command with data pipes (quoted, escaped, heredoc bodies) blanked out.
+_PIPE_RULE_SECTION = "reflect.code_execution"
+
 __all__ = ["check_patterns", "validate_command"]
+
+
+def _ask_reason(rule: str, command: str, why: str) -> str:
+    """The reason text for an ask: the rule, the command and why it matched."""
+    return format_reason(
+        kind="BASH",
+        state="ASK",
+        rule=rule,
+        body_lines=[f"command: {command[:100]}", f"why:     {why}"],
+    )
 
 
 def check_patterns(
@@ -38,10 +54,17 @@ def check_patterns(
 
     Returns (matched, section_name).
     """
+    pipe_view: str | None = None
     for pattern in patterns:
         if pattern.section in skip:
             continue
-        if pattern.regex.search(segment):
+        subject = segment
+        if pattern.section == _PIPE_RULE_SECTION:
+            # A shell's command string and heredoc are code: never mask them.
+            if pipe_view is None:
+                pipe_view = segment if runs_shell_code(segment) else mask_literal_pipes(segment)
+            subject = pipe_view
+        if pattern.regex.search(subject):
             return True, pattern.section
     return False, ""
 
@@ -188,6 +211,20 @@ def validate_command(
 
     env_context: dict[str, str] = {}
 
+    # Segments are single pipeline stages, so `curl ... | sh` never reaches the
+    # pipe rule as one string. Check each whole pipeline against it too.
+    pipe_patterns = [pat for pat in ask_patterns if pat.section == _PIPE_RULE_SECTION]
+    for pipeline in split_commands(command, split_pipes=False) if pipe_patterns else []:
+        cleaned_pipeline = clean_segment(pipeline)
+        hard, soft = _match([cleaned_pipeline], pipe_patterns, soft_sections)
+        if hard is None and soft:
+            soft_note("ask", soft, cleaned_pipeline)
+        elif hard is not None and not has_real_ask:
+            has_real_ask = True
+            ask_section = hard
+            ask_segment = cleaned_pipeline
+            ask_reason = _ask_reason(hard, cleaned_pipeline, f"matches {hard}")
+
     for segment in segments:
         env_context.update(extract_assignments(segment))
 
@@ -236,15 +273,7 @@ def validate_command(
                     has_real_ask = True
                     ask_section = substitution_rule
                     ask_segment = substitution_body
-                    ask_reason = format_reason(
-                        kind="BASH",
-                        state="ASK",
-                        rule=substitution_rule,
-                        body_lines=[
-                            f"command: {substitution_body[:100]}",
-                            f"why:     {substitution_reason}",
-                        ],
-                    )
+                    ask_reason = _ask_reason(substitution_rule, substitution_body, substitution_reason)
             elif substitution_category == "default" and not has_default_fallback:
                 has_default_fallback = True
                 fallback_segment = substitution_body
@@ -286,15 +315,7 @@ def validate_command(
                 has_real_ask = True
                 ask_section = section
                 ask_segment = cleaned
-                ask_reason = format_reason(
-                    kind="BASH",
-                    state="ASK",
-                    rule=section,
-                    body_lines=[
-                        f"command: {cleaned[:100]}",
-                        f"why:     matches {section}",
-                    ],
-                )
+                ask_reason = _ask_reason(section, cleaned, f"matches {section}")
             continue
 
         matched, section = check_patterns(cleaned, allow_patterns)

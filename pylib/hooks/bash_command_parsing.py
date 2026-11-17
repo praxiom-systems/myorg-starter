@@ -59,12 +59,11 @@ def strip_env_vars(cmd: str) -> str:
             # Single-quoted value
             end = rest.find("'", 1)
             cmd = rest[end + 1:] if end > 0 else ""
-        elif rest.startswith('$') and len(rest) > 1 and re.match(r'[A-Za-z_]', rest[1]):
-            # Variable reference $VAR
-            var_match = re.match(r'^\$[A-Za-z_][A-Za-z0-9_]*', rest)
-            cmd = rest[var_match.end():] if var_match else rest
         else:
-            # Unquoted value - ends at whitespace
+            # Unquoted value (including $VAR and $VAR/suffix) - ends at
+            # whitespace. Stripping only the `$VAR` part would leave the
+            # suffix standing in for the command and hide what really runs
+            # (`OUT=$S/x sudo id`).
             val_match = re.match(r'^[^\s]*\s*', rest)
             cmd = rest[val_match.end():] if val_match else ""
 
@@ -185,8 +184,11 @@ def _parse_heredoc_delim(cmd: str, pos: int) -> tuple:
         return None, False, pos
 
 
-def split_commands(cmd: str) -> list[str]:
+def split_commands(cmd: str, split_pipes: bool = True) -> list[str]:
     """Split command on &&, ||, ;, newlines (respecting quotes, comments, and shell syntax).
+
+    ``split_pipes=False`` keeps each pipeline in one piece, for rules about
+    what a pipe feeds into (`curl ... | sh`).
 
     Special handling for:
     - ;; (case statement terminator) - not a split point
@@ -276,6 +278,12 @@ def split_commands(cmd: str) -> list[str]:
                     segments.append(current)
                 current = ""
                 i += 2
+                continue
+            elif array_depth == 0 and char == '|' and not split_pipes:
+                # Keep the pipeline whole (`|&` too, so its `&` isn't a separator).
+                step = 2 if cmd[i:i+2] == '|&' else 1
+                current += cmd[i:i + step]
+                i += step
                 continue
             elif array_depth == 0 and char == '|':
                 # Single pipe is a split point — `cmd1 | cmd2` runs cmd2 with
@@ -432,6 +440,10 @@ def substitute_known_vars(segment: str, env: dict[str, str]) -> str:
 
     Only substitutes if the variable name exists in env.
     Only operates at position 0 (the command itself), not arguments.
+
+    TODO(#1053): env keeps only the last assignment, so a conditional one
+    (`L=/etc/profile || L=/tmp/x; echo hi > $L`) resolves to the harmless
+    value and the system-write rule doesn't fire.
     """
     if not segment.startswith('$'):
         return segment
@@ -594,10 +606,12 @@ def is_safe_pipe_consumer(segment: str) -> bool:
 
 
 def _is_bare_redirect(segment: str) -> bool:
-    """Check if a segment is just a bare redirect with no real command.
+    """Check if a segment is just a bare redirect that writes nothing.
 
-    After chain splitting, residual segments like '2>/dev/null', '>file',
-    or '2>&1' can appear. These are not commands and should be skipped.
+    After chain splitting, residual segments like '2>/dev/null' or '2>&1' can
+    appear. These are not commands and are skipped. A bare redirect into a
+    file ('> .claude/settings.json') still creates or truncates it, so it's
+    kept for the write rules to see (review on #1156).
 
     Pipe-tails are no longer handled here: split_commands() splits on `|`,
     so each pipe stage arrives as its own segment and is checked via
@@ -605,7 +619,10 @@ def _is_bare_redirect(segment: str) -> bool:
     """
     # Strip all redirections: N>/dev/null, 2>&1, >/dev/null, N>>/path, etc.
     s = re.sub(r'\d*>>?&?\d*\s*/?[\w./-]*', '', segment)
-    return not s.strip()
+    if s.strip():
+        return False
+    targets = re.findall(r'\d*>>?(&?)\s*(\S*)', segment)
+    return all(amp or not target or target == "/dev/null" for amp, target in targets)
 
 
 def contains_command_substitution(segment: str) -> bool:
@@ -814,6 +831,98 @@ def _strip_case_label(segment: str) -> str:
     return segment
 
 
+_SHELL_COMMAND = re.compile(r'^(?:\S*/)?(?:ba|z|da|k|a)?sh(?:\s|$)')
+
+
+def runs_shell_code(segment: str) -> bool:
+    """True when the segment runs a shell, whose quoted ``-c`` string and
+    heredoc body are code, not data: their pipes must stay visible to the
+    pipe-into-a-shell rule (``bash -c 'curl ... | sh'``; review on #1156)."""
+    return bool(_SHELL_COMMAND.match(segment.lstrip()))
+
+
+def mask_literal_pipes(segment: str) -> str:
+    """Blank out pipes that are data, so pipeline rules see only real pipes.
+
+    Hides pipes inside quotes, after a backslash, in a quoted-heredoc body and
+    after `<<<`. Pipes inside `$(...)` and backticks are masked on their own,
+    and pipes in an unquoted heredoc body stay, since its substitutions can
+    run. Whenever the structure is unclear (unterminated heredoc, unmatched
+    quote or substitution) the segment comes back unchanged, so every guard
+    stays visible.
+    """
+    out: list[str] = []
+    quote = None
+    heredocs: list[tuple[str, bool, bool]] = []  # (delimiter, strip_tabs, quoted)
+    i = 0
+    while i < len(segment):
+        char = segment[i]
+        if quote is None and segment[i:i + 3] == "<<<":
+            out.append("<<<")
+            i += 3
+            continue
+        if quote is None and segment[i:i + 2] == "<<":
+            delim, strip_tabs, end = _parse_heredoc_delim(segment, i + 2)
+            if not delim:
+                return segment
+            quoted = bool(re.match(r'''<<-?\s*['"]''', segment[i:end]))
+            heredocs.append((delim, strip_tabs, quoted))
+            out.append(segment[i:end])
+            i = end
+            continue
+        if char == "\n" and quote is None and heredocs:
+            out.append(char)
+            i += 1
+            for delim, strip_tabs, quoted in heredocs:
+                while i < len(segment):
+                    end = segment.find("\n", i)
+                    end = len(segment) if end == -1 else end + 1
+                    line = segment[i:end]
+                    candidate = line.rstrip("\n")
+                    if strip_tabs:
+                        candidate = candidate.lstrip("\t")
+                    out.append(line.replace("|", " ") if quoted else line)
+                    i = end
+                    if candidate == delim:
+                        break
+                else:
+                    return segment
+            heredocs = []
+            continue
+        if char == "\\" and quote != "'" and i + 1 < len(segment):
+            following = segment[i + 1]
+            out.append("\\ " if following == "|" else segment[i:i + 2])
+            i += 2
+            continue
+        if segment[i:i + 2] == "$(" and quote != "'":
+            end = _find_matching_paren(segment, i + 2)
+            if segment[end - 1:end] != ")":
+                return segment
+            out.append("$(" + mask_literal_pipes(segment[i + 2:end - 1]) + ")")
+            i = end
+            continue
+        if char == "`" and quote != "'":
+            end = segment.find("`", i + 1)
+            if end == -1:
+                return segment
+            out.append("`" + mask_literal_pipes(segment[i + 1:end]) + "`")
+            i = end + 1
+            continue
+        if char in ("'", '"'):
+            if quote is None:
+                quote = char
+            elif quote == char:
+                quote = None
+        out.append(" " if char == "|" and quote else char)
+        i += 1
+    return segment if quote is not None or heredocs else "".join(out)
+
+
+def strip_negation(segment: str) -> str:
+    """Drop leading ``!`` words: negation flips the exit status, not what runs."""
+    return re.sub(r'^(?:!\s+)+', '', segment)
+
+
 def clean_segment(segment: str) -> str:
     """Clean a command segment: strip whitespace, subshell chars, env vars, comments."""
     segment = segment.strip()
@@ -825,6 +934,8 @@ def clean_segment(segment: str) -> str:
 
     # Strip leading comments
     segment = strip_leading_comment(segment)
+
+    segment = strip_negation(segment)
 
     if _is_array_assignment(segment):
         return "" if _is_safe_array_assignment(segment) else segment
@@ -865,6 +976,9 @@ def clean_segment(segment: str) -> str:
 
     # Strip case-statement pattern labels (e.g. "pattern) grep -q ...")
     segment = _strip_case_label(segment)
+    # Again: a `!` can follow a control-flow keyword or case label
+    # (`then ! sudo id`), which only the steps above expose.
+    segment = strip_negation(segment)
 
     # Re-run strip_env_vars after control flow stripping. A segment like
     # "do name=$(cmd)" becomes "name=$(cmd)" after keyword stripping,

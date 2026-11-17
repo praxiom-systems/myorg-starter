@@ -439,11 +439,8 @@ def substitute_known_vars(segment: str, env: dict[str, str]) -> str:
     """Replace $VAR or ${VAR} at position 0 of a cleaned segment with known values.
 
     Only substitutes if the variable name exists in env.
-    Only operates at position 0 (the command itself), not arguments.
-
-    TODO(#1053): env keeps only the last assignment, so a conditional one
-    (`L=/etc/profile || L=/tmp/x; echo hi > $L`) resolves to the harmless
-    value and the system-write rule doesn't fire.
+    Only operates at position 0 (the command itself), not arguments; the
+    deny and ask checks also see every reading from expand_known_vars.
     """
     if not segment.startswith('$'):
         return segment
@@ -464,6 +461,34 @@ def substitute_known_vars(segment: str, env: dict[str, str]) -> str:
             return env[name] + segment[match.end():]
 
     return segment
+
+
+# The most readings expand_known_vars returns for one segment: enough for a
+# few variables with a couple of values each, and a bound on a long chain.
+MAX_VAR_READINGS = 16
+
+
+def expand_known_vars(segment: str, values: dict[str, list[str]]) -> list[str]:
+    """Return each reading of segment with its known variables expanded.
+
+    Every $VAR or ${VAR} anywhere in the segment (the command, an argument,
+    a redirect target) is replaced, once per value the variable was ever
+    assigned in the command: `L=/etc/profile || L=/tmp/x; echo hi > $L`
+    may write either path, so both readings are checked (#1053). Only
+    variables in values are touched; an expansion inside single quotes is
+    expanded too, which can only add a prompt, never hide one. At most
+    MAX_VAR_READINGS readings come back; the segment itself is not one.
+    """
+    names = [n for n in dict.fromkeys(re.findall(r'\$\{?([A-Za-z_][A-Za-z0-9_]*)', segment)) if values.get(n)]
+    readings = [segment]
+    for name in names:
+        ref = re.compile(r'\$(?:\{' + name + r'\}|' + name + r'(?![A-Za-z0-9_]))')
+        expanded = []
+        for reading in readings:
+            for value in dict.fromkeys(values[name]):
+                expanded.append(ref.sub(lambda _m, v=value: v, reading))
+        readings = list(dict.fromkeys(expanded))[:MAX_VAR_READINGS]
+    return [r for r in readings if r != segment]
 
 
 # Shell metacharacters that indicate a compound or redirecting inner command.

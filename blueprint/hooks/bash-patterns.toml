@@ -685,15 +685,16 @@ patterns = [
 [reflect.code_execution]
 description = "Arbitrary code execution patterns"
 patterns = [
-    # Pipe to shell - always ask regardless of source
-    "\\| *sh( |$)",
-    "\\| *bash( |$)",
-    "\\| *zsh( |$)",
+    # Pipe to shell - always ask regardless of source. Any whitespace ends the
+    # word, so a pipe on a heredoc line (`| bash` then a newline) counts too.
+    "\\| *sh(\\s|$)",
+    "\\| *bash(\\s|$)",
+    "\\| *zsh(\\s|$)",
     # Remote download piped to interpreters (curl/wget + interpreter)
-    "(curl|wget|http|fetch).*\\| *python[0-9.]*( |$)",
-    "(curl|wget|http|fetch).*\\| *perl( |$)",
-    "(curl|wget|http|fetch).*\\| *ruby( |$)",
-    "(curl|wget|http|fetch).*\\| *node( |$)",
+    "(curl|wget|http|fetch).*\\| *python[0-9.]*(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *perl(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *ruby(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *node(\\s|$)",
     "^eval ",
     "source /tmp/",
     "source /var/tmp/",
@@ -744,6 +745,10 @@ patterns = [
     "^apt(-get)? install",
     "^apt(-get)? upgrade",
     "^pip install",
+    # Path-based virtual environments keep the registry-install guard...
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/pip[0-9.]*\\s+install(?:\\s|$)",
+    # ...including `-m pip` with any interpreter flags (-I -m pip, -mpip, -Im pip).
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*\\s+.*?-[A-Za-z]*m\\s*pip(?:\\s|$)",
     "^npm install (?!\\.)(?!--)(?!\\d*>)(.+)",
     "^yarn add",
     "^brew install",
@@ -754,6 +759,16 @@ patterns = [
     "^uv add\\b",
     "^uv pip install\\b",
     "^go install\\b",
+]
+
+[reflect.venv_inline_execution]
+description = "Virtual-environment Python running inline code or stdin"
+note_from = "guarded"
+# The venv allow rules trust every binary under venv/bin/. These keep `-c` and
+# `-` (code from the command line or stdin) from riding that trust at strict.
+patterns = [
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*\\s+(?:-[A-Za-z]+\\s+)*-[A-Za-z]*c",
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*\\s+(?:-[A-Za-z]+\\s+)*-(?:\\s|$)",
 ]
 
 [reflect.kernel_modules]
@@ -818,6 +833,8 @@ description = "Writing under /etc, /usr, or non-cache /var (system configuration
 patterns = [
     ">>?\\s*/etc/",
     ">>?\\s*/usr/",
+    # An absolute path that walks back up into /etc or /usr (/tmp/../etc/profile)
+    ">>?\\s*[\"']?/\\S*\\.\\./(?:etc|usr)/",
     ">>?\\s*/var/(?!tmp/|cache/|log/|folders/)",
     "^tee\\s+(.*\\s)?/etc/",
     "^tee\\s+(.*\\s)?/usr/",
@@ -835,6 +852,23 @@ patterns = [
     # Bare /etc and /usr/non-local destinations for mkdir
     "^mkdir\\s+(-p\\s+)?/etc(\\s|$)",
     "^mkdir\\s+(-p\\s+)?/usr(?!/local)(\\s|$)",
+]
+
+[reflect.agent_config_writes]
+description = "Writing git hooks or agent settings and hook configs (code that runs later)"
+# Redirects, tee, cp and mv into .git/hooks/ or an agent's settings/hooks files.
+# Reading or listing them stays allowed.
+patterns = [
+    ">>?\\s*[\"']?\\S*\\.git/hooks/",
+    ">>?\\s*[\"']?\\S*\\.(?:claude|codex|gemini|opencode)/(?:settings(?:\\.local)?\\.json|hooks(?:\\.json|/)|config\\.(?:toml|json|yaml))",
+    "^tee\\s+(?:.*\\s)?\\S*\\.git/hooks/",
+    "^tee\\s+(?:.*\\s)?\\S*\\.(?:claude|codex|gemini|opencode)/(?:settings(?:\\.local)?\\.json|hooks(?:\\.json|/)|config\\.(?:toml|json|yaml))",
+    # cp/mv: only the destination counts — the last operand, or `-t DIR` /
+    # `--target-directory` — so copying a config out (a read) passes. A hooks
+    # directory needs no trailing slash.
+    "^(?:cp|mv)\\s+(?:\\S+\\s+)+[\"']?\\S*\\.git/hooks(?:/\\S*)?[\"']?\\s*$",
+    "^(?:cp|mv)\\s+(?:\\S+\\s+)+[\"']?\\S*\\.(?:claude|codex|gemini|opencode)/(?:settings(?:\\.local)?\\.json|hooks(?:\\.json|/\\S*)?|config\\.(?:toml|json|yaml))[\"']?\\s*$",
+    "^(?:cp|mv)\\s+(?:.*\\s)?(?:-t\\s*|--target-directory[=\\s])[\"']?\\S*(?:\\.git/hooks|\\.(?:claude|codex|gemini|opencode)/hooks)(?:/|[\"']?(?:\\s|$))",
 ]
 
 [reflect.process_substitution_from_network]

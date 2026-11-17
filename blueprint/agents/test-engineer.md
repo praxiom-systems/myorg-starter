@@ -5,7 +5,7 @@ description: Design and implement comprehensive test suites including unit, inte
 profile: execution
 color: blue
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

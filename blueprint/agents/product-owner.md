@@ -6,7 +6,7 @@ description: Define product direction, prioritize for value, write specs, and ma
 profile: planning
 color: magenta
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

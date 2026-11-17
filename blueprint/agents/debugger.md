@@ -5,7 +5,7 @@ description: Investigate and fix bugs systematically using root cause analysis. 
 profile: execution
 color: red
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

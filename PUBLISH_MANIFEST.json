@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "7491ae18cfd2f7a19292d53341ffa67397191026",
-  "generated_at": "2026-11-17T20:05:07+00:00",
+  "canonical_sha": "f2fc8ba17a496111bc0ce658ba764146d2f0f875",
+  "generated_at": "2026-11-17T23:01:26+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -36,43 +36,43 @@
     },
     {
       "path": "blueprint/agents/code-reviewer.md",
-      "sha256": "e6f012bc8f89087c7b69883acc0dbfd7b063e5cbbb177fa5e4dccb2f76d2fd3f"
+      "sha256": "35c0fce6345a57a826b46e20f4e3448e18ad52930c93479e1f72b60d8ec33b4f"
     },
     {
       "path": "blueprint/agents/debugger.md",
-      "sha256": "1c7a921efe31ddf0255af8ad0c669e7d1789f3979c6cc4d8e8a56fc7e182c3f2"
+      "sha256": "4e69d0a063a07eac46919e38644040e35a7cdda5d1b05b0c38b8e0c09a647903"
     },
     {
       "path": "blueprint/agents/fullstack-engineer.md",
-      "sha256": "374a0122769c4a42d2ded64f4ccef8e68dfe2a53bc85b6a256ee25dc7fd09567"
+      "sha256": "c84301ca23d9314d8f092544cced855556c5cf26854be8a07454547b7de95618"
     },
     {
       "path": "blueprint/agents/junior-engineer.md",
-      "sha256": "3ecbaf0a1bf5bff32771dc8a2c04090bfb3b2ae4bba28dee1ff99c76190d409c"
+      "sha256": "216db806693ed176fcf4c1692c37757fbfa313455a48812f58dce3e1dae25d9d"
     },
     {
       "path": "blueprint/agents/product-owner.md",
-      "sha256": "f6785c89089c1c3e35c71fbbe3e30192364a4c6b91a2881e14823a45e6abade9"
+      "sha256": "aec86be887229fec94813dc6fc116b2ec6c6aa80a54218649d39955a299fd92f"
     },
     {
       "path": "blueprint/agents/security-auditor.md",
-      "sha256": "fae39863bf92623a69f5cc68e993bb0e5fe399fc9de3abe61159f04abb0a2c15"
+      "sha256": "a7f341ba8bada3ddabca7a0b26bc786911aeb5b3092f4c84446b6df245a6784e"
     },
     {
       "path": "blueprint/agents/systems-architect.md",
-      "sha256": "4dd6ca1a067d27d752368121abc765a10c36733c07fbd5b3f4bd46f67969e4cc"
+      "sha256": "672e24406ce39533e1d0db1d84bdc3d9e57c6bbd97b51cd1f4453d2d4da664ac"
     },
     {
       "path": "blueprint/agents/tech-lead.md",
-      "sha256": "7fdd5c403a5519e576143fd80ac36d156c392cac5da662a77c362f5a913c0a48"
+      "sha256": "df1356ee2213a80eb60a61bd50f485f1fdeaa1177b7af1598f4b979517e067f8"
     },
     {
       "path": "blueprint/agents/technical-writer.md",
-      "sha256": "8779153b81fdb3f1e4c3b6f898006c7b8c7e2a39058635d3f9e9af12e4539f05"
+      "sha256": "a24d41ce7cdd7394a2e21dc4bdfe74a11f3bd3699900dfc759d6043d5ccc4344"
     },
     {
       "path": "blueprint/agents/test-engineer.md",
-      "sha256": "e01aa929020d4bf78ec43c9f884c4460fb1c3f03b270db069a7adf602b9ebd86"
+      "sha256": "a5643645f2c526b61e4e3b1bcd9e9bd3f306d717ebbaa5dc8a39a4e3eb3de531"
     },
     {
       "path": "blueprint/automation/scheduled-triage.md",
@@ -168,27 +168,27 @@
     },
     {
       "path": "blueprint/skills/decompose-changeset.md",
-      "sha256": "d5f03c34332073ea82f755a815345234005dd948587cd429e3d4f1ca3e2e8d62"
+      "sha256": "2156c49767309d49e2c2cc76bc60bbd1d678697cbb1e29cd782a36ff10c2e509"
     },
     {
       "path": "blueprint/skills/systematic-debugging.md",
-      "sha256": "abb78b38f0626cc38d87a55ca756836067c917233618bd0312ae57d6a5de56e0"
+      "sha256": "fe33d13f266642cf7fe326ea905520f3900ec47cf3c63ab33304306db714b3b7"
     },
     {
       "path": "blueprint/standards/change-discipline.md",
-      "sha256": "378a5d4a938015551a88342e9d541018d628a38a4371e3a0aab38dd35229d7c7"
+      "sha256": "59a80767cc97ae4f20b9e545093aab30cc523377b0e39e6aceecec589b0d2f7b"
     },
     {
       "path": "blueprint/standards/engineering.md",
-      "sha256": "355954a230e37082e5c322509fb919e3b542cf0fcb064a7eb86f62647419e401"
+      "sha256": "134eed2f389ab5f8f3f6a888feeec7e769086531094665356ca135491862bbd8"
     },
     {
       "path": "blueprint/standards/prefer-root-cause-fixes.md",
-      "sha256": "0fd05a3be90004baa0021d1b9f65df834af8c99e0b3cd3196a491931f90bac33"
+      "sha256": "8c38d28cbfb8ab3225f01ab896f32077e5316a9989b9ebcacfc6ffbe3b6a0b84"
     },
     {
       "path": "blueprint/standards/silent-failure.md",
-      "sha256": "984d331da951e0f3b5a2ee603b3e3aa1731f21da8224507a1af36e5bfc48d3f9"
+      "sha256": "5c919ab5ee6aadce8fcd3fa723d6cfcf0b8fc16adeab89fd8462100dc39d20a6"
     },
     {
       "path": "pylib/hooks/bash_command_parsing.py",

@@ -5,7 +5,7 @@ description: Perform thorough code reviews focusing on correctness, security, pe
 profile: execution
 color: yellow
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

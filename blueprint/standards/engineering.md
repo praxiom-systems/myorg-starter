@@ -3,7 +3,7 @@ name: Engineering Practices
 description: "Core engineering craft standards for all engineering department agents."
 scope: functional
 departments: [engineering]
-source: "https://github.com/praxiom-systems/claude-vorg-blueprint"
+source: https://github.com/praxiom-systems/getmyorg
 license: MIT
 visibility: public
 ---

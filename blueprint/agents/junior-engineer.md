@@ -6,7 +6,7 @@ description: Implement straightforward features, fix simple bugs, and write code
 profile: lightweight
 color: green
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

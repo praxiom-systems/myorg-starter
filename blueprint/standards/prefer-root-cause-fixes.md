@@ -2,7 +2,7 @@
 name: Prefer Root-Cause Fixes
 description: "In agent orgs, ship proper fixes that address causes — not band-aids that hide symptoms. Diagnose before patching."
 scope: org-wide
-source: "https://github.com/praxiom-systems/claude-vorg-blueprint"
+source: https://github.com/praxiom-systems/getmyorg
 license: MIT
 visibility: public
 ---

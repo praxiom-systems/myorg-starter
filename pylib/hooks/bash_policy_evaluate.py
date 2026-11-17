@@ -14,7 +14,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from bash_command_parsing import (
+    MAX_VAR_READINGS,
     clean_segment,
+    expand_known_vars,
     extract_assignments,
     extract_command_substitutions,
     is_safe_pipe_consumer,
@@ -210,6 +212,9 @@ def validate_command(
     allow_section: str | None = None
 
     env_context: dict[str, str] = {}
+    # Every value each variable was assigned, in order: a conditional
+    # assignment may leave either one in place (#1053).
+    env_values: dict[str, list[str]] = {}
 
     # Segments are single pipeline stages, so `curl ... | sh` never reaches the
     # pipe rule as one string. Check each whole pipeline against it too.
@@ -226,7 +231,10 @@ def validate_command(
             ask_reason = _ask_reason(hard, cleaned_pipeline, f"matches {hard}")
 
     for segment in segments:
-        env_context.update(extract_assignments(segment))
+        assigned = extract_assignments(segment)
+        env_context.update(assigned)
+        for name, value in assigned.items():
+            env_values.setdefault(name, []).append(value)
 
         for (
             substitution_body,
@@ -283,11 +291,16 @@ def validate_command(
         if not cleaned:
             continue
 
+        readings, every_combination = expand_known_vars(cleaned, env_values)
         cleaned = substitute_known_vars(cleaned, env_context)
         # Check what a wrapper runs too: `sudo dd of=/dev/sda` must hit the
-        # disk rule even where sudo alone is only a note.
-        unwrapped = unwrap_command(cleaned)
-        subjects = [cleaned] if unwrapped == cleaned else [cleaned, unwrapped]
+        # disk rule even where sudo alone is only a note. And check every
+        # value a variable may hold, wherever it appears: `> $L` writes to
+        # whichever path L was given.
+        subjects: list[str] = []
+        for subject in dict.fromkeys([cleaned, *readings]):
+            unwrapped = unwrap_command(subject)
+            subjects += [subject] if unwrapped == subject else [subject, unwrapped]
 
         hard, soft = _match(subjects, deny_patterns, soft_sections)
         if soft:
@@ -304,6 +317,17 @@ def validate_command(
                 ],
             )
             return "deny", reason, "deny", section
+
+        # Past the reading cap, a path two variables make together may go
+        # unchecked; ask rather than let it through (#1165 review).
+        if not every_combination and not has_real_ask:
+            has_real_ask = True
+            ask_segment = cleaned
+            ask_reason = _ask_reason(
+                None,
+                cleaned,
+                f"its variables combine in more than {MAX_VAR_READINGS} ways, too many to check each one",
+            )
 
         hard, soft = _match(subjects, ask_patterns, soft_sections)
         if hard is None and soft:

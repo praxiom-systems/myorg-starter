@@ -2,7 +2,7 @@
 name: Silent Failure Standard
 description: "Caller-visible failures must be surfaced explicitly with what happened, why it matters, and what to do next."
 scope: org-wide
-source: "https://github.com/praxiom-systems/getmyorg"
+source: https://github.com/praxiom-systems/getmyorg
 license: MIT
 visibility: public
 ---

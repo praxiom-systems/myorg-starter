@@ -5,7 +5,7 @@ description: Create clear, minimal documentation that follows DRY principles. Us
 profile: execution
 color: white
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

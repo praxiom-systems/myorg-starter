@@ -2,7 +2,7 @@
 name: Change Discipline
 description: "Atomic commits and scoped fixes: one reason to revert per commit, advisory bugfix size ceilings, and explicit override markers"
 scope: org-wide
-source: "https://github.com/praxiom-systems/getmyorg"
+source: https://github.com/praxiom-systems/getmyorg
 license: MIT
 visibility: public
 ---

@@ -6,7 +6,7 @@ description: Implement features, fix bugs, and refactor code with production-qua
 profile: execution
 color: cyan
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

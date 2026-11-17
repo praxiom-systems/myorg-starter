@@ -6,7 +6,7 @@ description: Provide high-level architectural guidance on system design, compone
 profile: planning
 color: purple
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

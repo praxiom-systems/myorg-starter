@@ -5,7 +5,7 @@ agents:
   - tech-lead
   - product-owner
   - fullstack-engineer
-source: "https://github.com/praxiom-systems/getmyorg"
+source: https://github.com/praxiom-systems/getmyorg
 license: MIT
 visibility: public
 ---

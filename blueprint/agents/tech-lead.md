@@ -6,7 +6,7 @@ description: Plan implementation approaches and break down complex tasks. Use fo
 profile: planning
 color: magenta
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

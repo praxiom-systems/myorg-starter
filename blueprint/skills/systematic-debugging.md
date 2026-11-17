@@ -5,7 +5,7 @@ agents:
   - debugger
   - fullstack-engineer
   - sre
-source: https://github.com/obra/superpowers
+source: https://github.com/praxiom-systems/getmyorg
 license: MIT
 visibility: public
 ---

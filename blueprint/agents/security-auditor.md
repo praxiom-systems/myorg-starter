@@ -5,7 +5,7 @@ description: Perform security assessments identifying vulnerabilities and recomm
 profile: planning
 color: orange
 source: https://github.com/praxiom-systems/getmyorg
-license: proprietary
+license: MIT
 visibility: public
 ---
 

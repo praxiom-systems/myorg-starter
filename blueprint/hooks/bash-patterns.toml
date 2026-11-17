@@ -885,9 +885,12 @@ description = "Adding/configuring MCP servers — risk surface for data exfil an
 # Catches CLI commands plus direct writes to MCP config files. Reads of the
 # config files stay allowed.
 patterns = [
-    "^claude\\s+mcp\\s+add\\b",
-    "^codex\\s+mcp\\s+add\\b",
-    "^gemini\\s+mcp\\s+add\\b",
+    # `… mcp add --help` only prints usage (getmyorg-community#11). A --help
+    # after `--` belongs to the server command being registered, so it still
+    # counts.
+    "^claude\\s+mcp\\s+add\\b(?!(?:(?!\\s--\\s).)*\\s(-h|--help)(\\s|$))",
+    "^codex\\s+mcp\\s+add\\b(?!(?:(?!\\s--\\s).)*\\s(-h|--help)(\\s|$))",
+    "^gemini\\s+mcp\\s+add\\b(?!(?:(?!\\s--\\s).)*\\s(-h|--help)(\\s|$))",
     ">>?\\s*~/?\\.claude\\.json",
     ">>?\\s*~/?\\.codex/",
     "^tee\\s+(.*\\s)?~/?\\.claude\\.json",

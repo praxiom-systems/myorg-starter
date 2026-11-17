@@ -439,11 +439,8 @@ def substitute_known_vars(segment: str, env: dict[str, str]) -> str:
     """Replace $VAR or ${VAR} at position 0 of a cleaned segment with known values.
 
     Only substitutes if the variable name exists in env.
-    Only operates at position 0 (the command itself), not arguments.
-
-    TODO(#1053): env keeps only the last assignment, so a conditional one
-    (`L=/etc/profile || L=/tmp/x; echo hi > $L`) resolves to the harmless
-    value and the system-write rule doesn't fire.
+    Only operates at position 0 (the command itself), not arguments; the
+    deny and ask checks also see every reading from expand_known_vars.
     """
     if not segment.startswith('$'):
         return segment
@@ -464,6 +461,56 @@ def substitute_known_vars(segment: str, env: dict[str, str]) -> str:
             return env[name] + segment[match.end():]
 
     return segment
+
+
+# The most readings expand_known_vars returns for one segment: enough for a
+# few variables with a couple of values each, and a bound on a long chain.
+MAX_VAR_READINGS = 16
+
+
+def expand_known_vars(segment: str, values: dict[str, list[str]]) -> tuple[list[str], bool]:
+    """Return each reading of segment with its known variables expanded, and
+    whether the readings cover every combination of their values.
+
+    Every $VAR or ${VAR} anywhere in the segment (the command, an argument,
+    a redirect target) is replaced, once per value the variable was ever
+    assigned in the command: `L=/etc/profile || L=/tmp/x; echo hi > $L`
+    may write either path, so both readings are checked (#1053). Only
+    variables in values are touched; an expansion inside single quotes is
+    expanded too, which can only add a prompt, never hide one.
+
+    While the combinations number MAX_VAR_READINGS or fewer, every one is
+    a reading. Past that, each value gets one reading of its own, the other
+    variables at their last value: no value is ever dropped, and the count
+    grows with the assignments instead of multiplying (#1164 review). Those
+    readings miss a path only two values make together (`> $A$B`), so the
+    second result is then False, unless there's one variable, whose every
+    value is a reading anyway (#1165 review). The segment itself is not a
+    reading.
+    """
+    names = [n for n in dict.fromkeys(re.findall(r'\$\{?([A-Za-z_][A-Za-z0-9_]*)', segment)) if values.get(n)]
+    options = {n: list(dict.fromkeys(values[n])) for n in names}
+    refs = {n: re.compile(r'\$(?:\{' + n + r'\}|' + n + r'(?![A-Za-z0-9_]))') for n in names}
+
+    def read(choice: dict[str, str]) -> str:
+        out = segment
+        for name, value in choice.items():
+            out = refs[name].sub(lambda _m, v=value: v, out)
+        return out
+
+    combos = 1
+    for name in names:
+        combos *= len(options[name])
+    complete = combos <= MAX_VAR_READINGS or len(names) == 1
+    if combos <= MAX_VAR_READINGS:
+        choices = [{}]
+        for name in names:
+            choices = [{**c, name: v} for c in choices for v in options[name]]
+    else:
+        last = {n: options[n][-1] for n in names}
+        choices = [{**last, name: v} for name in names for v in options[name]]
+    readings = dict.fromkeys(read(c) for c in choices)
+    return [r for r in readings if r != segment], complete
 
 
 # Shell metacharacters that indicate a compound or redirecting inner command.

@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "70f3a371bb64421bd70929a088ea2100b8ad6abc",
-  "generated_at": "2026-11-17T09:49:09+00:00",
+  "canonical_sha": "3651c8acb4cdaa2ad2db5c468195c83aa59dea79",
+  "generated_at": "2026-11-17T18:43:23+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -192,7 +192,7 @@
     },
     {
       "path": "pylib/hooks/bash_command_parsing.py",
-      "sha256": "f4f841b94eaf47cfa52b22b3205106a1e4436be8231e5e379f611b673c0d7d3d"
+      "sha256": "3e570150f3aed930838900654d33db1b4e86ebf164448fde2a0ee377f09fa124"
     },
     {
       "path": "pylib/hooks/bash_policy_decide.py",
@@ -200,7 +200,7 @@
     },
     {
       "path": "pylib/hooks/bash_policy_evaluate.py",
-      "sha256": "1b5b0f964cc8270494ed6c9c25a149971d2edc020c81cab5f46cdd29e93504cd"
+      "sha256": "51227e5834deb24b78c99af77aa6224529f41803fbd518a1e71d233515711792"
     },
     {
       "path": "pylib/hooks/bash_policy_patterns.py",

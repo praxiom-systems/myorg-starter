@@ -183,6 +183,41 @@ def _claude_prompts_off(cwd: str) -> str:
     return ""
 
 
+def _claude_remote_control_on(cwd: str) -> bool:
+    """Whether every Claude Code session here connects to Remote Control (as
+    getmyorg's claudeRemoteControlOn): the user's remoteControlAtStartup is
+    true and no repo settings file turns it off. A repo's true is ignored."""
+    def read(path: Path):
+        try:
+            return json.loads(path.read_text(encoding="utf-8")).get("remoteControlAtStartup")
+        except (OSError, ValueError, AttributeError):
+            return None
+
+    base = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    if read(base / "settings.json") is not True:
+        return False
+    root = next((p for p in (Path(cwd), *Path(cwd).parents) if (p / ".git").exists()), None)
+    if root is not None:
+        for name in ("settings.json", "settings.local.json"):
+            if read(root / ".claude" / name) is False:
+                return False
+    return True
+
+
+def _away_note(cwd: str) -> list[str]:
+    if _claude_remote_control_on(cwd):
+        return [
+            "  Away from your desk: Remote Control is set to connect every Claude Code session, so",
+            "  prompts and questions can reach claude.ai/code and the Claude app. Check it shows",
+            "  connected before you step away. Other ways, Codex included: getmyorg.com/docs/away",
+        ]
+    return [
+        "  Away from your desk, prompts and questions wait in the terminal. To answer them from",
+        "  your phone, turn on Enable Remote Control for all sessions and Push when actions",
+        "  required in Claude Code's /config. Other ways, Codex included: getmyorg.com/docs/away",
+    ]
+
+
 def describe_settings(cwd: str) -> str:
     """The starter's settings, for a bare /myorg-starter:config."""
     level, level_from = _resolved(cwd, "hook_strictness", "MYORG_HOOK_STRICTNESS", LEVELS, DEFAULT_LEVEL)
@@ -209,6 +244,7 @@ def describe_settings(cwd: str) -> str:
             f"  {ignored} is committed to this repo, so it's ignored: settings are yours,",
             "  not the repo's. Remove it from git (git rm --cached) if it was meant to be yours.",
         ]
+    lines += ["", *_away_note(cwd)]
     lines += [
         "",
         "Change them with /myorg-starter:config guards <strict|guarded|relaxed|off> or",

@@ -69,3 +69,14 @@ jobs:
             | MYORG_HOOK_LOG_DIR= plugins/myorg-starter/hooks/validate-bash.sh > /dev/null
       - name: Scripts parse
         run: bash -n bin/install.sh && bash -n bin/doctor.sh
+
+  # This repo is generated from getmyorg. A PR that edits its files by hand
+  # fails here; regen PRs update the files and PUBLISH_MANIFEST.json together.
+  # Forks and copies are theirs to edit, so it runs only in this repo.
+  generated:
+    if: github.repository == 'praxiom-systems/myorg-starter'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Files match what getmyorg published
+        run: python3 .github/check-generated.py

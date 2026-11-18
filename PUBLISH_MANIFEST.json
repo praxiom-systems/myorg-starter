@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "924f4f9cbfb0f2265abd7997107f68ddb76bbd36",
-  "generated_at": "2026-11-18T04:22:52+00:00",
+  "canonical_sha": "57f35d7c8bb8ff2c00c9660b13490341f7263e9f",
+  "generated_at": "2026-11-18T04:57:47+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -11,8 +11,12 @@
       "sha256": "430596ee49929873f6d9008be83c987ba9b597c3ddb2b98f7bf1a41ffe6624e3"
     },
     {
+      "path": ".github/check-generated.py",
+      "sha256": "58b0663c2253f5d64e382eefd2f0efd49b228aa5fbceec5e7610f7e50384c223"
+    },
+    {
       "path": ".github/workflows/ci.yml",
-      "sha256": "8d9a0a734b52f9bbf85caa176d73748c6f8fe953a6d935e4f26a77d0844e6854"
+      "sha256": "542801153b0a79e4e3fa989426d75610a5e20914bdd34c4843bf58061a2d47ab"
     },
     {
       "path": ".gitignore",

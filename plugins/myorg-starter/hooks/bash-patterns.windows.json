@@ -1,0 +1,118 @@
+{
+ "allow": {
+  "windows_clipboard": {
+   "description": "Windows clipboard utilities",
+   "patterns": [
+    "^clip\\.exe",
+    "^powershell.*Get-Clipboard",
+    "^powershell.*Set-Clipboard"
+   ]
+  },
+  "windows_dev_tools": {
+   "description": "Windows development tools",
+   "patterns": [
+    "^dotnet (build|test|run|publish|restore|clean|new|list|tool)",
+    "^msbuild ",
+    "^nuget (restore|list|search)"
+   ]
+  },
+  "windows_package_info": {
+   "description": "Windows package manager queries (read-only)",
+   "patterns": [
+    "^winget list",
+    "^winget search",
+    "^winget show",
+    "^choco list",
+    "^choco search",
+    "^choco info",
+    "^scoop list",
+    "^scoop search",
+    "^scoop info",
+    "^scoop status"
+   ]
+  },
+  "windows_system_info": {
+   "description": "Windows system information (read-only)",
+   "patterns": [
+    "^systeminfo",
+    "^wmic (os|cpu|memorychip|diskdrive|bios) (get|list)",
+    "^tasklist",
+    "^sc\\.exe query",
+    "^sc\\.exe queryex",
+    "^net session 2>",
+    "^ipconfig",
+    "^hostname\\.exe",
+    "^ver$",
+    "^powershell.*Get-ComputerInfo",
+    "^powershell.*Get-Process",
+    "^powershell.*Get-Service",
+    "^powershell.*Get-NetAdapter",
+    "^powershell.*Get-NetIPConfiguration",
+    "^powershell.*\\$PSVersionTable"
+   ]
+  },
+  "windows_utilities": {
+   "description": "Windows common utilities",
+   "patterns": [
+    "^cmd\\.exe /[cC] (dir|type|echo|set|where|findstr)",
+    "^where\\.exe ",
+    "^certutil -hashfile",
+    "^powershell.*Get-FileHash",
+    "^powershell.*Get-Content",
+    "^powershell.*Test-Path",
+    "^powershell.*Get-ChildItem",
+    "^start https?://",
+    "^explorer\\.exe ",
+    "^wsl --list",
+    "^wsl -l",
+    "^wsl --status"
+   ]
+  }
+ },
+ "deny": {
+  "windows_destructive": {
+   "description": "Windows destructive system commands",
+   "patterns": [
+    "^cmd\\.exe.*/[cC].*format ",
+    "^powershell.*Remove-Item.*-Recurse.*\\$env:",
+    "^powershell.*Remove-Item.*-Recurse.*C:\\\\Windows",
+    "^reg delete.*HKLM"
+   ]
+  }
+ },
+ "reflect": {
+  "windows_package_install": {
+   "description": "Windows package installation",
+   "note_from": "guarded",
+   "patterns": [
+    "^winget install",
+    "^choco install",
+    "^scoop install",
+    "^msiexec ",
+    "^nuget install"
+   ]
+  },
+  "windows_service_management": {
+   "description": "Windows service management",
+   "patterns": [
+    "^sc\\.exe (start|stop|delete|create|config)",
+    "^net (start|stop) ",
+    "^powershell.*-Service",
+    "^cmd\\.exe.*/[cC].*sc (start|stop|delete|create)"
+   ]
+  },
+  "windows_system_config": {
+   "description": "Windows system configuration",
+   "patterns": [
+    "^reg (add|delete|import)",
+    "^netsh ",
+    "^bcdedit",
+    "^schtasks /(create|delete|change|run|end)",
+    "^powershell.*Set-ExecutionPolicy",
+    "^powershell.*New-NetFirewallRule",
+    "^icacls .* /grant",
+    "^icacls .* /deny"
+   ]
+  }
+ }
+}

@@ -1,18 +1,22 @@
 {
-  "canonical_sha": "4e92a0fa7b6fcebecdda1dfe761d44cfa0a3d9b2",
-  "generated_at": "2026-11-18T02:19:07+00:00",
+  "canonical_sha": "924f4f9cbfb0f2265abd7997107f68ddb76bbd36",
+  "generated_at": "2026-11-18T04:22:52+00:00",
   "files": [
     {
+      "path": ".agents/plugins/marketplace.json",
+      "sha256": "7c80ae61a7666f67d6605888425366f6907d6df814dcc5e9e8d80d78252b6253"
+    },
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "sha256": "430596ee49929873f6d9008be83c987ba9b597c3ddb2b98f7bf1a41ffe6624e3"
+    },
+    {
       "path": ".github/workflows/ci.yml",
-      "sha256": "313bad4152bdcb200ab349141181a7fb0a8d759be8547f1fcace189e390bc369"
+      "sha256": "8d9a0a734b52f9bbf85caa176d73748c6f8fe953a6d935e4f26a77d0844e6854"
     },
     {
       "path": ".gitignore",
       "sha256": "60c9bdd905fcf45ac485c680d32e9773962cf061b6f041dcddd033911558a672"
-    },
-    {
-      "path": ".myorg/config.yaml",
-      "sha256": "f4b40a6113cdbc4d1823ee9213fa62e07563956a02e819cefd23cc4d4c8ff9b1"
     },
     {
       "path": "CONTRIBUTING.md",
@@ -28,227 +32,231 @@
     },
     {
       "path": "README.md",
-      "sha256": "ff9e76a4fa9dc9b0e8496a2e6391a3ed597ad3f51ef6e153128b6a9357b7e774"
+      "sha256": "e3a7276613695473be6cf756d09caf2492f027fe27865e22a83c037857fcc4b6"
     },
     {
       "path": "bin/doctor.sh",
-      "sha256": "be5768ef42dff3bfc7b23bae84659eeb72fdbd7a5e54de31abdbd3bf02e7d288"
+      "sha256": "a297f7aa507f441cf7d743512811c84ae812285721cc78752ea48424104dee2c"
     },
     {
-      "path": "blueprint/agents/code-reviewer.md",
+      "path": "bin/install.sh",
+      "sha256": "255d972b7f0665febe2e24248bd70d0d9cd7e8ddfa7e1fde3d0b5e918f6b94cd"
+    },
+    {
+      "path": "plugins/myorg-starter/.claude-plugin/plugin.json",
+      "sha256": "991e4a17c3a5d98be9a1a9be664370fc25115da1cc0cfe76b75fd26712418602"
+    },
+    {
+      "path": "plugins/myorg-starter/.codex-plugin/plugin.json",
+      "sha256": "f141edead0bbedc390b74b0a7a6e754151ee49f54fa0fbbe3f05a538a3ad9e73"
+    },
+    {
+      "path": "plugins/myorg-starter/agents/code-reviewer.md",
       "sha256": "35c0fce6345a57a826b46e20f4e3448e18ad52930c93479e1f72b60d8ec33b4f"
     },
     {
-      "path": "blueprint/agents/debugger.md",
+      "path": "plugins/myorg-starter/agents/debugger.md",
       "sha256": "4e69d0a063a07eac46919e38644040e35a7cdda5d1b05b0c38b8e0c09a647903"
     },
     {
-      "path": "blueprint/agents/fullstack-engineer.md",
+      "path": "plugins/myorg-starter/agents/fullstack-engineer.md",
       "sha256": "c84301ca23d9314d8f092544cced855556c5cf26854be8a07454547b7de95618"
     },
     {
-      "path": "blueprint/agents/junior-engineer.md",
+      "path": "plugins/myorg-starter/agents/junior-engineer.md",
       "sha256": "216db806693ed176fcf4c1692c37757fbfa313455a48812f58dce3e1dae25d9d"
     },
     {
-      "path": "blueprint/agents/product-owner.md",
+      "path": "plugins/myorg-starter/agents/product-owner.md",
       "sha256": "aec86be887229fec94813dc6fc116b2ec6c6aa80a54218649d39955a299fd92f"
     },
     {
-      "path": "blueprint/agents/security-auditor.md",
+      "path": "plugins/myorg-starter/agents/security-auditor.md",
       "sha256": "a7f341ba8bada3ddabca7a0b26bc786911aeb5b3092f4c84446b6df245a6784e"
     },
     {
-      "path": "blueprint/agents/systems-architect.md",
+      "path": "plugins/myorg-starter/agents/systems-architect.md",
       "sha256": "672e24406ce39533e1d0db1d84bdc3d9e57c6bbd97b51cd1f4453d2d4da664ac"
     },
     {
-      "path": "blueprint/agents/tech-lead.md",
+      "path": "plugins/myorg-starter/agents/tech-lead.md",
       "sha256": "df1356ee2213a80eb60a61bd50f485f1fdeaa1177b7af1598f4b979517e067f8"
     },
     {
-      "path": "blueprint/agents/technical-writer.md",
+      "path": "plugins/myorg-starter/agents/technical-writer.md",
       "sha256": "a24d41ce7cdd7394a2e21dc4bdfe74a11f3bd3699900dfc759d6043d5ccc4344"
     },
     {
-      "path": "blueprint/agents/test-engineer.md",
+      "path": "plugins/myorg-starter/agents/test-engineer.md",
       "sha256": "a5643645f2c526b61e4e3b1bcd9e9bd3f306d717ebbaa5dc8a39a4e3eb3de531"
     },
     {
-      "path": "blueprint/automation/scheduled-triage.md",
-      "sha256": "e5998fd19cc617aed27c5e79c275d72427e62a38e87e3e6787ab729af2ebe558"
+      "path": "plugins/myorg-starter/hooks/band-aid-patterns.json",
+      "sha256": "410af86fc948c43396d73a40563d9ddd76113b488db3eb9766329118b4eb72d9"
     },
     {
-      "path": "blueprint/automation/scheduled-triage.yaml",
-      "sha256": "83dc872c71aad7451b0c5491187ca3b3f394e626b71b83ef00a173ae6e6c1553"
+      "path": "plugins/myorg-starter/hooks/band-aid-patterns.toml",
+      "sha256": "2267615d8840503d5ae69132609d919a016ec68dd0e0a02659670c190036a4cf"
     },
     {
-      "path": "blueprint/automation/triage.md",
-      "sha256": "0bb2da76b0b29c5a2a3ee0aeafcfe6a0268558f1524ddea1947521aa8008b69b"
+      "path": "plugins/myorg-starter/hooks/bash-patterns.darwin.json",
+      "sha256": "be1f1c72c19ec7899c43ff42cfcd658382f3e86e8cfa7f5747e51c5b5063c7f6"
     },
     {
-      "path": "blueprint/automation/triage.yaml",
-      "sha256": "ed571a87b2002ad94b72e1eb5b701d8fa2ddac2a4845db765468c19d3fafdff1"
-    },
-    {
-      "path": "blueprint/hooks/band-aid-patterns.toml",
-      "sha256": "61efc987940dd452396050d18cd1b5ed778de2cc31c984048e0fca0fb07934a8"
-    },
-    {
-      "path": "blueprint/hooks/bash-patterns.darwin.toml",
+      "path": "plugins/myorg-starter/hooks/bash-patterns.darwin.toml",
       "sha256": "173c26a43d7ceb535404f5f66aa2c8353c1e8a7ef1ea74581d760e7d7debb639"
     },
     {
-      "path": "blueprint/hooks/bash-patterns.linux.toml",
-      "sha256": "4a11f4e43468bf6a5ceda31a319d23709bc7269a020a322c9dd9917deb546f7b"
+      "path": "plugins/myorg-starter/hooks/bash-patterns.json",
+      "sha256": "161636df3ab2732d2ce261067d943eb0ce59fd40ccbafb21293cddb1d920b920"
     },
     {
-      "path": "blueprint/hooks/bash-patterns.toml",
-      "sha256": "236495bada862ccb4ed4ede9acad761791376b7dc4a3cbffa8f904800d8b552e"
+      "path": "plugins/myorg-starter/hooks/bash-patterns.linux.json",
+      "sha256": "8e51b5046eedfe414c9989eb681a4328b7f931c6987bc47c4237e19c1dbaaea8"
     },
     {
-      "path": "blueprint/hooks/bash-patterns.windows.toml",
+      "path": "plugins/myorg-starter/hooks/bash-patterns.linux.toml",
+      "sha256": "0c7017e86db338ef2390c601d933698ecaa606874a448a1abbdfe65ecbfab948"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/bash-patterns.toml",
+      "sha256": "798aca98599fc80c9c59b9a0ac286b4014f38ef0f496f15d173a3e3be637d181"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/bash-patterns.windows.json",
+      "sha256": "a2f0ea8b218f65ce5c9ccf20baf1425d7089f5ba22248b0141d5a27373cd305d"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/bash-patterns.windows.toml",
       "sha256": "161ccdaf920abcd06166c042c2020143604e2a145f1e20ad451bedd1ca378db5"
     },
     {
-      "path": "blueprint/hooks/codex-permission-bash.sh",
-      "sha256": "75b34f12a2fd356ad905619d8d9c8cdbedfa3efb114efcac8b85635aaff226d0"
+      "path": "plugins/myorg-starter/hooks/bash_command_parsing.py",
+      "sha256": "c15b661172834e6a67a233099b530b2d83fc84246a066c08406009b4903cd111"
     },
     {
-      "path": "blueprint/hooks/codex-session-stop.sh",
-      "sha256": "7522c5b0d39dc133896a10ae0dd2f8729e17fcd072bd177b0fa6b126c3640a35"
+      "path": "plugins/myorg-starter/hooks/bash_policy_decide.py",
+      "sha256": "56735b70cd67323cde1363afb26f2a54f830f69e11dd239d7fa1d94f531a66f0"
     },
     {
-      "path": "blueprint/hooks/codex-validate-bash.sh",
-      "sha256": "5fa69cc1d4f44b367dd6d3cee3549b1ff6b1654b2406ef289109b188659cd0c4"
-    },
-    {
-      "path": "blueprint/hooks/codex-validate-edit.sh",
-      "sha256": "5f1b7e04c36ce08766c93b56fa95555fc54c04ed460b3dc7d9c27da228678092"
-    },
-    {
-      "path": "blueprint/hooks/codex-validate-postedit.sh",
-      "sha256": "ec42753693619466b1726b6152c4e7e7d86774d02609322328c6c953145b2848"
-    },
-    {
-      "path": "blueprint/hooks/hook-lib.sh",
-      "sha256": "d669e7510a2ccd55950fd995af988513d50ff0b98d2904c4912048e909c891aa"
-    },
-    {
-      "path": "blueprint/hooks/injection-patterns.toml",
-      "sha256": "67dd9a89257ebb77dd30809aad85908b68b38ae0e519930b2ec8800d60e48f5e"
-    },
-    {
-      "path": "blueprint/hooks/post-bash.sh",
-      "sha256": "e4d7f9090eec3a8250a563dc82672c3bf72727a641f6196b4ddb0bfc731d7269"
-    },
-    {
-      "path": "blueprint/hooks/session-end.sh",
-      "sha256": "38d1d538abc8bf802b36e0bd37f05f8d97f418ff2d1b890148f936408eefd229"
-    },
-    {
-      "path": "blueprint/hooks/session-stop.sh",
-      "sha256": "fe4645690e8525d1b6734c4f225cbeac342c20b5caae4b03756772825e65acff"
-    },
-    {
-      "path": "blueprint/hooks/validate-bash.sh",
-      "sha256": "1f66334c2c38bdd086f4dba74b1e193188df8f697d4ff605b08c871336ef38d7"
-    },
-    {
-      "path": "blueprint/hooks/validate-edit.sh",
-      "sha256": "596a5df6e4fa06f48ca0fcc83e806f7a300f621cb9d594e7c4406ab96bc986bb"
-    },
-    {
-      "path": "blueprint/hooks/validate-postedit.sh",
-      "sha256": "ac5015f6b33cf0a38783b00f44001a598d2f9c9fda20beeb4779a198e046bbaf"
-    },
-    {
-      "path": "blueprint/hooks/validate-read.sh",
-      "sha256": "08d0f7968fe3ae8a5b2565539d8777575cc9b9848827e68ba2674e8ace9cb6d4"
-    },
-    {
-      "path": "blueprint/skills/decompose-changeset.md",
-      "sha256": "2156c49767309d49e2c2cc76bc60bbd1d678697cbb1e29cd782a36ff10c2e509"
-    },
-    {
-      "path": "blueprint/skills/systematic-debugging.md",
-      "sha256": "fe33d13f266642cf7fe326ea905520f3900ec47cf3c63ab33304306db714b3b7"
-    },
-    {
-      "path": "blueprint/standards/change-discipline.md",
-      "sha256": "59a80767cc97ae4f20b9e545093aab30cc523377b0e39e6aceecec589b0d2f7b"
-    },
-    {
-      "path": "blueprint/standards/engineering.md",
-      "sha256": "134eed2f389ab5f8f3f6a888feeec7e769086531094665356ca135491862bbd8"
-    },
-    {
-      "path": "blueprint/standards/prefer-root-cause-fixes.md",
-      "sha256": "2ceb9515c1d176934b32518a73ce495f60e9e146278bebb1e1ada0b5f8f1c4ea"
-    },
-    {
-      "path": "blueprint/standards/silent-failure.md",
-      "sha256": "5c919ab5ee6aadce8fcd3fa723d6cfcf0b8fc16adeab89fd8462100dc39d20a6"
-    },
-    {
-      "path": "pylib/hooks/bash_command_parsing.py",
-      "sha256": "3e570150f3aed930838900654d33db1b4e86ebf164448fde2a0ee377f09fa124"
-    },
-    {
-      "path": "pylib/hooks/bash_policy_decide.py",
-      "sha256": "7e8648df6b4aaa21cdeeb736432475dc580d83bb396b1382dc68cc68786d1948"
-    },
-    {
-      "path": "pylib/hooks/bash_policy_evaluate.py",
+      "path": "plugins/myorg-starter/hooks/bash_policy_evaluate.py",
       "sha256": "51227e5834deb24b78c99af77aa6224529f41803fbd518a1e71d233515711792"
     },
     {
-      "path": "pylib/hooks/bash_policy_patterns.py",
+      "path": "plugins/myorg-starter/hooks/bash_policy_patterns.py",
       "sha256": "6f1e9cf583ef5b9b731327140ab06a4f3007613082993e264b2d69e1cc21bb7e"
     },
     {
-      "path": "pylib/hooks/bash_policy_shadow.py",
+      "path": "plugins/myorg-starter/hooks/bash_policy_shadow.py",
       "sha256": "5d805c37c71dee28fdebbb405f71ca8ad48c2b0b94bceaf98763e52ee073f579"
     },
     {
-      "path": "pylib/hooks/entries/validate_bash.py",
-      "sha256": "593b18f48bf6b53236f74f6968d251b8ee109b2c96810bb3b970980288aa49c8"
+      "path": "plugins/myorg-starter/hooks/config-prompt.py",
+      "sha256": "50071130cbe33332b577dd716d92c8763bf72e559407700b9b49b752e83bfca1"
     },
     {
-      "path": "pylib/hooks/entries/validate_edit.py",
-      "sha256": "422952930be3d20858fa20534c38000cf975c1427879df13ebf990f09605f452"
+      "path": "plugins/myorg-starter/hooks/config-prompt.sh",
+      "sha256": "ab0b9c75d7ae2ba0ab19a383d6a92d66c1b1802ffbec431a3fb57653efcdc2f0"
     },
     {
-      "path": "pylib/hooks/entries/validate_postedit.py",
-      "sha256": "498612eeada8953cc309656c5ec50df9aad9fc215d27e6c99ae0ea5bcb324af8"
-    },
-    {
-      "path": "pylib/hooks/entries/validate_read.py",
-      "sha256": "9ac331f248f30d2587ede486b183ef6840395842be6c107e058ad58ac1b23a9d"
-    },
-    {
-      "path": "pylib/hooks/force_push.py",
+      "path": "plugins/myorg-starter/hooks/force_push.py",
       "sha256": "3d922df4b82383fa096be9b7642d642cfa8b5b3804a987171ff89670a3206aaf"
     },
     {
-      "path": "pylib/hooks/hook_log.py",
+      "path": "plugins/myorg-starter/hooks/hook-lib.sh",
+      "sha256": "d6a2fb65a5597806d53cb853700958e66f773bad5502948913aa9ec643b9c7c4"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/hook_log.py",
       "sha256": "3c354bbe47d31753430a43e72d81dc7ad132df27f83348bd01b6e3130cf0a098"
     },
     {
-      "path": "pylib/hooks/mark_registry.py",
+      "path": "plugins/myorg-starter/hooks/hooks.json",
+      "sha256": "b325cf9b9e3deb43949df39159a9efb0ba0cd7811432490464356f42ab04542e"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/injection-patterns.json",
+      "sha256": "e136de8c08b00aa2f6216cba1a9d68054014496085ee1b06cd309485d2f3a512"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/injection-patterns.toml",
+      "sha256": "67dd9a89257ebb77dd30809aad85908b68b38ae0e519930b2ec8800d60e48f5e"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/mark_registry.py",
       "sha256": "4aa090264fe55b0887246434970dccbbd8af564658ae7a314e4c1e719e1bad78"
     },
     {
-      "path": "pylib/hooks/myorg_message.py",
-      "sha256": "206e202d5d12eb0242dde68f60a2c17eca557a807d88e7ba1d1b9140539cac56"
+      "path": "plugins/myorg-starter/hooks/myorg_message.py",
+      "sha256": "f75bc2a2cded2449588ecc4dc50fe394770beded37ca5c370a45798cc658d6ed"
     },
     {
-      "path": "pylib/hooks/pattern_files.py",
+      "path": "plugins/myorg-starter/hooks/pattern_files.py",
       "sha256": "1f76df87423fccfe6f07beae660ab542facfbec81985f43c45f663eb2f8c6c61"
     },
     {
-      "path": "pylib/hooks/reflect_predicate.py",
+      "path": "plugins/myorg-starter/hooks/reflect_predicate.py",
       "sha256": "093625fabcfff3b3500f3936758f7d9c4d7f7f1285d3e42824dd15d1cd41dcbe"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/validate-bash.py",
+      "sha256": "d4b6f5898bf1e1d6fe542797c217868dd80419e065fcb4d124c534a328c4b745"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/validate-bash.sh",
+      "sha256": "1f66334c2c38bdd086f4dba74b1e193188df8f697d4ff605b08c871336ef38d7"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/validate-edit.py",
+      "sha256": "442a8f9fed72a11ad0b3764613586d7c0393f7f750603e7c31dc34a64f8b990f"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/validate-edit.sh",
+      "sha256": "596a5df6e4fa06f48ca0fcc83e806f7a300f621cb9d594e7c4406ab96bc986bb"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/validate-read.py",
+      "sha256": "97662533af6e460b6157d15f1ecdcde0272eeba1a63ecfe7e8db4ba4e4c1f966"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/validate-read.sh",
+      "sha256": "08d0f7968fe3ae8a5b2565539d8777575cc9b9848827e68ba2674e8ace9cb6d4"
+    },
+    {
+      "path": "plugins/myorg-starter/skills/config/SKILL.md",
+      "sha256": "53b12adfd367590b3fa19917ee722913df0788c12e1e8e8efb4e384aa671cdf9"
+    },
+    {
+      "path": "plugins/myorg-starter/skills/decompose-changeset/SKILL.md",
+      "sha256": "2156c49767309d49e2c2cc76bc60bbd1d678697cbb1e29cd782a36ff10c2e509"
+    },
+    {
+      "path": "plugins/myorg-starter/skills/systematic-debugging/SKILL.md",
+      "sha256": "fe33d13f266642cf7fe326ea905520f3900ec47cf3c63ab33304306db714b3b7"
+    },
+    {
+      "path": "standards/change-discipline.md",
+      "sha256": "59a80767cc97ae4f20b9e545093aab30cc523377b0e39e6aceecec589b0d2f7b"
+    },
+    {
+      "path": "standards/engineering.md",
+      "sha256": "134eed2f389ab5f8f3f6a888feeec7e769086531094665356ca135491862bbd8"
+    },
+    {
+      "path": "standards/prefer-root-cause-fixes.md",
+      "sha256": "2ceb9515c1d176934b32518a73ce495f60e9e146278bebb1e1ada0b5f8f1c4ea"
+    },
+    {
+      "path": "standards/silent-failure.md",
+      "sha256": "5c919ab5ee6aadce8fcd3fa723d6cfcf0b8fc16adeab89fd8462100dc39d20a6"
+    },
+    {
+      "path": "templates/workflows/claude-code-review.yml",
+      "sha256": "f91c3d3769e0ce3993b5a9122c790dd31f57dc025016ecfc3b27e5d6adfc641d"
+    },
+    {
+      "path": "templates/workflows/claude.yml",
+      "sha256": "fd9f00a1c22f259f366a70f18de7b808a69a7445859ce886c1a45a62867bb5fb"
     }
   ]
 }

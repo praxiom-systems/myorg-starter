@@ -18,33 +18,54 @@ jobs:
       - run: pip install pyyaml
       - name: LICENSE and NOTICE present
         run: test -f LICENSE && test -f NOTICE
-      - name: Agent frontmatter parses
+      - name: Plugin and marketplace manifests parse
+        run: |
+          for f in .claude-plugin/marketplace.json .agents/plugins/marketplace.json \
+                   plugins/myorg-starter/.claude-plugin/plugin.json \
+                   plugins/myorg-starter/.codex-plugin/plugin.json \
+                   plugins/myorg-starter/hooks/hooks.json; do
+            python3 -m json.tool "$f" > /dev/null || { echo "FAIL: $f"; exit 1; }
+          done
+      - name: Agent and skill frontmatter parses
         run: |
           python3 -c "
           import sys, pathlib, yaml
-          paths = list(pathlib.Path('blueprint/agents').glob('*.md'))
+          root = pathlib.Path('plugins/myorg-starter')
+          paths = list(root.glob('agents/*.md')) + list(root.glob('skills/*/SKILL.md'))
           if not paths:
-              print('FAIL: no agent files found in blueprint/agents'); sys.exit(1)
+              print('FAIL: no agents or skills found'); sys.exit(1)
           fail = 0
           for p in paths:
               text = p.read_text()
               if not text.startswith('---'):
                   print(f'{p}: missing frontmatter'); fail = 1; continue
-              fm = text.split('---', 2)[1]
               try:
-                  yaml.safe_load(fm)
+                  yaml.safe_load(text.split('---', 2)[1])
               except Exception as e:
                   print(f'{p}: {e}'); fail = 1
           sys.exit(fail)
           "
-      - name: Hooks executable smoke
+      - name: Every registered hook ships and runs
         run: |
           set -euo pipefail
-          test -f blueprint/hooks/validate-bash.sh
-          chmod +x blueprint/hooks/validate-bash.sh
-          echo '{"tool_input":{"command":"echo ok"}}' | \
-            blueprint/hooks/validate-bash.sh > /dev/null
-      - name: Doctor smoke
+          python3 - <<'PY'
+          import json, os, sys
+          root = "plugins/myorg-starter"
+          hooks = json.load(open(f"{root}/hooks/hooks.json"))["hooks"]
+          for groups in hooks.values():
+              for group in groups:
+                  for h in group["hooks"]:
+                      path = h["command"].strip('"').replace("${CLAUDE_PLUGIN_ROOT}", root)
+                      if not os.access(path, os.X_OK):
+                          sys.exit(f"FAIL: {path} is missing or not executable")
+          PY
+      - name: The Bash guard stops a never-OK command
         run: |
-          chmod +x bin/doctor.sh
-          bash bin/doctor.sh
+          set -euo pipefail
+          out=$(echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"},"cwd":"/tmp"}' \
+            | MYORG_HOOK_LOG_DIR= plugins/myorg-starter/hooks/validate-bash.sh)
+          echo "$out" | grep -q '"permissionDecision": "deny"'
+          echo '{"tool_name":"Bash","tool_input":{"command":"ls"},"cwd":"/tmp"}' \
+            | MYORG_HOOK_LOG_DIR= plugins/myorg-starter/hooks/validate-bash.sh > /dev/null
+      - name: Scripts parse
+        run: bash -n bin/install.sh && bash -n bin/doctor.sh

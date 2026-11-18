@@ -1,0 +1,48 @@
+{
+ "advise": {
+  "forget_context": {
+   "description": "Attempt to wipe or forget prior context.",
+   "patterns": [
+    "forget\\s+(everything|all)\\s+(you\\s+)?(know|learned|were\\s+told)",
+    "erase\\s+(all\\s+)?(your\\s+)?(previous\\s+)?(memory|context|instructions)"
+   ]
+  },
+  "reveal_prompt": {
+   "description": "Prompt-extraction attempt (asking the model to leak its system prompt).",
+   "patterns": [
+    "reveal\\s+(your\\s+)?(system\\s+)?(prompt|instructions)",
+    "print\\s+(your\\s+)?(system\\s+)?(prompt|instructions)",
+    "what\\s+(is|are)\\s+your\\s+(system\\s+)?(prompt|instructions)"
+   ]
+  },
+  "role_swap": {
+   "description": "Role-swap or persona hijack attempt ('you are now', 'pretend to be').",
+   "patterns": [
+    "you\\s+are\\s+now\\s+(a|an|the)\\s+[a-z]+",
+    "pretend\\s+(you\\s+are|to\\s+be)\\s+(a|an|the)\\s+[a-z]+"
+   ]
+  }
+ },
+ "deny": {
+  "chatml_system": {
+   "description": "ChatML system-role hijack: embedded <|im_start|>system or similar.",
+   "patterns": [
+    "<\\|im_start\\|>\\s*system",
+    "<\\|system\\|>"
+   ]
+  },
+  "ignore_previous": {
+   "description": "Classic instruction-override prompt: 'ignore all previous instructions'.",
+   "patterns": [
+    "ignore\\s+(all\\s+)?(previous|prior|above|earlier)\\s+instructions",
+    "disregard\\s+(all\\s+)?(previous|prior|above|earlier)\\s+instructions"
+   ]
+  },
+  "override_prompt": {
+   "description": "Explicit system-prompt override directive.",
+   "patterns": [
+    "override\\s+(your\\s+)?(system\\s+)?prompt"
+   ]
+  }
+ }
+}

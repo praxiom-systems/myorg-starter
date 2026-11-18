@@ -1,0 +1,32 @@
+{
+  "description": "myorg-starter session guards: stop risky commands, flag prompt injection in files and band-aid edits, and apply /myorg-starter:config guards|gate. The level is the user's: their getmyorg config.yaml, or the repo's .myorg/config.local.yaml.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/validate-bash.sh\"", "timeout": 10 }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/validate-read.sh\"", "timeout": 10 }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|apply_patch",
+        "hooks": [
+          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/validate-edit.sh\"", "timeout": 10 }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/config-prompt.sh\"", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "myorg-starter",
+  "version": "1.0.0",
+  "description": "Session guards that stop risky commands, prompt injection in files, and band-aid fixes, plus two skills.",
+  "author": {
+    "name": "Praxiom Systems",
+    "url": "https://praxiom.systems"
+  },
+  "homepage": "https://getmyorg.com",
+  "repository": "https://github.com/praxiom-systems/myorg-starter",
+  "license": "MIT",
+  "keywords": [
+    "guards",
+    "hooks",
+    "safety"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "myorg-starter",
+    "shortDescription": "Session guards for coding agents",
+    "longDescription": "Checks every shell command, file read and edit the agent makes. Risky commands are stopped or sent back to the agent, files that try to inject instructions are flagged, and edits that hide a problem instead of fixing it get a note.\n",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Show my myorg-starter guard settings."
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "myorg-starter",
+  "interface": {
+    "displayName": "myorg-starter"
+  },
+  "owner": {
+    "name": "Praxiom Systems"
+  },
+  "plugins": [
+    {
+      "name": "myorg-starter",
+      "source": {
+        "source": "local",
+        "path": "./plugins/myorg-starter"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Coding"
+    }
+  ]
+}

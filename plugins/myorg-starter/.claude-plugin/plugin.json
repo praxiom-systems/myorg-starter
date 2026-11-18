@@ -1,0 +1,17 @@
+{
+  "name": "myorg-starter",
+  "description": "Ten agents, two skills, and session guards that stop risky commands, prompt injection in files, and band-aid fixes.",
+  "author": {
+    "name": "Praxiom Systems",
+    "url": "https://praxiom.systems"
+  },
+  "license": "MIT",
+  "homepage": "https://getmyorg.com",
+  "repository": "https://github.com/praxiom-systems/myorg-starter",
+  "keywords": [
+    "agents",
+    "guards",
+    "hooks",
+    "safety"
+  ]
+}

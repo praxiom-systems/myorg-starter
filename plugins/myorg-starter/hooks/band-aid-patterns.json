@@ -1,0 +1,53 @@
+{
+ "advise": {
+  "suppressions": {
+   "description": "Line-scoped lint/type suppressions warrant a justification comment",
+   "patterns": [
+    "//\\s*eslint-disable-next-line\\b",
+    "//\\s*eslint-disable-line\\b",
+    "//\\s*@ts-expect-error\\b",
+    "#\\s*type:\\s*ignore\\b",
+    "#\\s*noqa\\b",
+    "#\\s*pragma:\\s*no\\s*cover\\b",
+    "#\\s*pylint:\\s*disable\\b"
+   ]
+  },
+  "test_skips": {
+   "description": "Skipped tests reduce coverage silently",
+   "patterns": [
+    "\\b(it|describe|test)\\.skip\\b",
+    "\\bxit\\(",
+    "\\bxdescribe\\(",
+    "@pytest\\.mark\\.(skip|xfail|skipif)\\b",
+    "@unittest\\.skip\\b"
+   ]
+  },
+  "todo_markers": {
+   "description": "TODO/FIXME/HACK/XXX without issue link may leave problems unfindable",
+   "patterns": [
+    "\\b(TODO|FIXME|HACK|XXX)\\b"
+   ]
+  }
+ },
+ "deny": {
+  "eslint_file_disable": {
+   "description": "File-level eslint-disable removes safety for the whole file",
+   "patterns": [
+    "^\\s*/\\*\\s*eslint-disable\\s*\\*/"
+   ]
+  },
+  "python_swallowed_errors": {
+   "description": "Bare except clauses suppress all errors including KeyboardInterrupt",
+   "patterns": [
+    "^\\s*except\\s*:\\s*",
+    "^\\s*except\\s+Exception\\s*:\\s*pass\\b"
+   ]
+  },
+  "ts_ignore_naked": {
+   "description": "@ts-ignore without justification comment silences the type checker for the next line",
+   "patterns": [
+    "^\\s*//\\s*@ts-ignore\\s*$"
+   ]
+  }
+ }
+}

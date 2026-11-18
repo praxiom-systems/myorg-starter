@@ -1,0 +1,14 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "myorg-starter",
+  "owner": {
+    "name": "Praxiom Systems"
+  },
+  "plugins": [
+    {
+      "name": "myorg-starter",
+      "source": "./plugins/myorg-starter",
+      "description": "Ten agents, two skills, and session guards that stop risky commands, prompt injection in files, and band-aid fixes."
+    }
+  ]
+}

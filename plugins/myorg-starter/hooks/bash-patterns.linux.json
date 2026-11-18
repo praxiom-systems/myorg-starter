@@ -1,0 +1,114 @@
+{
+ "allow": {
+  "linux_failure_inspection": {
+   "description": "Read-only failure and filesystem-header inspection",
+   "patterns": [
+    "^systemctl\\s+--failed(?:\\s+--(?:no-pager|plain|no-legend|all))*\\s*(?=$|[|<>]|[12]>)",
+    "^dumpe2fs\\s+-h(?:\\s|$)"
+   ]
+  },
+  "linux_hardware_info": {
+   "description": "Linux hardware inspection (read-only)",
+   "patterns": [
+    "^lshw",
+    "^dmidecode",
+    "^hwinfo",
+    "^udevadm info",
+    "^lsmod",
+    "^modinfo ",
+    "^cat /proc/(cpuinfo|meminfo|version|cmdline|partitions|mounts|uptime)",
+    "^cat /etc/(os-release|lsb-release|issue|hostname|fstab|resolv\\.conf)"
+   ]
+  },
+  "linux_network_readonly": {
+   "description": "Linux network inspection (read-only queries)",
+   "patterns": [
+    "^nmcli .*(show|status|list)",
+    "^nmcli -[tgf]",
+    "^xrandr",
+    "^xdpyinfo",
+    "^wmctrl -l",
+    "^wmctrl -d"
+   ]
+  },
+  "linux_process_tools": {
+   "description": "Linux process inspection (read-only)",
+   "patterns": [
+    "^pidof ",
+    "^taskset -p ",
+    "^chrt -p ",
+    "^ionice -p ",
+    "^numactl --show",
+    "^numactl --hardware",
+    "^nproc --all"
+   ]
+  },
+  "linux_security_readonly": {
+   "description": "Linux security inspection (read-only)",
+   "patterns": [
+    "^aa-status",
+    "^sestatus",
+    "^getenforce",
+    "^getsebool",
+    "^ausearch ",
+    "^aureport",
+    "^faillog -a",
+    "^lastlog"
+   ]
+  },
+  "systemd_analysis": {
+   "description": "systemd analysis and debugging (read-only)",
+   "patterns": [
+    "^systemd-analyze",
+    "^systemd-cgls",
+    "^systemd-cgtop",
+    "^busctl (list|tree|introspect|monitor|status)",
+    "^hostnamectl$",
+    "^hostnamectl status",
+    "^resolvectl (status|query|statistics)",
+    "^networkctl (list|status|lldp)"
+   ]
+  }
+ },
+ "reflect": {
+  "apparmor_selinux": {
+   "description": "Linux mandatory access control",
+   "patterns": [
+    "^aa-enforce",
+    "^aa-complain",
+    "^aa-disable",
+    "^setenforce",
+    "^setsebool",
+    "^chcon ",
+    "^restorecon"
+   ]
+  },
+  "disk_management": {
+   "description": "Linux disk/volume management",
+   "patterns": [
+    "^mount ",
+    "^umount",
+    "^lvresize",
+    "^lvcreate",
+    "^lvremove",
+    "^vgcreate",
+    "^pvcreate",
+    "^cryptsetup",
+    "^mdadm",
+    "^swapoff",
+    "^mkswap"
+   ]
+  },
+  "network_config": {
+   "description": "Linux network configuration (persistent changes)",
+   "patterns": [
+    "^ip link set",
+    "^ip addr (add|del|flush)",
+    "^ip route (add|del|replace|flush)",
+    "^nmcli connection (modify|add|delete|up|down)",
+    "^netplan apply",
+    "^brctl "
+   ]
+  }
+ }
+}

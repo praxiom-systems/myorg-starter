@@ -1,0 +1,1809 @@
+{
+ "allow": {
+  "absolute_path_executables": {
+   "description": "System and user-installed binaries by absolute path",
+   "patterns": [
+    "^/usr/bin/",
+    "^/usr/local/bin/",
+    "^/home/[^/]+/\\.local/bin/",
+    "^~/\\.local/bin/"
+   ]
+  },
+  "backup_tools": {
+   "description": "Backup and restore tools",
+   "patterns": [
+    "^restic",
+    "^resticprofile"
+   ]
+  },
+  "bash_project_scripts": {
+   "description": "Running project scripts via bash/sh with absolute paths",
+   "patterns": [
+    "^(bash|sh|zsh) /[\\w./-]+/scripts/",
+    "^(bash|sh|zsh) /[\\w./-]+/tests/",
+    "^(bash|sh|zsh) /[\\w./-]+/bin/"
+   ]
+  },
+  "benchmarks": {
+   "description": "Benchmarking tools",
+   "patterns": [
+    "^phoronix-test-suite",
+    "^sysbench",
+    "^fio ",
+    "^iperf"
+   ]
+  },
+  "build_tools": {
+   "description": "Build systems and task runners",
+   "patterns": [
+    "^make",
+    "^cmake",
+    "^ninja",
+    "^meson",
+    "^bazel",
+    "^just",
+    "^task ",
+    "^task$"
+   ]
+  },
+  "c_cpp_toolchain": {
+   "description": "C/C++ compilation and linking",
+   "patterns": [
+    "^gcc",
+    "^g\\+\\+",
+    "^clang",
+    "^cc ",
+    "^c\\+\\+ ",
+    "^ld ",
+    "^ar ",
+    "^nm ",
+    "^objdump",
+    "^ldd ",
+    "^pkg-config",
+    "^strip"
+   ]
+  },
+  "checksums": {
+   "description": "Checksums and encoding",
+   "patterns": [
+    "^md5sum",
+    "^sha256sum",
+    "^sha1sum",
+    "^base64",
+    "^xxd",
+    "^hexdump",
+    "^openssl",
+    "^ssh-keygen"
+   ]
+  },
+  "ci_cd": {
+   "description": "CI/CD local runners",
+   "patterns": [
+    "^act"
+   ]
+  },
+  "clipboard_opener": {
+   "description": "Clipboard utilities and URL openers",
+   "patterns": [
+    "^pbcopy",
+    "^pbpaste",
+    "^xclip",
+    "^xsel",
+    "^wl-copy",
+    "^wl-paste",
+    "^xdg-open\\s+[\"']?https?://",
+    "^open\\s+[\"']?https?://"
+   ]
+  },
+  "clojure": {
+   "description": "Clojure toolchain",
+   "patterns": [
+    "^clj ",
+    "^clojure",
+    "^lein"
+   ]
+  },
+  "cloud_cli": {
+   "description": "Cloud CLIs (mutations blocked by ask patterns)",
+   "patterns": [
+    "^aws ",
+    "^gcloud ",
+    "^az ",
+    "^terraform ",
+    "^pulumi ",
+    "^ansible ",
+    "^vagrant",
+    "^packer",
+    "^supabase",
+    "^firecrawl"
+   ]
+  },
+  "cloud_platforms": {
+   "description": "Cloud platform CLIs (read operations)",
+   "patterns": [
+    "^vercel",
+    "^netlify",
+    "^flyctl",
+    "^railway",
+    "^heroku",
+    "^cloudflared",
+    "^ngrok",
+    "^wrangler",
+    "^doctl",
+    "^eksctl",
+    "^sam "
+   ]
+  },
+  "command_utilities": {
+   "description": "Command execution utilities",
+   "patterns": [
+    "^command -v",
+    "^env ",
+    "^exec ",
+    "^nohup ",
+    "^nice ",
+    "^ionice "
+   ]
+  },
+  "command_wrappers": {
+   "description": "Command execution wrappers",
+   "patterns": [
+    "^unbuffer",
+    "^stdbuf",
+    "^setsid",
+    "^parallel",
+    "^chronic",
+    "^sponge",
+    "^poetrun run "
+   ]
+  },
+  "compression": {
+   "description": "Compression and archiving",
+   "patterns": [
+    "^bzip2",
+    "^bunzip2",
+    "^bzcat",
+    "^xz ",
+    "^unxz",
+    "^xzcat",
+    "^zstd",
+    "^unzstd",
+    "^zstdcat",
+    "^lz4",
+    "^7z ",
+    "^rar ",
+    "^unrar"
+   ]
+  },
+  "dart_flutter": {
+   "description": "Dart and Flutter",
+   "patterns": [
+    "^dart ",
+    "^flutter",
+    "^pub "
+   ]
+  },
+  "database_tools": {
+   "description": "Database CLI tools",
+   "patterns": [
+    "^pgcli",
+    "^mycli",
+    "^litecli",
+    "^usql",
+    "^pg_dump",
+    "^pg_restore",
+    "^mysqldump",
+    "^mongodump"
+   ]
+  },
+  "databases": {
+   "description": "Database clients",
+   "patterns": [
+    "^psql",
+    "^mysql",
+    "^sqlite3",
+    "^mongosh",
+    "^redis-cli"
+   ]
+  },
+  "diff_patch": {
+   "description": "Diff and patch tools",
+   "patterns": [
+    "^diff",
+    "^colordiff",
+    "^delta",
+    "^patch"
+   ]
+  },
+  "docker": {
+   "description": "Docker (mutations blocked by ask patterns)",
+   "patterns": [
+    "^docker ",
+    "^docker-compose",
+    "^podman"
+   ]
+  },
+  "file_deletion_relative": {
+   "description": "File removal on relative paths (project files, build artifacts)",
+   "patterns": [
+    "^rm\\s+(-[a-zA-Z]+\\s+)*[^-/~$\\s]",
+    "^rm\\s+(-[a-zA-Z]+\\s+)*\\./"
+   ]
+  },
+  "file_operations": {
+   "description": "Common file operations",
+   "patterns": [
+    "^ls",
+    "^cat ",
+    "^head ",
+    "^tail ",
+    "^wc ",
+    "^grep",
+    "^rg ",
+    "^ag ",
+    "^fd ",
+    "^fzf",
+    "^find ",
+    "^pwd$",
+    "^env$",
+    "^printenv",
+    "^which ",
+    "^whereis",
+    "^type ",
+    "^file ",
+    "^stat ",
+    "^tree",
+    "^cloc",
+    "^tokei",
+    "^mkdir",
+    "^rmdir",
+    "^cp ",
+    "^mv ",
+    "^ln ",
+    "^chmod ",
+    "^touch ",
+    "^echo( |$)",
+    "^printf",
+    "^sort",
+    "^uniq",
+    "^cut ",
+    "^tr ",
+    "^xargs",
+    "^tar ",
+    "^zip",
+    "^unzip",
+    "^gzip",
+    "^gunzip",
+    "^zcat",
+    "^du ",
+    "^df",
+    "^free",
+    "^test ",
+    "^\\[ ",
+    "^tee ",
+    "^awk",
+    "^sed ",
+    "^jq",
+    "^yq",
+    "^rsync ",
+    "^curl",
+    "^wget",
+    "^http ",
+    "^httpie"
+   ]
+  },
+  "file_truncate": {
+   "description": "File truncation on relative paths, /tmp, and /var/tmp",
+   "patterns": [
+    "^truncate\\s+(-[a-zA-Z]+\\s+)*[^-/~$\\s]",
+    "^truncate\\s+(-[a-zA-Z]+\\s+)*\\./",
+    "^truncate\\s+(-[a-zA-Z]+\\s+)*/tmp/",
+    "^truncate\\s+(-[a-zA-Z]+\\s+)*/var/tmp/"
+   ]
+  },
+  "find_exec_readonly": {
+   "description": "find -exec continuation segments with read-only commands",
+   "patterns": [
+    "^-exec\\s+(cat|echo|head|tail|grep|wc|stat|file|ls|print|printf)\\s"
+   ]
+  },
+  "find_readonly": {
+   "description": "find with read-only actions (grep, cat, ls, wc, file, stat)",
+   "patterns": [
+    "^find .+ -exec (grep|cat|ls|wc|file|stat|head|tail|basename|dirname|sha256sum|md5sum|cksum)\\b",
+    "^find .+ -print"
+   ]
+  },
+  "generic_read_subcommands": {
+   "description": "Any tool using universally read-only subcommand verbs",
+   "patterns": [
+    "^[a-z][a-z0-9_-]+ (list|ls)( |$)",
+    "^[a-z][a-z0-9_-]+ status( |$)",
+    "^[a-z][a-z0-9_-]+ describe( |$)",
+    "^[a-z][a-z0-9_-]+ query( |$)",
+    "^[a-z][a-z0-9_-]+ version( |$)"
+   ]
+  },
+  "getmyorg": {
+   "description": "getmyorg CLI subcommands — read-only or scoped to .myorg/ artifacts in the current repo",
+   "patterns": [
+    "^getmyorg (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|semantic-group|answer|describe|parked|suggest|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)(?:\\s|$)",
+    "^(?:~|\\$HOME)?/[\\w./-]+/getmyorg (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|semantic-group|answer|describe|parked|suggest|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)(?:\\s|$)",
+    "^\"\\$GETMYORG\" (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|semantic-group|answer|describe|parked|suggest|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)(?:\\s|$)"
+   ]
+  },
+  "gh_pr_close": {
+   "description": "GitHub PR close (reversible via reopen)",
+   "patterns": [
+    "^gh pr close\\b"
+   ]
+  },
+  "git": {
+   "description": "Git and GitHub CLI",
+   "patterns": [
+    "^git ",
+    "^gh ",
+    "^cd .+ && git (add|status|diff|log|show|fetch|pull|checkout|switch|branch|commit|remote|tag|submodule|stash)( |$)"
+   ]
+  },
+  "git_branch_delete": {
+   "description": "Git branch deletion (safe lowercase -d refuses unmerged)",
+   "patterns": [
+    "^git branch -d\\b",
+    "^git stash drop"
+   ]
+  },
+  "git_merge_local": {
+   "description": "Git merge of local branches (not squash or strategy overrides)",
+   "patterns": [
+    "^git merge --ff-only\\b",
+    "^git merge --no-edit\\b",
+    "^git merge --abort",
+    "^git merge worktree-",
+    "^git cherry-pick\\b",
+    "^git cherry-pick --continue",
+    "^git cherry-pick --abort",
+    "^git cherry-pick --skip"
+   ]
+  },
+  "github_labels": {
+   "description": "GitHub CLI label management (read and create operations)",
+   "patterns": [
+    "^gh label list",
+    "^gh label create ",
+    "^gh label edit "
+   ]
+  },
+  "github_lifecycle": {
+   "description": "GitHub CLI lifecycle operations that are reversible or purely additive",
+   "patterns": [
+    "^gh issue close",
+    "^gh issue reopen",
+    "^gh issue comment",
+    "^gh pr comment"
+   ]
+  },
+  "go": {
+   "description": "Go toolchain",
+   "patterns": [
+    "^go ",
+    "^gofmt",
+    "^goimports",
+    "^golangci-lint"
+   ]
+  },
+  "gpu_tools": {
+   "description": "GPU monitoring tools",
+   "patterns": [
+    "^nvidia-smi",
+    "^rocm-smi",
+    "^nvtop"
+   ]
+  },
+  "gsd_framework": {
+   "description": "Get-Shit-Done (GSD) framework commands",
+   "patterns": [
+    "gsd-tools\\.cjs"
+   ]
+  },
+  "haskell": {
+   "description": "Haskell toolchain",
+   "patterns": [
+    "^ghc",
+    "^ghci",
+    "^stack ",
+    "^cabal ",
+    "^hlint"
+   ]
+  },
+  "help_and_info": {
+   "description": "Help and version information",
+   "patterns": [
+    "^less",
+    "^bat",
+    "^watch ",
+    "^man ",
+    "--version(\\s|$)",
+    "--help(\\s|$)"
+   ]
+  },
+  "image_tools": {
+   "description": "Image processing and conversion tools",
+   "patterns": [
+    "^convert ",
+    "^identify ",
+    "^inkscape",
+    "^magick ",
+    "^ffmpeg",
+    "^ffprobe"
+   ]
+  },
+  "java": {
+   "description": "Java/JVM ecosystem",
+   "patterns": [
+    "^java ",
+    "^javac",
+    "^mvn ",
+    "^gradle",
+    "^\\./gradlew",
+    "^scala",
+    "^sbt ",
+    "^kotlin"
+   ]
+  },
+  "javascript": {
+   "description": "JavaScript/Node.js ecosystem",
+   "patterns": [
+    "^npm ",
+    "^npx ",
+    "^node ",
+    "^yarn ",
+    "^pnpm ",
+    "^bun ",
+    "^deno "
+   ]
+  },
+  "js_bundlers": {
+   "description": "JavaScript/CSS bundlers and build tools",
+   "patterns": [
+    "^webpack",
+    "^vite",
+    "^esbuild",
+    "^rollup",
+    "^parcel",
+    "^turbo",
+    "^nx ",
+    "^lerna",
+    "^sass ",
+    "^postcss",
+    "^tailwindcss",
+    "^bunx ",
+    "^wasm-pack"
+   ]
+  },
+  "julia": {
+   "description": "Julia language",
+   "patterns": [
+    "^julia"
+   ]
+  },
+  "kubernetes": {
+   "description": "Kubernetes (mutations blocked by ask patterns)",
+   "patterns": [
+    "^kubectl\\s+(?!exec\\b)\\S",
+    "^k3s kubectl\\s+(?!exec\\b)\\S",
+    "^k9s",
+    "^helm ",
+    "^helmfile ",
+    "^kustomize",
+    "^skaffold",
+    "^istioctl",
+    "^argocd",
+    "^flux"
+   ]
+  },
+  "kubernetes_exec_database": {
+   "description": "kubectl exec database CLI tools (mutations blocked by ask.kubectl_exec_db_mutations)",
+   "patterns": [
+    "^kubectl exec .* -- psql ",
+    "^kubectl exec .* -- psql$",
+    "^kubectl exec .* -- env .* psql",
+    "^kubectl exec .* -- mysql ",
+    "^kubectl exec .* -- mysql$",
+    "^k3s kubectl exec .* -- psql ",
+    "^k3s kubectl exec .* -- env .* psql",
+    "^k3s kubectl exec .* -- mysql "
+   ]
+  },
+  "kubernetes_exec_readonly": {
+   "description": "kubectl exec with read-only commands (other exec falls through to ask)",
+   "patterns": [
+    "^kubectl exec .* -- cat ",
+    "^kubectl exec .* -- head ",
+    "^kubectl exec .* -- tail ",
+    "^kubectl exec .* -- less ",
+    "^kubectl exec .* -- more ",
+    "^kubectl exec .* -- ls",
+    "^kubectl exec .* -- stat ",
+    "^kubectl exec .* -- file ",
+    "^kubectl exec .* -- wc ",
+    "^kubectl exec .* -- env$",
+    "^kubectl exec .* -- printenv",
+    "^kubectl exec .* -- ps ",
+    "^kubectl exec .* -- ps$",
+    "^kubectl exec .* -- top ",
+    "^kubectl exec .* -- whoami",
+    "^kubectl exec .* -- id$",
+    "^kubectl exec .* -- id ",
+    "^kubectl exec .* -- pwd$",
+    "^kubectl exec .* -- hostname",
+    "^kubectl exec .* -- uname",
+    "^kubectl exec .* -- grep ",
+    "^kubectl exec .* -- df ",
+    "^kubectl exec .* -- df$",
+    "^kubectl exec .* -- du ",
+    "^kubectl exec .* -- free",
+    "^kubectl exec .* -- netstat",
+    "^kubectl exec .* -- ss ",
+    "^kubectl exec .* -- date",
+    "^kubectl exec .* -- uptime",
+    "^k3s kubectl exec .* -- cat ",
+    "^k3s kubectl exec .* -- ls",
+    "^k3s kubectl exec .* -- env$",
+    "^k3s kubectl exec .* -- ps",
+    "^k3s kubectl exec .* -- grep ",
+    "^k3s kubectl exec .* -- head ",
+    "^k3s kubectl exec .* -- tail "
+   ]
+  },
+  "kubernetes_exec_shell_commands": {
+   "description": "kubectl exec with bash -c wrappers and common read-only inner commands",
+   "patterns": [
+    "kubectl exec .* -- bash -c '.*psql",
+    "kubectl exec .* -- bash -c \".*psql",
+    "kubectl exec .* -- wget ",
+    "kubectl exec .* -- curl ",
+    "kubectl exec .* -- find ",
+    "k3s kubectl exec .* -- bash -c '.*psql",
+    "k3s kubectl exec .* -- bash -c \".*psql",
+    "k3s kubectl exec .* -- wget ",
+    "k3s kubectl exec .* -- curl ",
+    "k3s kubectl exec .* -- find "
+   ]
+  },
+  "kubernetes_utilities": {
+   "description": "Kubernetes helper utilities",
+   "patterns": [
+    "^kubectx",
+    "^kubens",
+    "^stern ",
+    "^krew"
+   ]
+  },
+  "linters": {
+   "description": "Linters and formatters",
+   "patterns": [
+    "^ruff ",
+    "^mypy",
+    "^black ",
+    "^isort",
+    "^flake8",
+    "^pylint",
+    "^bandit",
+    "^yamllint",
+    "^shellcheck",
+    "^actionlint",
+    "^prettier",
+    "^eslint",
+    "^biome",
+    "^tsc",
+    "^pre-commit"
+   ]
+  },
+  "local_kubernetes": {
+   "description": "Local Kubernetes tools",
+   "patterns": [
+    "^kind ",
+    "^minikube",
+    "^k3d"
+   ]
+  },
+  "local_scripts": {
+   "description": "Local project test and utility scripts",
+   "patterns": [
+    "^\\./tests/",
+    "^tests/",
+    "^\\./scripts/",
+    "^scripts/",
+    "^\\./bin/",
+    "^bin/",
+    "^(bash|sh|zsh) tests/",
+    "^(bash|sh|zsh) scripts/",
+    "^(bash|sh|zsh) bin/"
+   ]
+  },
+  "mail_tools": {
+   "description": "Mail tools (sendmail, msmtp, mail)",
+   "patterns": [
+    "^sendmail",
+    "^msmtp",
+    "^mail "
+   ]
+  },
+  "network_diagnostics": {
+   "description": "Network diagnostic tools",
+   "patterns": [
+    "^dig ",
+    "^nslookup",
+    "^host ",
+    "^ping",
+    "^traceroute",
+    "^mtr",
+    "^ss ",
+    "^netstat",
+    "^ip ",
+    "^ifconfig",
+    "^nc ",
+    "^whois",
+    "^ethtool [a-z]",
+    "^nmcli (connection|device|general|radio|monitor) (show|list|status|help)",
+    "^tc (qdisc|filter|class|route) (show|list|get) ",
+    "^sysctl [a-z]"
+   ]
+  },
+  "node_modules_bin": {
+   "description": "Local node_modules/.bin executables (project-local dev tools)",
+   "patterns": [
+    "^node_modules/\\.bin/",
+    "^\\./node_modules/\\.bin/",
+    "^/[\\w./-]+/node_modules/\\.bin/"
+   ]
+  },
+  "npm_install_local": {
+   "description": "npm install from package.json (no registry package specified)",
+   "patterns": [
+    "^npm install\\s*$",
+    "^npm install\\s+2>",
+    "^npm ci\\b",
+    "^yarn install\\s*$",
+    "^yarn install\\s+2>",
+    "^pnpm install\\s*$",
+    "^pnpm install\\s+2>"
+   ]
+  },
+  "observability": {
+   "description": "Observability tools",
+   "patterns": [
+    "^promtool",
+    "^logcli"
+   ]
+  },
+  "other_languages": {
+   "description": "Other language runtimes",
+   "patterns": [
+    "^dotnet",
+    "^elixir",
+    "^mix ",
+    "^iex",
+    "^swift",
+    "^zig ",
+    "^lua ",
+    "^luarocks",
+    "^perl "
+   ]
+  },
+  "package_info": {
+   "description": "Package manager read-only queries",
+   "patterns": [
+    "^apt list",
+    "^apt show",
+    "^apt search",
+    "^apt-cache",
+    "^apt policy",
+    "^dpkg -l",
+    "^dpkg -L",
+    "^dpkg -s",
+    "^dpkg --list",
+    "^snap list",
+    "^snap info",
+    "^flatpak list",
+    "^flatpak info"
+   ]
+  },
+  "path_utilities": {
+   "description": "Path manipulation utilities",
+   "patterns": [
+    "^basename",
+    "^dirname",
+    "^realpath",
+    "^readlink",
+    "^mktemp",
+    "^seq ",
+    "^rev",
+    "^yes "
+   ]
+  },
+  "pdf_utilities": {
+   "description": "PDF inspection, text extraction, and preview rendering",
+   "patterns": [
+    "^(pdfinfo|pdftotext|pdftoppm)(?:\\s|$)"
+   ]
+  },
+  "php": {
+   "description": "PHP ecosystem",
+   "patterns": [
+    "^php ",
+    "^composer",
+    "^phpunit",
+    "^phpstan"
+   ]
+  },
+  "process_inspection": {
+   "description": "Process inspection (not control)",
+   "patterns": [
+    "^lsof",
+    "^pgrep",
+    "^ps ",
+    "^top",
+    "^htop",
+    "^timeout ",
+    "^time ",
+    "^date",
+    "^cal",
+    "^uptime",
+    "^uname",
+    "^hostname",
+    "^whoami",
+    "^id",
+    "^groups"
+   ]
+  },
+  "project_executables": {
+   "description": "Running project executables from relative paths",
+   "patterns": [
+    "^\\./[\\w.-]+",
+    "^[\\w][\\w.-]*/[\\w.-]+"
+   ]
+  },
+  "protobuf": {
+   "description": "Protocol Buffers and gRPC",
+   "patterns": [
+    "^protoc",
+    "^grpcurl",
+    "^buf "
+   ]
+  },
+  "python": {
+   "description": "Python ecosystem",
+   "patterns": [
+    "^python",
+    "^pytest",
+    "^poetry ",
+    "^pip",
+    "^pipx ",
+    "^uv ",
+    "^pdm ",
+    "^hatch "
+   ]
+  },
+  "r_lang": {
+   "description": "R language",
+   "patterns": [
+    "^R ",
+    "^Rscript"
+   ]
+  },
+  "redirect_fragments": {
+   "description": "A loop or group's closing word, or ':', with only redirects after it",
+   "patterns": [
+    "^(?::|done|\\}|fi|esac)(?:\\s+(?:[0-9]?<\\s*[^\\s;&|]+|[0-9]?>&[0-9-]|[0-9]?>>?\\s*(?![^\\s;&|]*\\.\\.)(?:/dev/null|/(?:var/)?tmp/[^\\s;&|]+|(?![/~$])[^\\s;&|]+)))+\\s*$"
+   ]
+  },
+  "ruby": {
+   "description": "Ruby ecosystem",
+   "patterns": [
+    "^ruby ",
+    "^gem ",
+    "^bundle",
+    "^rake ",
+    "^rails ",
+    "^rspec",
+    "^rubocop"
+   ]
+  },
+  "rust": {
+   "description": "Rust toolchain",
+   "patterns": [
+    "^cargo ",
+    "^rustc",
+    "^rustfmt",
+    "^clippy"
+   ]
+  },
+  "secrets": {
+   "description": "Secrets decryption",
+   "patterns": [
+    "^sops -d",
+    "^sops --decrypt",
+    "^age "
+   ]
+  },
+  "session_inspection": {
+   "description": "File comparison, shell syntax checks, and CLI status inspection",
+   "patterns": [
+    "^cmp(?:\\s|$)",
+    "^(?:/bin/)?sh\\s+-n\\s+(?![-+])[^\\s]+",
+    "^tmux\\s+-V(?:\\s|$)",
+    "^claude\\s+plugin\\s+list(?:\\s|$)",
+    "^claude\\s+auth\\s+status(?:\\s|$)"
+   ]
+  },
+  "shell_constructs": {
+   "description": "Shell builtins and constructs",
+   "patterns": [
+    "^\\(",
+    "^\\{",
+    "^:$",
+    "^true$",
+    "^false$",
+    "^sleep ",
+    "^read ",
+    "^wait",
+    "^set ",
+    "^return",
+    "^exit",
+    "^local ",
+    "^bash -n ",
+    "^test$",
+    "^\\[$",
+    "^\\[\\[ (?!.*(?:\\$\\((?!\\()|`|<\\(|>\\())",
+    "^continue$",
+    "^continue ",
+    "^break$",
+    "^break ",
+    "^shift$",
+    "^shift ",
+    "^unset ",
+    "^readonly ",
+    "^typeset ",
+    "^let ",
+    "^getopts ",
+    "^builtin (?!eval|exec|source|mapfile)\\S",
+    "^hash ",
+    "^hash$",
+    "^for ",
+    "^while ",
+    "^until ",
+    "^if ",
+    "^elif ",
+    "^else$",
+    "^then$",
+    "^fi$",
+    "^fi;",
+    "^do$",
+    "^done$",
+    "^done;",
+    "^case ",
+    "^esac$",
+    "^esac;"
+   ]
+  },
+  "shell_navigation": {
+   "description": "Shell navigation and history",
+   "patterns": [
+    "^cd ",
+    "^pushd",
+    "^popd",
+    "^dirs",
+    "^history",
+    "^jobs",
+    "^fg",
+    "^bg",
+    "^source ",
+    "^\\. ",
+    "^export ",
+    "^alias",
+    "^declare"
+   ]
+  },
+  "swap_memory": {
+   "description": "Swap and memory inspection",
+   "patterns": [
+    "^swapon",
+    "^vmstat",
+    "^iostat",
+    "^sar "
+   ]
+  },
+  "system_inspection": {
+   "description": "System information commands",
+   "patterns": [
+    "^lscpu",
+    "^lsmem",
+    "^lsblk",
+    "^lspci",
+    "^lsusb",
+    "^nproc",
+    "^sensors",
+    "^inxi",
+    "^neofetch",
+    "^strace",
+    "^ltrace",
+    "^perf ",
+    "^valgrind",
+    "^gnome-extensions ",
+    "^glxinfo",
+    "^gsettings (get|list|describe|range|monitor|help)",
+    "^dconf (dump|read|list|watch|help)",
+    "^update-desktop-database",
+    "^prime-select query",
+    "^findmnt",
+    "^pstree",
+    "^numfmt"
+   ]
+  },
+  "system_readonly": {
+   "description": "Read-only system inspection",
+   "patterns": [
+    "^tailscale",
+    "^mount$",
+    "^dmesg",
+    "^journalctl",
+    "^systemctl status",
+    "^systemctl show",
+    "^systemctl list",
+    "^systemctl is-",
+    "^systemctl cat",
+    "^crontab -l",
+    "^service .* status",
+    "^getent ",
+    "^locale(\\s|$)",
+    "^timedatectl$",
+    "^timedatectl status",
+    "^timedatectl timesync-status",
+    "^timedatectl show-timesync",
+    "^timedatectl show$",
+    "^timedatectl show ",
+    "^loginctl list-sessions",
+    "^loginctl session-status",
+    "^loginctl list-users",
+    "^loginctl user-status",
+    "^loginctl show-session",
+    "^loginctl show-user",
+    "^loginctl list-seats",
+    "^loginctl show-seat"
+   ]
+  },
+  "system_user_info": {
+   "description": "User session and power profile queries (read-only)",
+   "patterns": [
+    "^who\\b",
+    "^last\\b",
+    "^powerprofilesctl"
+   ]
+  },
+  "temp_cleanup": {
+   "description": "Temp file cleanup",
+   "patterns": [
+    "^rm -rf /tmp/",
+    "^rm -f /tmp/",
+    "^rm /tmp/",
+    "^rm -rf /var/tmp/",
+    "^rm -f /var/tmp/",
+    "^rm /var/tmp/"
+   ]
+  },
+  "terminal_multiplexers": {
+   "description": "Terminal multiplexer read-only operations",
+   "patterns": [
+    "^tmux ls$",
+    "^tmux ls ",
+    "^tmux list-",
+    "^tmux show-",
+    "^tmux display-",
+    "^tmux capture-pane",
+    "^tmux has-session",
+    "^tmux info",
+    "^tmux server-info",
+    "^tmux wait-for",
+    "^screen -ls",
+    "^screen -list",
+    "^screen -wipe"
+   ]
+  },
+  "testing": {
+   "description": "Testing frameworks and automation",
+   "patterns": [
+    "^jest",
+    "^vitest",
+    "^mocha",
+    "^playwright",
+    "^cypress",
+    "^tox",
+    "^nox",
+    "^coverage "
+   ]
+  },
+  "text_comparison": {
+   "description": "Text comparison tools (read-only)",
+   "patterns": [
+    "^comm ",
+    "^join ",
+    "^colordiff "
+   ]
+  },
+  "text_processing": {
+   "description": "Text processing utilities",
+   "patterns": [
+    "^column",
+    "^fold",
+    "^nl ",
+    "^paste",
+    "^shuf",
+    "^tac",
+    "^iconv",
+    "^dos2unix",
+    "^unix2dos",
+    "^strings",
+    "^bc ",
+    "^expr"
+   ]
+  },
+  "venv": {
+   "description": "Virtual environment binaries",
+   "patterns": [
+    "^\\.venv/bin/",
+    "^venv/bin/",
+    "/\\.venv/bin/",
+    "/venv/bin/",
+    "pypoetry/virtualenvs/.*/bin/",
+    "conda.*/envs/.*/bin/",
+    "pipx/venvs/.*/bin/",
+    "^(?:\\$\\w+/|[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*(?:\\s|$)",
+    "^/tmp/[^/]+/bin/"
+   ]
+  },
+  "version_managers": {
+   "description": "Language version managers",
+   "patterns": [
+    "^nvm ",
+    "^pyenv",
+    "^rbenv",
+    "^asdf",
+    "^volta",
+    "^fnm",
+    "^direnv"
+   ]
+  },
+  "web3": {
+   "description": "Solidity and Web3 tools",
+   "patterns": [
+    "^solc",
+    "^hardhat",
+    "^forge ",
+    "^cast ",
+    "^anvil"
+   ]
+  },
+  "xargs_readonly": {
+   "description": "xargs with read-only commands (grep, cat, ls, wc, basename)",
+   "patterns": [
+    "xargs (grep|cat|ls|wc|file|stat|head|tail|basename|dirname|sha256sum|md5sum|cksum)\\b"
+   ]
+  }
+ },
+ "deny": {
+  "catastrophic_deletion": {
+   "description": "File deletion that could destroy system or all user data",
+   "patterns": [
+    "^rm -rf /(\\s|$)",
+    "^rm -rf /\\*",
+    "^rm -rf ~/?(\\s|$)",
+    "^rm -rf ~/?\\*",
+    "^rm -rf \\.$",
+    "^rm -rf \\*$",
+    " rm -rf /(\\s|$)",
+    " rm -rf /\\*"
+   ]
+  },
+  "chained_privilege_escalation": {
+   "description": "Privilege escalation chained after another command",
+   "note_from": "relaxed",
+   "patterns": [
+    ";\\s*sudo ",
+    "&&\\s*sudo ",
+    "\\|\\|\\s*sudo "
+   ]
+  },
+  "container_escape": {
+   "description": "Container run flags that grant host escape or full-host filesystem access",
+   "note_from": "relaxed",
+   "patterns": [
+    "^docker\\s+run\\b.*\\s--privileged\\b",
+    "^docker\\s+run\\b.*\\s--pid=host\\b",
+    "^docker\\s+run\\b.*\\s--cap-add[= ]SYS_ADMIN\\b",
+    "^docker\\s+run\\b.*\\s-v\\s+/:/",
+    "^docker\\s+run\\b.*\\s-v\\s+/var/run/docker\\.sock",
+    "^podman\\s+run\\b.*\\s--privileged\\b",
+    "^podman\\s+run\\b.*\\s--pid=host\\b",
+    "^podman\\s+run\\b.*\\s--cap-add[= ]SYS_ADMIN\\b",
+    "^podman\\s+run\\b.*\\s-v\\s+/:/",
+    "^podman\\s+run\\b.*\\s-v\\s+/var/run/docker\\.sock"
+   ]
+  },
+  "credential_reads": {
+   "description": "Reading private keys, cloud credentials, password stores, and browser cookies",
+   "patterns": [
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.ssh/id_",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.aws/credentials",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.netrc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/gcloud/(application_default_credentials|legacy_credentials|credentials\\.db|access_tokens\\.db)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.kube/config(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.gnupg/private-keys",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.password-store/",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*(~|\\$HOME|\\$\\{HOME\\}|/home/[^/\\s]+|/Users/[^/\\s]+|/root)/\\.npmrc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*(~|\\$HOME|\\$\\{HOME\\}|/home/[^/\\s]+|/Users/[^/\\s]+|/root)/\\.pypirc(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*(~|\\$HOME|\\$\\{HOME\\}|/home/[^/\\s]+|/Users/[^/\\s]+|/root)/\\.docker/config\\.json(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.git-credentials(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/gh/hosts\\.yml(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.config/hub(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|tar|zip|gzip|scp|rsync|openssl|base64)\\b.*\\.azure/accessTokens\\.json(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|sqlite3)\\b.*/Cookies(\\s|$)",
+    "^(cat|less|bat|head|tail|more|tac|xxd|od|strings|hexdump|grep|rg|awk|sed|jq|cp|mv|sqlite3)\\b.*/cookies\\.sqlite",
+    "^(kubectl|k3s kubectl)\\b(?=.*(^|\\s)get(\\s|$))(?=.*(^|\\s)secrets?(\\s|$|/|,))(?=.*(-o(=|\\s*)|--output(=|\\s+))(yaml|json|jsonpath|jsonpath-file|go-template|go-template-file|template|templatefile|custom-columns|custom-columns-file)[^\\s]*)"
+   ]
+  },
+  "dangerous_chaining": {
+   "description": "Dangerous command combinations via chaining operators",
+   "patterns": [
+    ";\\s*rm -rf /$",
+    "&&\\s*rm -rf /$",
+    "\\|\\|\\s*rm -rf /$",
+    ";\\s*rm -rf ~/?(\\*|\\s|$)",
+    "&&\\s*rm -rf ~/?(\\*|\\s|$)",
+    "\\|\\|\\s*rm -rf ~/?(\\*|\\s|$)",
+    ";\\s*rm -rf /\\*",
+    "&&\\s*rm -rf /\\*",
+    "\\|\\|\\s*rm -rf /\\*"
+   ]
+  },
+  "dangerous_chmod": {
+   "description": "Recursive chmod targeting HOME or filesystem root, or world-writable on system paths",
+   "note_from": "relaxed",
+   "patterns": [
+    "^chmod\\s+-R\\b.*\\s/$",
+    "^chmod\\s+-R\\b.*\\s~(/|$)",
+    "^chmod\\s+-R\\b.*\\s\\$HOME(/|$)",
+    "^chmod\\s+(-R\\s+)?[0-7]?777\\s+/(?!tmp/|var/tmp/)"
+   ]
+  },
+  "debugger_attach": {
+   "description": "Attaching debuggers / tracers to running processes (privilege bypass / secret extraction)",
+   "note_from": "relaxed",
+   "patterns": [
+    "^gdb\\s+(.*\\s)?-p\\s+\\S",
+    "^lldb\\s+(.*\\s)?-p\\s+\\S",
+    "^lldb\\s+(.*\\s)?--attach-pid\\s+\\S",
+    "^strace\\s+(.*\\s)?-p\\s+\\S",
+    "^ltrace\\s+(.*\\s)?-p\\s+\\S"
+   ]
+  },
+  "disk_destruction": {
+   "description": "Direct disk/partition manipulation",
+   "patterns": [
+    "^dd if=.*/dev/",
+    "^dd of=/dev/",
+    "^mkfs\\.",
+    "^fdisk ",
+    "^parted "
+   ]
+  },
+  "env_to_network_exfil": {
+   "description": "Piping environment vars or credential file contents to network endpoints",
+   "patterns": [
+    "^(env|printenv)\\b.*\\|\\s*(curl|wget|nc|httpie|http)\\b",
+    "^(curl|httpie|http)\\b.*(-d|--data(-binary|-raw|-urlencode)?[\\s=])\\s*@\\S*\\.aws/credentials",
+    "^(curl|httpie|http)\\b.*(-d|--data(-binary|-raw|-urlencode)?[\\s=])\\s*@\\S*\\.ssh/id_",
+    "^(curl|httpie|http)\\b.*(-d|--data(-binary|-raw|-urlencode)?[\\s=])\\s*@\\S*\\.netrc",
+    "^(curl|httpie|http)\\b(?=.*(^|\\s)(-F|-f|--form)(\\s|=)).*@\\S*(\\.aws/credentials|\\.ssh/id_|\\.netrc(\\s|$)|\\.npmrc(\\s|$)|\\.pypirc(\\s|$)|\\.docker/config\\.json(\\s|$)|\\.git-credentials(\\s|$)|\\.config/gh/hosts\\.yml(\\s|$)|\\.config/hub(\\s|$)|\\.azure/accessTokens\\.json(\\s|$))",
+    "^wget\\b.*--post-file[\\s=]\\S*\\.aws/credentials",
+    "^wget\\b.*--post-file[\\s=]\\S*\\.ssh/id_",
+    "^wget\\b.*--post-file[\\s=]\\S*\\.netrc",
+    "^(curl|httpie|http)\\b.*(-T|--upload-file)[\\s=]\\S*\\.aws/credentials",
+    "^(curl|httpie|http)\\b.*(-T|--upload-file)[\\s=]\\S*\\.ssh/id_",
+    "^(curl|httpie|http)\\b.*(-T|--upload-file)[\\s=]\\S*\\.netrc"
+   ]
+  },
+  "git_config_hijack": {
+   "description": "Git config writes that hijack hook execution (alias/url rewrites are ask, not deny)",
+   "note_from": "relaxed",
+   "patterns": [
+    "^git\\s+config\\b.*\\bcore\\.hooksPath\\b",
+    "^git\\s+config\\b.*\\bcore\\.fsmonitor\\b"
+   ]
+  },
+  "guard_level_change": {
+   "description": "Changing the user's getmyorg guard level, gate mode or profile (only the user changes them, with /myorg:config)",
+   "patterns": [
+    "^\\S*getmyorg[\"')]*\\s+config\\s+set\\s+(guards|gate|profile)\\s+[a-zA-Z]",
+    "^\\S*(claude|codex)\\b.*[/$]myorg(-starter)?:config\\s+(guards|gate|profile)\\s+[a-zA-Z]",
+    "\\|\\s*(\\S+\\s+)?\\S*config-prompt\\.(sh|py)\\b",
+    "^(bash|sh|python3?)\\s+\\S*config-prompt\\.(sh|py)\\b",
+    "^(sed|gsed|perl)\\b(?=.*\\s-[a-zA-Z]*i).*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    "^yq\\b(?=.*\\s(-i|--inplace)\\b).*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    ">>?\\s*\\S*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    "\\|\\s*tee\\b.*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    "^(rm|unlink|truncate|shred)\\b.*((\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)|\\.myorg/?(\\s|$))",
+    "^mv\\b.*((\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)|\\.myorg/?(\\s|$))",
+    "^(cp|install|ln)\\b.*\\s\\S*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)\\s*$",
+    "^git\\s+(checkout|restore|rm|mv)\\b.*\\.myorg/config\\.local\\.yaml",
+    "^(python3?|perl|ruby|node)\\b(?=.*\\s-(c|e)\\b)(?=.*(write|unlink|remove|rename|replace|truncate|rmSync|\\bdump\\b|open\\s*\\([^)]*['\"][wax]\\+?['\"]|open\\s*\\([^)]*['\"]\\+?>)).*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)"
+   ]
+  },
+  "key_extraction": {
+   "description": "Exporting GPG private keys or extracting macOS keychain secrets",
+   "patterns": [
+    "^gpg\\b.*--export-secret-keys",
+    "^gpg\\b.*--export-secret-subkeys",
+    "^security\\s+dump-keychain",
+    "^security\\s+find-generic-password\\s+(.*\\s)?-w(\\s|$)",
+    "^security\\s+find-internet-password\\s+(.*\\s)?-w(\\s|$)"
+   ]
+  },
+  "library_injection": {
+   "description": "LD_PRELOAD / DYLD_INSERT_LIBRARIES injection (hijacks subsequent process exec)",
+   "note_from": "relaxed",
+   "patterns": [
+    "\\bLD_PRELOAD=\\S",
+    "\\bDYLD_INSERT_LIBRARIES=\\S"
+   ]
+  },
+  "malicious_patterns": {
+   "description": "Known malicious patterns",
+   "patterns": [
+    ":.*\\(\\).*\\{.*:\\|",
+    "^history -c",
+    "^history -w /dev/null"
+   ]
+  },
+  "persistence_writes": {
+   "description": "Writing to shell rc files, cron, systemd, or launchd (persistence vectors)",
+   "note_from": "relaxed",
+   "patterns": [
+    ">>?\\s*~/?\\.(bashrc|zshrc|bash_profile|profile|zprofile|zshenv|bash_login|inputrc)\\b",
+    ">>?\\s*\\$HOME/\\.(bashrc|zshrc|bash_profile|profile|zprofile|zshenv|bash_login|inputrc)\\b",
+    "^tee\\s+.*~/?\\.(bashrc|zshrc|bash_profile|profile|zprofile|zshenv|bash_login|inputrc)\\b",
+    "^tee\\s+.*\\$HOME/\\.(bashrc|zshrc|bash_profile|profile|zprofile|zshenv|bash_login|inputrc)\\b",
+    ">>?\\s*/etc/cron(\\.|tab)",
+    "^tee\\s+.*/etc/cron(\\.|tab)",
+    ">>?\\s*/etc/systemd/system/",
+    ">>?\\s*~/?\\.config/systemd/",
+    "^tee\\s+.*/etc/systemd/system/",
+    ">>?\\s*~/?Library/LaunchAgents/",
+    ">>?\\s*/Library/LaunchDaemons/",
+    "^tee\\s+.*~/?\\s*\\.config/systemd/",
+    "^tee\\s+.*/Library/LaunchAgents/",
+    "^tee\\s+.*/Library/LaunchDaemons/",
+    "^crontab\\s+(?!-l\\b)"
+   ]
+  },
+  "privilege_escalation": {
+   "description": "Commands that escalate privileges",
+   "note_from": "relaxed",
+   "patterns": [
+    "^sudo ",
+    "^su ",
+    "^doas ",
+    "/usr/bin/sudo ",
+    "/bin/su "
+   ]
+  },
+  "reverse_shells": {
+   "description": "Reverse-shell primitives (bash /dev/tcp, nc -e/-c, socat exec, scripted socket)",
+   "patterns": [
+    "bash\\s+-i\\s+>&\\s*/dev/tcp/",
+    "bash\\s+>&\\s*/dev/tcp/",
+    "/dev/tcp/.*\\d+\\b.*<&",
+    "^nc\\s+(.*\\s)?-e\\s",
+    "^ncat\\s+(.*\\s)?-e\\s",
+    "^nc\\s+(.*\\s)?-c\\s",
+    "^ncat\\s+(.*\\s)?-c\\s",
+    "^socat\\s+.*[Ee][Xx][Ee][Cc]:",
+    "^python[0-9.]*\\s+-c\\s+['\"].*socket.*connect.*(sh|bash|/bin/)",
+    "^perl\\s+-e\\s+['\"].*socket.*connect.*(sh|bash|/bin/)"
+   ]
+  },
+  "system_shutdown": {
+   "description": "System shutdown/reboot commands",
+   "note_from": "relaxed",
+   "patterns": [
+    "^reboot",
+    "^shutdown",
+    "^poweroff",
+    "^halt$",
+    "^init 0",
+    "^init 6"
+   ]
+  }
+ },
+ "reflect": {
+  "agent_config_writes": {
+   "description": "Writing git hooks or agent settings and hook configs (code that runs later)",
+   "patterns": [
+    ">>?\\s*[\"']?\\S*\\.git/hooks/",
+    ">>?\\s*[\"']?\\S*\\.(?:claude|codex|gemini|opencode)/(?:settings(?:\\.local)?\\.json|hooks(?:\\.json|/)|config\\.(?:toml|json|yaml))",
+    "^tee\\s+(?:.*\\s)?\\S*\\.git/hooks/",
+    "^tee\\s+(?:.*\\s)?\\S*\\.(?:claude|codex|gemini|opencode)/(?:settings(?:\\.local)?\\.json|hooks(?:\\.json|/)|config\\.(?:toml|json|yaml))",
+    "^(?:cp|mv)\\s+(?:\\S+\\s+)+[\"']?\\S*\\.git/hooks(?:/\\S*)?[\"']?\\s*$",
+    "^(?:cp|mv)\\s+(?:\\S+\\s+)+[\"']?\\S*\\.(?:claude|codex|gemini|opencode)/(?:settings(?:\\.local)?\\.json|hooks(?:\\.json|/\\S*)?|config\\.(?:toml|json|yaml))[\"']?\\s*$",
+    "^(?:cp|mv)\\s+(?:.*\\s)?(?:-t\\s*|--target-directory[=\\s])[\"']?\\S*(?:\\.git/hooks|\\.(?:claude|codex|gemini|opencode)/hooks)(?:/|[\"']?(?:\\s|$))"
+   ]
+  },
+  "cloud_mutations": {
+   "description": "Cloud CLI operations that create/modify/delete resources",
+   "patterns": [
+    "aws .* delete(\\s|$)",
+    "aws .* remove(\\s|$)",
+    "aws .* terminate(\\s|$)",
+    "aws .* create(\\s|$)",
+    "aws .* put(\\s|$)",
+    "aws .* update(\\s|$)",
+    "gcloud .* delete(\\s|$)",
+    "gcloud .* create(\\s|$)",
+    "az .* delete(\\s|$)",
+    "az .* create(\\s|$)",
+    "supabase .* (delete|reset|push|destroy)(\\s|$)",
+    "supabase (db push|db reset|projects delete|functions delete)(\\s|$)"
+   ]
+  },
+  "code_execution": {
+   "description": "Arbitrary code execution patterns",
+   "patterns": [
+    "\\| *sh(\\s|$)",
+    "\\| *bash(\\s|$)",
+    "\\| *zsh(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *python[0-9.]*(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *perl(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *ruby(\\s|$)",
+    "(curl|wget|http|fetch).*\\| *node(\\s|$)",
+    "^eval ",
+    "source /tmp/",
+    "source /var/tmp/",
+    "\\. /tmp/",
+    "\\. /var/tmp/"
+   ]
+  },
+  "dangerous_pipelines": {
+   "description": "Dangerous command combinations",
+   "patterns": [
+    "xargs.* rm\\b",
+    "xargs.* mv\\b",
+    "xargs.* chmod\\b",
+    "xargs.* chown\\b",
+    "find.*-exec.* rm\\b",
+    "find.*-exec.* mv\\b",
+    "find.*-exec.* chmod\\b",
+    "find.*-delete"
+   ]
+  },
+  "database_destructive": {
+   "description": "Database operations that destroy data",
+   "patterns": [
+    "^psql .*DROP",
+    "^psql .*TRUNCATE",
+    "^mysql .*DROP"
+   ]
+  },
+  "docker_control": {
+   "description": "Docker operations that stop/remove containers or clean up",
+   "note_from": "guarded",
+   "patterns": [
+    "^docker system prune",
+    "^docker volume prune",
+    "^docker network prune",
+    "^docker image prune",
+    "^docker rmi",
+    "^docker rm ",
+    "^docker stop",
+    "^docker kill",
+    "^docker container rm",
+    "^docker container stop"
+   ]
+  },
+  "file_deletion": {
+   "description": "File removal targeting absolute system paths (outside /tmp and current git repo)",
+   "patterns": [
+    "^rm\\s+(-[a-zA-Z]*r[a-zA-Z]*\\s+)+/(?!tmp/|var/tmp/)",
+    "^rm\\s+(-[a-zA-Z]*f[a-zA-Z]*\\s+)+/(?!tmp/|var/tmp/)",
+    "^rm\\s+/(?!tmp/|var/tmp/)"
+   ]
+  },
+  "file_ownership": {
+   "description": "Changing file ownership",
+   "note_from": "guarded",
+   "patterns": [
+    "^chown ",
+    "^chgrp "
+   ]
+  },
+  "file_permissions": {
+   "description": "Broad file permission changes",
+   "patterns": [
+    "^chmod 777",
+    "^chmod -R 777"
+   ]
+  },
+  "firewall": {
+   "description": "Firewall configuration",
+   "patterns": [
+    "^iptables",
+    "^ip6tables",
+    "^ufw ",
+    "^firewall-cmd",
+    "^nft "
+   ]
+  },
+  "git_bypass_hooks": {
+   "description": "Bypassing git hooks (band-aid pattern — see prefer-root-cause-fixes)",
+   "patterns": [
+    "^git commit\\b.*--no-verify\\b",
+    "^git commit\\b.*(?:^|\\s)-(?!-)[a-zA-Z]*n[a-zA-Z]*\\b",
+    "^git push\\b.*--no-verify\\b",
+    "^git rebase\\b.*--no-verify\\b",
+    "^git merge\\b.*--no-verify\\b"
+   ]
+  },
+  "git_config_rewrites": {
+   "description": "Git config writes that can intercept normal git commands (alias hijack, URL rewrite)",
+   "patterns": [
+    "^git\\s+config\\b.*\\balias\\.",
+    "^git\\s+config\\b.*\\burl\\..*\\.insteadOf\\b"
+   ]
+  },
+  "git_destructive": {
+   "description": "Git operations that rewrite history or are hard to undo",
+   "patterns": [
+    "^git push --force(?!-with-lease\\b)",
+    "^git push -f\\b",
+    "^git reset --hard",
+    "^git clean -fd",
+    "^git rebase .*(-i |--interactive |--exec\\b|-i$|--interactive$)",
+    "^git merge.* -X (theirs|ours)",
+    "^git merge.* --strategy-option[= ](theirs|ours)",
+    "^git stash clear",
+    "^git branch -D\\b"
+   ]
+  },
+  "git_force_with_lease": {
+   "description": "git push --force-with-lease — safer than bare --force but still rewrites remote history",
+   "patterns": [
+    "^git push\\b.*\\s--force-with-lease\\b"
+   ]
+  },
+  "git_main_branch": {
+   "description": "Pushing directly to main/master branches",
+   "patterns": [
+    "^git push .* main$",
+    "^git push .* master$",
+    "^git push origin main",
+    "^git push origin master"
+   ]
+  },
+  "git_remote_mutations": {
+   "description": "Adding or rewriting git remotes (exfil pivot when paired with push)",
+   "patterns": [
+    "^git\\s+remote\\s+add\\b",
+    "^git\\s+remote\\s+set-url\\b",
+    "^git\\s+remote\\s+rename\\b"
+   ]
+  },
+  "git_routine": {
+   "description": "Everyday history operations that are easy to undo (merge, revert, squash)",
+   "note_from": "guarded",
+   "patterns": [
+    "^git merge(?!-base\\b)(?!.* origin/)(?!\\s+--ff-only\\b)(?!\\s+--abort)(?!\\s+--no-edit\\b)(?!\\s+worktree-)",
+    "^git merge.* --squash",
+    "^git cherry-pick.*--no-commit",
+    "^git revert"
+   ]
+  },
+  "github_api_mutations": {
+   "description": "GitHub API calls that mutate state (POST, PUT, PATCH, DELETE)",
+   "patterns": [
+    "^gh api (?!.*/(?:replies|reactions|issues/[^/]+/comments|pulls/[^/]+/comments)\\b).* -X POST",
+    "^gh api (?!.*/(?:replies|reactions|issues/[^/]+/comments|pulls/[^/]+/comments)\\b).* -XPOST",
+    "^gh api (?!.*/(?:replies|reactions|issues/[^/]+/comments|pulls/[^/]+/comments)\\b).* --method[= ]POST",
+    "^gh api -X POST(?!.*/(?:replies|reactions|issues/[^/]+/comments|pulls/[^/]+/comments)\\b)",
+    "^gh api -XPOST(?!.*/(?:replies|reactions|issues/[^/]+/comments|pulls/[^/]+/comments)\\b)",
+    "^gh api --method[= ]POST(?!.*/(?:replies|reactions|issues/[^/]+/comments|pulls/[^/]+/comments)\\b)",
+    "^gh api .* -X (PUT|PATCH|DELETE)",
+    "^gh api .* -X(PUT|PATCH|DELETE)",
+    "^gh api .* --method[= ](PUT|PATCH|DELETE)",
+    "^gh api -X (PUT|PATCH|DELETE)",
+    "^gh api -X(PUT|PATCH|DELETE)",
+    "^gh api --method[= ](PUT|PATCH|DELETE)"
+   ]
+  },
+  "github_label_delete": {
+   "description": "GitHub CLI label deletion",
+   "patterns": [
+    "^gh label delete "
+   ]
+  },
+  "github_mutations": {
+   "description": "GitHub CLI operations that modify state (irreversible or high-impact)",
+   "patterns": [
+    "^gh repo delete",
+    "^gh repo archive",
+    "^gh release delete"
+   ]
+  },
+  "github_routine": {
+   "description": "GitHub CLI operations that are part of normal PR work",
+   "note_from": "guarded",
+   "patterns": [
+    "^gh pr merge",
+    "^gh pr ready",
+    "^gh run cancel"
+   ]
+  },
+  "group_switching": {
+   "description": "Commands executed with different group permissions",
+   "patterns": [
+    "^sg ",
+    "^newgrp "
+   ]
+  },
+  "helm_mutations": {
+   "description": "Helm operations that modify releases",
+   "patterns": [
+    "^helm install",
+    "^helm upgrade",
+    "^helm uninstall",
+    "^helm rollback",
+    "^helm repo add",
+    "^helm repo remove",
+    "^helm repo update",
+    "^helmfile apply",
+    "^helmfile sync",
+    "^helmfile destroy",
+    "^k3s-helm ",
+    "^poetrun run k3s-helm "
+   ]
+  },
+  "infrastructure_as_code": {
+   "description": "IaC tools that modify infrastructure",
+   "patterns": [
+    "^terraform apply",
+    "^terraform destroy",
+    "^terraform import",
+    "^terraform taint",
+    "^terraform untaint",
+    "^pulumi up",
+    "^pulumi destroy",
+    "^pulumi refresh",
+    "^ansible-playbook"
+   ]
+  },
+  "kernel_modules": {
+   "description": "Kernel module load/unload operations",
+   "patterns": [
+    "^insmod ",
+    "^modprobe ",
+    "^rmmod "
+   ]
+  },
+  "kubectl_exec_db_mutations": {
+   "description": "kubectl exec database commands with destructive SQL",
+   "patterns": [
+    "kubectl exec .* -- .*psql.*(?i:DROP|TRUNCATE|DELETE|INSERT|UPDATE|ALTER|CREATE|GRANT|REVOKE)",
+    "kubectl exec .* -- .*mysql.*(?i:DROP|TRUNCATE|DELETE|INSERT|UPDATE|ALTER|CREATE|GRANT|REVOKE)",
+    "kubectl exec .* -- .*psql.* -f ",
+    "kubectl exec .* -- .*mysql.* < "
+   ]
+  },
+  "kubernetes_mutations": {
+   "description": "Kubernetes operations that modify cluster state",
+   "patterns": [
+    "^kubectl apply",
+    "^kubectl create",
+    "^kubectl delete",
+    "^kubectl edit",
+    "^kubectl patch",
+    "^kubectl replace",
+    "^kubectl scale",
+    "^kubectl rollout restart",
+    "^kubectl rollout undo",
+    "^kubectl set ",
+    "^kubectl label",
+    "^kubectl annotate",
+    "^kubectl taint",
+    "^kubectl cordon",
+    "^kubectl uncordon",
+    "^kubectl drain",
+    "^kubectl run ",
+    "^kubectl cp ",
+    "^k3s kubectl apply",
+    "^k3s kubectl create",
+    "^k3s kubectl delete",
+    "^k3s kubectl edit",
+    "^k3s kubectl patch",
+    "^k3s kubectl run ",
+    "^k3s kubectl cp "
+   ]
+  },
+  "macos_metadata": {
+   "description": "macOS quarantine bypass and `defaults write` (changes system/app behavior)",
+   "patterns": [
+    "^defaults\\s+write\\b",
+    "^xattr\\s+-d\\s+com\\.apple\\.quarantine\\b",
+    "^xattr\\s+-c\\b",
+    "^extattr\\s+"
+   ]
+  },
+  "mcp_server_registration": {
+   "description": "Adding/configuring MCP servers — risk surface for data exfil and tool injection",
+   "patterns": [
+    "^claude\\s+mcp\\s+add\\b(?!(?:(?!\\s--\\s).)*\\s(-h|--help)(\\s|$))",
+    "^codex\\s+mcp\\s+add\\b(?!(?:(?!\\s--\\s).)*\\s(-h|--help)(\\s|$))",
+    "^gemini\\s+mcp\\s+add\\b(?!(?:(?!\\s--\\s).)*\\s(-h|--help)(\\s|$))",
+    ">>?\\s*~/?\\.claude\\.json",
+    ">>?\\s*~/?\\.codex/",
+    "^tee\\s+(.*\\s)?~/?\\.claude\\.json"
+   ]
+  },
+  "outbound_network_connection": {
+   "description": "Outbound non-localhost network connections (nc to remote host, rsync to remote target)",
+   "patterns": [
+    "^nc\\s+(?!(-l|-h|-z|--help|-V|--version|localhost|127\\.|::1))",
+    "^rsync\\b.*\\s\\S+:\\S"
+   ]
+  },
+  "package_manager_install": {
+   "description": "Package installation from remote registries (supply chain risk)",
+   "note_from": "guarded",
+   "patterns": [
+    "^apt(-get)? install",
+    "^apt(-get)? upgrade",
+    "^pip install",
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/pip[0-9.]*\\s+install(?:\\s|$)",
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*\\s+.*?-[A-Za-z]*m\\s*pip(?:\\s|$)",
+    "^npm install (?!\\.)(?!--)(?!\\d*>)(.+)",
+    "^yarn add",
+    "^brew install",
+    "^pacman -S ",
+    "^cargo install ",
+    "^gem install",
+    "^uv add\\b",
+    "^uv pip install\\b",
+    "^go install\\b"
+   ]
+  },
+  "package_publishing": {
+   "description": "Publishing packages to registries",
+   "patterns": [
+    "^npm publish",
+    "^yarn publish",
+    "^pnpm publish",
+    "^cargo publish",
+    "^poetry publish",
+    "^twine upload",
+    "^gh release create"
+   ]
+  },
+  "process_control": {
+   "description": "Killing or stopping processes",
+   "note_from": "guarded",
+   "patterns": [
+    "^kill ",
+    "^killall",
+    "^pkill"
+   ]
+  },
+  "process_substitution_from_network": {
+   "description": "Process substitution feeding network downloads to interpreters",
+   "patterns": [
+    "^(source|\\.)\\s+<\\(\\s*(curl|wget|http|httpie|fetch)\\b",
+    "^(bash|sh|zsh|python|perl|ruby|node)\\s+<\\(\\s*(curl|wget|http|httpie|fetch)\\b"
+   ]
+  },
+  "remote_access": {
+   "description": "Remote access and file transfer",
+   "note_from": "guarded",
+   "patterns": [
+    "^ssh ",
+    "^scp ",
+    "^sftp ",
+    "^ftp ",
+    "^telnet ",
+    "^nc -l"
+   ]
+  },
+  "secrets_encryption": {
+   "description": "Encrypting secrets (decryption is allowed)",
+   "patterns": [
+    "^sops -e",
+    "^sops --encrypt"
+   ]
+  },
+  "service_management": {
+   "description": "Starting/stopping system services",
+   "patterns": [
+    "^systemctl start",
+    "^systemctl stop",
+    "^systemctl restart",
+    "^systemctl enable",
+    "^systemctl disable",
+    "^systemctl mask",
+    "^service .* start",
+    "^service .* stop",
+    "^service .* restart"
+   ]
+  },
+  "system_path_writes": {
+   "description": "Writing under /etc, /usr, or non-cache /var (system configuration changes)",
+   "patterns": [
+    ">>?\\s*/etc/",
+    ">>?\\s*/usr/",
+    ">>?\\s*[\"']?/\\S*\\.\\./(?:etc|usr)/",
+    ">>?\\s*/var/(?!tmp/|cache/|log/|folders/)",
+    "^tee\\s+(.*\\s)?/etc/",
+    "^tee\\s+(.*\\s)?/usr/",
+    "^cp\\s+(.*\\s)+/etc/",
+    "^cp\\s+(.*\\s)+/usr/(?!local/bin/)",
+    "^cp\\s+(.*\\s)+/etc(\\s|$)",
+    "^cp\\s+(.*\\s)+/usr(\\s|$)",
+    "^mv\\s+(.*\\s)+/etc/",
+    "^mv\\s+(.*\\s)+/etc(\\s|$)",
+    "^mv\\s+(.*\\s)+/usr(\\s|$)",
+    "^mkdir\\s+(-p\\s+)?/etc/",
+    "^mkdir\\s+(-p\\s+)?/usr/(?!local/)",
+    "^mkdir\\s+(-p\\s+)?/etc(\\s|$)",
+    "^mkdir\\s+(-p\\s+)?/usr(?!/local)(\\s|$)"
+   ]
+  },
+  "terminal_multiplexer_mutations": {
+   "description": "Terminal multiplexer operations that affect sessions or execute commands",
+   "patterns": [
+    "^tmux kill",
+    "^tmux send-keys",
+    "^tmux send-prefix",
+    "^tmux respawn",
+    "^tmux run-shell",
+    "^tmux run ",
+    "^tmux if-shell",
+    "^tmux pipe-pane",
+    "^tmux new-session",
+    "^tmux new-window",
+    "^tmux split-window",
+    "^tmux new ",
+    "^screen -X ",
+    "^screen -S .* -X",
+    "^screen .*-c "
+   ]
+  },
+  "user_management": {
+   "description": "User, group, and cron management",
+   "patterns": [
+    "^crontab -e",
+    "^crontab -r",
+    "^crontab [^-]",
+    "^visudo",
+    "^passwd",
+    "^useradd",
+    "^userdel",
+    "^usermod",
+    "^groupadd",
+    "^groupdel"
+   ]
+  },
+  "venv_inline_execution": {
+   "description": "Virtual-environment Python running inline code or stdin",
+   "note_from": "guarded",
+   "patterns": [
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*\\s+(?:-[A-Za-z]+\\s+)*-[A-Za-z]*c",
+    "^(?:[\\w./-]+/)?[\\w.-]*venv/bin/python[0-9.]*\\s+(?:-[A-Za-z]+\\s+)*-(?:\\s|$)"
+   ]
+  }
+ }
+}

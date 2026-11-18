@@ -269,25 +269,31 @@ patterns = [
 ]
 
 [deny.guard_level_change]
-description = "Changing the getmyorg guard level (only the user changes it, with /myorg:guards)"
+description = "Changing the user's getmyorg guard level or profile (only the user changes them, with /myorg:config)"
 # A speed bump, not a security boundary: it catches the obvious ways an agent
-# would change the level, and leaves commands that only mention it alone.
+# would change its own settings (#1089, #1178), and leaves commands that only
+# mention them alone. The settings live in the repo's .myorg/config.local.yaml
+# and the user's getmyorg/config.yaml; the committed .myorg/config.yaml no
+# longer holds them. The credential's plan tier sets the default profile and
+# preset, so getmyorg/credentials.json is covered too; /myorg:login writes it.
 patterns = [
     # The CLI, however it's spelled or quoted, in command position.
-    "^\\S*getmyorg[\"')]*\\s+guards\\s+set\\s+[a-zA-Z]",
+    "^\\S*getmyorg[\"')]*\\s+config\\s+set\\s+(guards|profile)\\s+[a-zA-Z]",
     # The user's slash command typed into a nested session, or fed to the hook.
-    "^\\S*(claude|codex)\\b.*[/$]myorg:guards\\s+[a-zA-Z]",
-    "\\|\\s*(\\S+\\s+)?\\S*guards-prompt\\.(sh|py)\\b",
-    "^(bash|sh|python3?)\\s+\\S*guards-prompt\\.(sh|py)\\b",
-    # Writing, replacing or deleting .myorg/config.yaml from the shell.
-    "^(sed|gsed|perl)\\b(?=.*\\s-[a-zA-Z]*i).*\\.myorg/config\\.yaml",
-    "^yq\\b(?=.*\\s(-i|--inplace)\\b).*\\.myorg/config\\.yaml",
-    ">>?\\s*\\S*\\.myorg/config\\.yaml",
-    "\\|\\s*tee\\b.*\\.myorg/config\\.yaml",
-    "^(rm|unlink|truncate|shred)\\b.*\\.myorg(/config\\.yaml|/?(\\s|$))",
-    "^mv\\b.*\\.myorg(/config\\.yaml|/?(\\s|$))",
-    "^(cp|install|ln)\\b.*\\s\\S*\\.myorg/config\\.yaml\\s*$",
-    "^git\\s+(checkout|restore|rm|mv)\\b.*\\.myorg/config\\.yaml",
+    "^\\S*(claude|codex)\\b.*[/$]myorg:config\\s+(guards|profile)\\s+[a-zA-Z]",
+    "\\|\\s*(\\S+\\s+)?\\S*config-prompt\\.(sh|py)\\b",
+    "^(bash|sh|python3?)\\s+\\S*config-prompt\\.(sh|py)\\b",
+    # Writing, replacing or deleting a settings file from the shell.
+    "^(sed|gsed|perl)\\b(?=.*\\s-[a-zA-Z]*i).*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    "^yq\\b(?=.*\\s(-i|--inplace)\\b).*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    ">>?\\s*\\S*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    "\\|\\s*tee\\b.*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
+    "^(rm|unlink|truncate|shred)\\b.*((\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)|\\.myorg/?(\\s|$))",
+    "^mv\\b.*((\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)|\\.myorg/?(\\s|$))",
+    "^(cp|install|ln)\\b.*\\s\\S*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)\\s*$",
+    "^git\\s+(checkout|restore|rm|mv)\\b.*\\.myorg/config\\.local\\.yaml",
+    # A one-liner that writes, renames or deletes one of them; reading is fine.
+    "^(python3?|perl|ruby|node)\\b(?=.*\\s-(c|e)\\b)(?=.*(write|unlink|remove|rename|replace|truncate|rmSync|\\bdump\\b|open\\s*\\([^)]*['\"][wax]\\+?['\"]|open\\s*\\([^)]*['\"]\\+?>)).*(\\.myorg/config\\.local\\.yaml|getmyorg/config\\.yaml|getmyorg/credentials\\.json)",
 ]
 
 [deny.key_extraction]

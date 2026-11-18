@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "849cb1ccdfbf3669da41bc25770f7a2c0e6224d4",
-  "generated_at": "2026-11-18T00:57:41+00:00",
+  "canonical_sha": "4e92a0fa7b6fcebecdda1dfe761d44cfa0a3d9b2",
+  "generated_at": "2026-11-18T02:19:07+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
@@ -104,7 +104,7 @@
     },
     {
       "path": "blueprint/hooks/bash-patterns.toml",
-      "sha256": "b64b276d98f4e76117d08e69aa40173b5b854c7632239c8cc9393fd38267d034"
+      "sha256": "236495bada862ccb4ed4ede9acad761791376b7dc4a3cbffa8f904800d8b552e"
     },
     {
       "path": "blueprint/hooks/bash-patterns.windows.toml",
@@ -156,7 +156,7 @@
     },
     {
       "path": "blueprint/hooks/validate-edit.sh",
-      "sha256": "8149011d4aa182e3b45b4b1acfa42ba98b33f71fc0469d73806ad337d263a7bd"
+      "sha256": "596a5df6e4fa06f48ca0fcc83e806f7a300f621cb9d594e7c4406ab96bc986bb"
     },
     {
       "path": "blueprint/hooks/validate-postedit.sh",
@@ -184,7 +184,7 @@
     },
     {
       "path": "blueprint/standards/prefer-root-cause-fixes.md",
-      "sha256": "8c38d28cbfb8ab3225f01ab896f32077e5316a9989b9ebcacfc6ffbe3b6a0b84"
+      "sha256": "2ceb9515c1d176934b32518a73ce495f60e9e146278bebb1e1ada0b5f8f1c4ea"
     },
     {
       "path": "blueprint/standards/silent-failure.md",
@@ -196,7 +196,7 @@
     },
     {
       "path": "pylib/hooks/bash_policy_decide.py",
-      "sha256": "18fe8ac8e2a6e298fb8d37f270ba37ffb53c99596774e6a68335f256b9765868"
+      "sha256": "7e8648df6b4aaa21cdeeb736432475dc580d83bb396b1382dc68cc68786d1948"
     },
     {
       "path": "pylib/hooks/bash_policy_evaluate.py",
@@ -216,7 +216,7 @@
     },
     {
       "path": "pylib/hooks/entries/validate_edit.py",
-      "sha256": "9fc0ec82f3a0fb87987aab754a597203adee3e41f9e8825f4c44f4ffb8089844"
+      "sha256": "422952930be3d20858fa20534c38000cf975c1427879df13ebf990f09605f452"
     },
     {
       "path": "pylib/hooks/entries/validate_postedit.py",
@@ -240,7 +240,7 @@
     },
     {
       "path": "pylib/hooks/myorg_message.py",
-      "sha256": "a253d10319e7d12f0ce1dd7e566b842489c7283b4093c2fe7a2a3dd672790671"
+      "sha256": "206e202d5d12eb0242dde68f60a2c17eca557a807d88e7ba1d1b9140539cac56"
     },
     {
       "path": "pylib/hooks/pattern_files.py",

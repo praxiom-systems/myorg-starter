@@ -94,10 +94,10 @@ Two narrow controls are enforced at the diff boundary, aligned with this standar
 1. **Commit-bypass gate** — `git commit --no-verify` and `git push --no-verify` are gated through `[ask.*]` in `blueprint/hooks/bash-patterns.toml`, requiring user confirmation before bypassing pre-commit hooks. Bypassing hooks is one of the most common band-aid patterns and the most syntactically detectable.
 
 2. **Edit-time band-aid detector** — A `PreToolUse` hook on `Edit`, `Write`, and `MultiEdit` scans added lines against `blueprint/hooks/band-aid-patterns.toml`. The high-precision subset of patterns from this standard that are syntactically unambiguous is enforced here:
-   - **Deny** (stops the edit at the `strict` guard level; a note at `guarded`, the default): bare `except:`, `except Exception: pass`, file-level `/* eslint-disable */`, naked `// @ts-ignore` without a justification comment.
+   - **Deny** (stops the edit at the `strict` guard level; a note at `guarded` and `relaxed`, the default): bare `except:`, `except Exception: pass`, file-level `/* eslint-disable */`, naked `// @ts-ignore` without a justification comment.
    - **Advise** (non-blocking, surfaces in transcript): unlinked `TODO`/`FIXME`/`HACK`/`XXX`, line-scoped suppressions (`# noqa`, `# type: ignore`, `// eslint-disable-next-line`, `# pylint: disable`, `# pragma: no cover`), skipped tests (`it.skip`, `@pytest.mark.skip`, etc.).
    - Legitimate uses are accommodated: `@ts-ignore` with a trailing explanation, `TODO(#NNN)` with an issue link, `it.skip` in test files while iterating. The hook gates the *unjustified* form, not the justified one.
-   - The `relaxed` and `off` guard levels (`/myorg:guards`) skip the scan.
+   - The `off` guard level (`/myorg:config guards`) skips the scan.
 
 Most band-aid patterns require judgment to distinguish from legitimate uses. Mechanical enforcement is intentionally narrow — the patterns above are the highest-signal, lowest-false-positive subset. Broader detection (JS empty `catch {}`, semantic type-coercion, hardcoded fallbacks) relies on review and self-discipline.
 

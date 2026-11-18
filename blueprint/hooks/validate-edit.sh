@@ -4,7 +4,7 @@
 # skipped tests, unlinked TODOs) against band-aid-patterns.toml.
 # A match is a note to the agent; only at the strict guard level do the
 # high-confidence patterns stop the edit. Also stops edits that change the guard
-# level itself (only the user's /myorg:guards does that).
+# level itself (only the user's /myorg:config does that).
 
 set -e
 

@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "58d6e39ca9cfd0ee9d26b8212eb97a89c12c0200",
-  "generated_at": "2026-11-18T06:54:48+00:00",
+  "canonical_sha": "4e712b86f185ddfbbfbb7b08fc9d004b7ecbfedc",
+  "generated_at": "2026-11-18T07:23:53+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",

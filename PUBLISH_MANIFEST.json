@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "c7b72651c305cd87fe8173a99faa30a4886e3206",
-  "generated_at": "2026-11-17T23:57:01+00:00",
+  "canonical_sha": "849cb1ccdfbf3669da41bc25770f7a2c0e6224d4",
+  "generated_at": "2026-11-18T00:57:41+00:00",
   "files": [
     {
       "path": ".github/workflows/ci.yml",

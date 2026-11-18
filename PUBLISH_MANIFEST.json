@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "57f35d7c8bb8ff2c00c9660b13490341f7263e9f",
-  "generated_at": "2026-11-18T04:57:47+00:00",
+  "canonical_sha": "58d6e39ca9cfd0ee9d26b8212eb97a89c12c0200",
+  "generated_at": "2026-11-18T06:54:48+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -156,7 +156,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/config-prompt.py",
-      "sha256": "50071130cbe33332b577dd716d92c8763bf72e559407700b9b49b752e83bfca1"
+      "sha256": "6690c3d09081199858d91d21f6e1975298eef4a187c6e877441381edad73889b"
     },
     {
       "path": "plugins/myorg-starter/hooks/config-prompt.sh",

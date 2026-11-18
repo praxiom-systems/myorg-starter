@@ -9,13 +9,14 @@ broad-suppression [deny.*] patterns stop the edit.
 
 Pattern catalog: blueprint/hooks/band-aid-patterns.toml.
 
-Guard level (.myorg/config.yaml ``autonomy.hook_strictness``):
+Guard level (the user's ``autonomy.hook_strictness``, #1178):
   strict  — [deny.*] hits stop the edit; [advise.*] hits are notes
-  guarded — every hit is a note (the default)
-  relaxed — no band-aid scan
+  guarded — every hit is a note
+  relaxed — every hit is a note (the default)
   off     — nothing at all
-At every level but off, an edit that loosens the guard level itself is
-stopped: only the user's /myorg:guards does that.
+At every level but off, an edit that loosens the user's settings (raises
+the profile or lowers the guard level) in their config or the repo's
+.myorg/config.local.yaml is stopped: only the user's /myorg:config does that.
 
 Public API (importable by sibling hooks):
   scan_diff(added_lines, config_path, file_path="", new_content_lines=None)
@@ -27,7 +28,7 @@ Public API (importable by sibling hooks):
   _get_added_lines_for_input(tool_name, tool_input) → (added_lines, file_path, new_content_lines)
   _build_reason(result, level) → (decision, reason)
   output_decision(decision, reason, fmt, why) → None
-  changes_guard_level(tool_name, tool_input, cwd) → bool  (loosens the guard level?)
+  changes_guard_level(tool_name, tool_input, cwd) → bool  (loosens the user's settings?)
   ScanResult, SectionHit, CompiledPattern  — dataclasses
 """
 
@@ -493,8 +494,19 @@ def output_decision(decision: str, reason: str, fmt: str = "claude", why: str = 
     print(json.dumps({"hookSpecificOutput": out}))
 
 
-def _is_myorg_config(file_path: str) -> bool:
-    return file_path.replace("\\", "/").endswith(".myorg/config.yaml")
+def _is_settings_file(file_path: str, cwd: str = "") -> bool:
+    """True for a file that holds the user's settings (#1178): the repo's
+    .myorg/config.local.yaml or the user's own getmyorg config."""
+    normalized = file_path.replace("\\", "/")
+    if normalized.endswith(".myorg/config.local.yaml"):
+        return True
+    from pylib.hooks.bash_policy_decide import user_config_path
+
+    path = file_path if os.path.isabs(file_path) or not cwd else os.path.join(cwd, file_path)
+    try:
+        return os.path.realpath(path) == os.path.realpath(str(user_config_path()))
+    except OSError:
+        return False
 
 
 def _read_text(file_path: str) -> str:
@@ -508,40 +520,62 @@ def _read_text(file_path: str) -> str:
 _PATCH_FILE_OP_RE = re.compile(r"^\*\*\* (Add|Update|Delete) File: (.+)$")
 
 
-def _patch_touches_guard_level(patch: str) -> bool:
-    """True when an apply_patch deletes a .myorg/config.yaml or changes a
-    hook_strictness line in one. Context lines don't count."""
+def _is_credential_file(file_path: str, cwd: str = "") -> bool:
+    """True for the user's getmyorg credential, next to their config."""
+    from pylib.hooks.bash_policy_decide import user_config_path
+
+    path = file_path if os.path.isabs(file_path) or not cwd else os.path.join(cwd, file_path)
+    try:
+        return os.path.realpath(path) == os.path.realpath(str(user_config_path().with_name("credentials.json")))
+    except OSError:
+        return False
+
+
+def _patch_touches_guard_level(patch: str, cwd: str = "") -> bool:
+    """True when an apply_patch deletes a settings file or changes a
+    hook_strictness or profile line in one. Context lines don't count."""
     in_config = False
     for line in patch.splitlines():
         op = _PATCH_FILE_OP_RE.match(line)
         if op:
-            in_config = _is_myorg_config(op.group(2).strip())
+            if _is_credential_file(op.group(2).strip(), cwd):
+                return True
+            in_config = _is_settings_file(op.group(2).strip(), cwd)
             if in_config and op.group(1) == "Delete":
                 return True
             continue
-        if in_config and line[:1] in "+-" and "hook_strictness" in line:
+        if in_config and line[:1] in "+-" and ("hook_strictness" in line or "profile" in line):
             return True
     return False
 
 
 def changes_guard_level(tool_name: str, tool_input: dict, cwd: str = "") -> bool:
-    """True when an edit would loosen ``autonomy.hook_strictness`` (#1089).
+    """True when an edit could loosen the user's settings (#1089, #1178).
 
-    The agent mustn't lower its own guard level; only the user's
-    /myorg:guards does that. Compares the level before and after the edit,
-    with no level meaning the default; tightening it is fine.
+    The agent mustn't lower its own guard level or raise its own profile;
+    only the user's /myorg:config does that. A file with no value inherits
+    one from the layer below (the user's config, then the plan), which this
+    hook can't see, so an absent value is unknown, not a default. An edit is
+    fine only when, for each setting, it keeps the value, tightens an
+    explicit one, or sets the tightest value there is (strict, assisted).
+    Removing a value, or setting one where there was none, could expose or
+    set something looser, so it stops.
     """
-    from pylib.hooks.bash_policy_decide import DEFAULT_LEVEL, LEVELS, read_level_from_text
+    from pylib.hooks.bash_policy_decide import LEVELS, PROFILES, read_autonomy_key
 
     name = tool_name.lower()
     if name == "apply_patch":
         patch = tool_input.get("command") or tool_input.get("input") or ""
         if isinstance(patch, list):
             patch = "\n".join(str(p) for p in patch)
-        return _patch_touches_guard_level(patch)
+        return _patch_touches_guard_level(patch, cwd)
 
     file_path = tool_input.get("file_path", "") or ""
-    if not _is_myorg_config(file_path):
+    if _is_credential_file(file_path, cwd):
+        # Its plan tier sets the default profile and preset (#1178); only
+        # /myorg:login writes it.
+        return True
+    if not _is_settings_file(file_path, cwd):
         return False
     if cwd and not os.path.isabs(file_path):
         file_path = os.path.join(cwd, file_path)
@@ -561,11 +595,22 @@ def changes_guard_level(tool_name: str, tool_input: dict, cwd: str = "") -> bool
             else:
                 after = after.replace(old, new, 1)
 
-    def rank(text: str) -> int:
-        level = read_level_from_text(text)
-        return LEVELS.index(level if level in LEVELS else DEFAULT_LEVEL)
+    def loosens(key: str, ladder: tuple[str, ...]) -> bool:
+        """ladder is tightest first."""
+        was, now = read_autonomy_key(before, key), read_autonomy_key(after, key)
+        was = was if was in ladder else None
+        now = now if now in ladder else None
+        if now == was:
+            return False
+        if now is None:
+            return True  # removed: the layer below shows through
+        if now == ladder[0]:
+            return False  # the tightest value can't loosen anything
+        if was is None:
+            return True  # new: the layer below may have been tighter
+        return ladder.index(now) > ladder.index(was)
 
-    return rank(after) > rank(before)
+    return loosens("hook_strictness", LEVELS) or loosens("profile", PROFILES)
 
 
 def _get_added_lines_for_input(
@@ -708,14 +753,13 @@ def main() -> None:
     if tool_name.lower() not in ("edit", "write", "multiedit", "apply_patch"):
         sys.exit(0)
 
-    # Guard level (#1089): off → nothing; relaxed → only the guard-level
-    # check below; strict → band-aid [deny.*] hits stop the edit;
-    # guarded → they're notes.
+    # Guard level (#1089, #1178): off → nothing; strict → band-aid [deny.*]
+    # hits stop the edit; guarded and relaxed → they're notes.
     try:
         from pylib.hooks.bash_policy_decide import resolve_hook_strictness
         level = resolve_hook_strictness(cwd)
     except Exception:
-        level = "guarded"
+        level = "relaxed"
     if level == "off":
         sys.exit(0)
 
@@ -726,15 +770,15 @@ def main() -> None:
                 kind="EDIT",
                 state="STOPPED",
                 rule="guard_level",
-                body_lines=["file:    .myorg/config.yaml", "why:     changes autonomy.hook_strictness"],
+                body_lines=[
+                    "file:    " + (tool_input.get("file_path") or "a getmyorg settings file"),
+                    "why:     loosens the guard level or the profile; only the user changes them, with /myorg:config",
+                ],
             ),
             fmt=fmt,
             why="guard-level",
         )
         return
-
-    if level == "relaxed":
-        sys.exit(0)
 
     scan_inputs = _get_scan_inputs_for_input(
         tool_name, tool_input

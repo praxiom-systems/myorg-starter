@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""UserPromptSubmit hook: apply ``/myorg:config guards|gate|profile <value>`` from the user's own prompt.
+"""UserPromptSubmit hook: apply ``/myorg:config guards|gate|profile|share-stats <value>`` from the user's own prompt.
 
 Only the user changes their guard level, gate mode and autonomy profile
-(#1089, #1168, #1178). The session guards stop the agent from running
+(#1089, #1168, #1178), and whether the guard's counts are shared (#1195). The session guards stop the agent from running
 ``getmyorg config set`` or editing the settings files, so the change happens
 here, on the text the user typed, before the agent sees it. The hook hands
 the result to the agent as context; the config skill then reports the
@@ -44,14 +44,22 @@ from bash_policy_decide import (
     repo_override,
     user_config_path,
 )
+from guard_events import resolve_pending
 from myorg_message import PLUGIN
 
 _COMMAND = re.compile(
-    r"^\s*[/$]myorg(?:-starter)?:config\s+(?P<key>guards|gate|profile)(?:\s+(?P<value>\S+))?(?P<repo>\s+--repo)?\s*$",
+    r"^\s*[/$]myorg(?:-starter)?:config\s+(?P<key>guards|gate|profile|share-stats)(?:\s+(?P<value>\S+))?(?P<repo>\s+--repo)?\s*$",
     re.IGNORECASE,
 )
 
-_VALUES = {"guards": ("guard level", LEVELS), "gate": ("gate mode", GATES), "profile": ("profile", PROFILES)}
+_VALUES = {
+    "guards": ("guard level", LEVELS),
+    "gate": ("gate mode", GATES),
+    "profile": ("profile", PROFILES),
+    # #1195: sending the guard's counts to getmyorg. The user's consent, so
+    # like the rest only their own prompt sets it.
+    "share-stats": ("guard-stats sharing", GATES),
+}
 
 # The settings file's key for each command word.
 _FILE_KEY = {"guards": "hook_strictness", "gate": "gate", "profile": "profile"}
@@ -257,6 +265,8 @@ def _set_directly(key: str, value: str, repo_only: bool, cwd: str) -> tuple[bool
     """The starter's setter: write the settings file itself."""
     if key == "profile":
         return False, "The autonomy profile is a getmyorg setting; the starter has no profiles."
+    if key == "share-stats":
+        return False, "Sharing guard stats is a getmyorg setting; the starter sends nothing anywhere."
     if repo_only:
         myorg = _myorg_dir(cwd)
         if myorg is None:
@@ -290,6 +300,9 @@ def main() -> None:
         data = json.load(sys.stdin)
     except json.JSONDecodeError:
         sys.exit(0)
+    # Rejecting a gate prompt and then typing is the common way a decline
+    # shows; resolve it now (#1195).
+    resolve_pending()
     prompt = data.get("prompt", "")
     cwd = data.get("cwd") or os.getcwd()
     if PLUGIN == "myorg-starter" and _SHOW.match(prompt):

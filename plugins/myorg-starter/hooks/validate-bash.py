@@ -24,6 +24,7 @@ from bash_policy_decide import (
     resolve_hook_strictness,
     strictness_to_default_action,
 )
+from bash_command_parsing import clean_segment, split_commands
 from bash_policy_evaluate import validate_command
 from bash_policy_patterns import (
     compile_patterns,
@@ -34,6 +35,11 @@ from bash_policy_patterns import (
 )
 from bash_policy_shadow import build_shadow_row, write_shadow_row
 from force_push import protected_force_push
+from guard_events import (
+    RECORDED as RECORDED_DECISIONS,
+    record as record_guard_event,
+    resolve_pending as resolve_pending_prompts,
+)
 from mark_registry import find_mark_for_command
 from myorg_message import GATE_OFF_COMMAND, GUARDS_COMMAND, format_reason
 from reflect_predicate import DEFAULT_PREDICATE, evaluate as evaluate_predicate
@@ -130,6 +136,41 @@ def soft_sections_for(config: dict, level: str) -> frozenset[str]:
             if isinstance(entry, dict) and entry.get("note_from") == "relaxed":
                 soft.add(f"deny.{name}")
     return frozenset(soft)
+
+
+def host_of(fmt: str, input_data: dict) -> str:
+    """Which host ran the guard: Codex sends a ``turn_id`` or sets ``PLUGIN_ROOT``."""
+    if "turn_id" in input_data or os.environ.get("PLUGIN_ROOT"):
+        return "codex"
+    return "claude" if fmt == "claude" else "other"
+
+
+def deciding_segment(command: str, rule: str | None, patterns: list, allow_patterns: list) -> str:
+    """The part of a compound command the decision is about, for its shape.
+
+    The first part the matched rule's own patterns match; with no rule (a
+    gate prompt for an unknown command), the first part no routine rule
+    covers; else the first part.
+    """
+    try:
+        # A rule can match a whole pipeline (``curl … | sh``), so look at
+        # pipelines first and their parts second.
+        pipelines = [p for p in (clean_segment(s) for s in split_commands(command, split_pipes=False)) if p]
+        parts = [p for p in (clean_segment(s) for s in split_commands(command)) if p]
+    except Exception:  # an odd command still gets a row, shaped from its start
+        pipelines = parts = []
+    if not parts:
+        return command
+    if rule:
+        own = [p for p in patterns if p.section == rule]
+        for part in pipelines + parts:
+            if any(p.regex.search(part) for p in own):
+                return part
+    else:
+        for part in parts:
+            if not any(p.regex.search(part) for p in allow_patterns):
+                return part
+    return parts[0]
 
 
 def gate_applies(gate: str, fmt: str, input_data: dict) -> bool:
@@ -281,6 +322,9 @@ def main():
         # Invalid input, let it pass
         sys.exit(0)
 
+    # A gate prompt the user rejected since the last call gets its outcome (#1195).
+    resolve_pending_prompts()
+
     command = input_data.get("tool_input", {}).get("command", "")
     if not command:
         sys.exit(0)
@@ -310,6 +354,11 @@ def main():
 
     protected = protected_force_push(command, cwd)
     if protected:
+        record_guard_event(
+            decision="deny", rule="force_push.protected_branch", segment=command,
+            host=host_of(fmt, input_data), level=strictness, gate=False,
+            tool_use_id=input_data.get("tool_use_id"),
+        )
         output_decision(
             "deny",
             format_reason(
@@ -400,6 +449,14 @@ def main():
             default_mode=default_action,
         )
     )
+
+    if decision in RECORDED_DECISIONS:
+        record_guard_event(
+            decision=decision, rule=matched_rule,
+            segment=deciding_segment(command, matched_rule, deny_patterns + ask_patterns, allow_patterns),
+            host=host_of(fmt, input_data), level=strictness, gate=gate,
+            tool_use_id=input_data.get("tool_use_id"), transcript_path=input_data.get("transcript_path"),
+        )
 
     output_decision(decision, reason, fmt=fmt, level=strictness)
 

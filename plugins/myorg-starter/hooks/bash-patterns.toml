@@ -269,7 +269,7 @@ patterns = [
 ]
 
 [deny.guard_level_change]
-description = "Changing the user's getmyorg guard level, gate mode or profile (only the user changes them, with /myorg:config)"
+description = "Changing the user's getmyorg guard level, gate mode, profile or guard-stats sharing (only the user changes them, with /myorg:config)"
 # A speed bump, not a security boundary: it catches the obvious ways an agent
 # would change its own settings (#1089, #1178), and leaves commands that only
 # mention them alone. The settings live in the repo's .myorg/config.local.yaml
@@ -278,9 +278,9 @@ description = "Changing the user's getmyorg guard level, gate mode or profile (o
 # preset, so getmyorg/credentials.json is covered too; /myorg:login writes it.
 patterns = [
     # The CLI, however it's spelled or quoted, in command position.
-    "^\\S*getmyorg[\"')]*\\s+config\\s+set\\s+(guards|gate|profile)\\s+[a-zA-Z]",
+    "^\\S*getmyorg[\"')]*\\s+config\\s+set\\s+(guards|gate|profile|share-stats)\\s+[a-zA-Z]",
     # The user's slash command typed into a nested session, or fed to the hook.
-    "^\\S*(claude|codex)\\b.*[/$]myorg(-starter)?:config\\s+(guards|gate|profile)\\s+[a-zA-Z]",
+    "^\\S*(claude|codex)\\b.*[/$]myorg(-starter)?:config\\s+(guards|gate|profile|share-stats)\\s+[a-zA-Z]",
     "\\|\\s*(\\S+\\s+)?\\S*config-prompt\\.(sh|py)\\b",
     "^(bash|sh|python3?)\\s+\\S*config-prompt\\.(sh|py)\\b",
     # Writing, replacing or deleting a settings file from the shell.

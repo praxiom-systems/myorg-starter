@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "4e712b86f185ddfbbfbb7b08fc9d004b7ecbfedc",
-  "generated_at": "2026-11-18T07:23:53+00:00",
+  "canonical_sha": "1e0fd5799fe5a079dfb8e3604017e10322fd4017",
+  "generated_at": "2026-11-19T01:08:51+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -112,7 +112,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.json",
-      "sha256": "161636df3ab2732d2ce261067d943eb0ce59fd40ccbafb21293cddb1d920b920"
+      "sha256": "ff5bb3f415447619e76d1d279d98cfcdd0f4d286aed3a39bedeb1be4cf1d69c1"
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.linux.json",
@@ -124,7 +124,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.toml",
-      "sha256": "798aca98599fc80c9c59b9a0ac286b4014f38ef0f496f15d173a3e3be637d181"
+      "sha256": "5396b01405fb6dee490177bf93369a0b62c90685c3607899a87e8ba48c564627"
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.windows.json",
@@ -156,7 +156,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/config-prompt.py",
-      "sha256": "6690c3d09081199858d91d21f6e1975298eef4a187c6e877441381edad73889b"
+      "sha256": "a10ae5c2ca98459e1d0d78864244da729999113461e7587fb84c5a616c3dc0a7"
     },
     {
       "path": "plugins/myorg-starter/hooks/config-prompt.sh",
@@ -165,6 +165,14 @@
     {
       "path": "plugins/myorg-starter/hooks/force_push.py",
       "sha256": "3d922df4b82383fa096be9b7642d642cfa8b5b3804a987171ff89670a3206aaf"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/guard-outcome.sh",
+      "sha256": "627f4e3fe44bda25df928c12591b61b35e1b98c1b92ed6fa9ffea7faa38f2535"
+    },
+    {
+      "path": "plugins/myorg-starter/hooks/guard_events.py",
+      "sha256": "2261c9ac9cb24b2aecdeb0537aac0d851d38a809f464006d367f55c9a49cf541"
     },
     {
       "path": "plugins/myorg-starter/hooks/hook-lib.sh",
@@ -176,7 +184,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/hooks.json",
-      "sha256": "b325cf9b9e3deb43949df39159a9efb0ba0cd7811432490464356f42ab04542e"
+      "sha256": "33f6eeef1978c7c2b5ce09dd6e36e4a5c6a00927702002f0dba5198d1b7c65df"
     },
     {
       "path": "plugins/myorg-starter/hooks/injection-patterns.json",
@@ -204,7 +212,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/validate-bash.py",
-      "sha256": "d4b6f5898bf1e1d6fe542797c217868dd80419e065fcb4d124c534a328c4b745"
+      "sha256": "fb796c2f907560bbbc9435b9f73408548ddeb15062463e5e6a650da4f08761ba"
     },
     {
       "path": "plugins/myorg-starter/hooks/validate-bash.sh",

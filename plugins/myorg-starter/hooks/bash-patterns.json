@@ -1092,6 +1092,13 @@
    ]
   }
  },
+ "codex_permission": {
+  "routine_commands": [
+   "gh (?:issue|pr) view [0-9]+(?: --repo [a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)? --json [a-zA-Z]+(?:,[a-zA-Z]+)*",
+   "dig (?:\\+(?:short|noall|comments|answer) )*[a-zA-Z0-9][a-zA-Z0-9.-]* (?:A|AAAA|TXT|MX|NS|CNAME|DS)",
+   "(?:pwd|whoami|git --version|gh --version)"
+  ]
+ },
  "deny": {
   "catastrophic_deletion": {
    "description": "File deletion that could destroy system or all user data",

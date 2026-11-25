@@ -2180,3 +2180,13 @@ patterns = [
     "^(?:~|\\$HOME)?/[\\w./-]+/getmyorg (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|semantic-group|answer|describe|parked|suggest|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)(?:\\s|$)",
     "^\"\\$GETMYORG\" (doctor|install-freshness|install|project-map|org-map|registry|plans|audit|policy|map-query|map-neighborhood|map-drift|map-overview|map-explain|map-recent-changes|map-context-neighborhood|map-file-inventory|map-file-outline|map-span-body|map-span-metadata|map-path|hq|brief|init|retrospective|pending|refresh|render|goal|verify|evidence|readiness|change-brief|change-review|docs-reconcile|why|setup|extensions|semantic-telemetry|semantic-audit|audit-docs|semantic-curate|semantic-refresh|semantic-group|answer|describe|parked|suggest|synthesis|dispatch|route-preview|review-bundle|proposals|statusline|slack-bridge|org|codify|anchor-writer|--help|-h|--version)(?:\\s|$)",
 ]
+
+# A native Codex approval can run outside the workspace sandbox. Only these
+# complete command lines qualify. The ordinary [allow.*] rules also cover
+# project scripts and interpreters that may run arbitrary workspace code.
+[codex_permission]
+routine_commands = [
+    'gh (?:issue|pr) view [0-9]+(?: --repo [a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)? --json [a-zA-Z]+(?:,[a-zA-Z]+)*',
+    'dig (?:\+(?:short|noall|comments|answer) )*[a-zA-Z0-9][a-zA-Z0-9.-]* (?:A|AAAA|TXT|MX|NS|CNAME|DS)',
+    '(?:pwd|whoami|git --version|gh --version)',
+]

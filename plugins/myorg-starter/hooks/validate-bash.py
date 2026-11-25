@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 
 from bash_policy_decide import (
@@ -186,10 +187,24 @@ def gate_applies(gate: str, fmt: str, input_data: dict) -> bool:
     return not ("turn_id" in input_data or os.environ.get("PLUGIN_ROOT"))
 
 
+def routine_codex_command(config: dict, command: str) -> bool:
+    section = config.get("codex_permission", {})
+    patterns = section.get("routine_commands", []) if isinstance(section, dict) else None
+    if not isinstance(patterns, list) or not all(isinstance(p, str) for p in patterns):
+        print("Invalid [codex_permission].routine_commands: expected a list of patterns", file=sys.stderr)
+        return False
+    try:
+        compiled = [re.compile(pattern) for pattern in patterns]
+    except re.error as err:
+        print(f"Invalid [codex_permission].routine_commands pattern: {err}", file=sys.stderr)
+        return False
+    return any(pattern.fullmatch(command) for pattern in compiled)
+
+
 def output_decision(decision: str, reason: str, fmt: str = "claude", level: str = "guarded"):
     """Emit the validator decision in a host-specific shape.
 
-    The guard never emits ``allow`` (#1089): a plugin's hooks run in every
+    The PreToolUse guard never emits ``allow`` (#1089): a plugin's hooks run in every
     project, and an allow would skip the user's own permission prompts.
 
     - ``deny``: a stop the agent can't clear.
@@ -204,6 +219,16 @@ def output_decision(decision: str, reason: str, fmt: str = "claude", level: str 
     scripts: ``deny`` (a stop or a bounce, with the full message), ``note``
     or ``allow``.
     """
+    if fmt == "codex-permission":
+        if decision not in ("allow", "deny"):
+            return  # Let Codex handle notes and review requests.
+        verdict = {"behavior": decision}
+        if decision == "deny":
+            verdict["message"] = reason
+        print(json.dumps({"hookSpecificOutput": {
+            "hookEventName": "PermissionRequest", "decision": verdict,
+        }}))
+        return
     if fmt == "raw":
         if decision in ("ask", "deny"):
             template = REFLECT_PROMPT_TEMPLATE if decision == "ask" else STOP_TEMPLATE
@@ -240,12 +265,12 @@ def output_decision(decision: str, reason: str, fmt: str = "claude", level: str 
 
 
 _HELP_TEXT = """\
-Usage: validate-bash.py <config.toml> [--format claude|raw] [--help]
+Usage: validate-bash.py <config.toml> [--format claude|raw|codex-permission] [--help]
 
 Validates a bash command (read as JSON on stdin) against the deny / reflect /
 allow patterns in <config.toml>. It stops the command, bounces it back to the
-agent, adds a note, asks the user (gate mode), or says nothing. It never
-emits "allow".
+agent, adds a note, asks the user (gate mode), or says nothing. The Codex
+PermissionRequest format can approve a listed routine command.
 
 The guard level is the user's autonomy.hook_strictness: the repo's
 gitignored .myorg/config.local.yaml, then the user's getmyorg config.yaml,
@@ -258,7 +283,7 @@ then relaxed.
 
 Gate mode (autonomy.gate: on, default off) asks the user, through Claude
 Code's permission prompt, about every command that isn't routine, at every
-level but off. Codex can't ask, so it doesn't apply there.
+level but off. Codex handles its own approval requests.
 
 Force-pushing or deleting main, master or the remote's default branch is
 stopped at every level except off.
@@ -309,7 +334,7 @@ def main():
         positional.append(a)
         i += 1
 
-    if len(positional) != 1 or fmt not in ("claude", "raw"):
+    if len(positional) != 1 or fmt not in ("claude", "raw", "codex-permission"):
         print(_HELP_TEXT, file=sys.stderr)
         sys.exit(1)
 
@@ -321,6 +346,11 @@ def main():
     except json.JSONDecodeError:
         # Invalid input, let it pass
         sys.exit(0)
+
+    if fmt == "codex-permission" and (
+        input_data.get("hook_event_name") != "PermissionRequest" or input_data.get("tool_name") != "Bash"
+    ):
+        return
 
     # A gate prompt the user rejected since the last call gets its outcome (#1195).
     resolve_pending_prompts()
@@ -458,6 +488,9 @@ def main():
             tool_use_id=input_data.get("tool_use_id"), transcript_path=input_data.get("transcript_path"),
         )
 
+    if fmt == "codex-permission" and decision == "allow":
+        if matched_category != "allow" or not routine_codex_command(config, command):
+            return
     output_decision(decision, reason, fmt=fmt, level=strictness)
 
 

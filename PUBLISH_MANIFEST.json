@@ -1,6 +1,6 @@
 {
-  "canonical_sha": "1e0fd5799fe5a079dfb8e3604017e10322fd4017",
-  "generated_at": "2026-11-19T01:08:51+00:00",
+  "canonical_sha": "93781e65619d519271e631104fc65771a7a18069",
+  "generated_at": "2026-11-25T02:31:03+00:00",
   "files": [
     {
       "path": ".agents/plugins/marketplace.json",
@@ -112,7 +112,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.json",
-      "sha256": "ff5bb3f415447619e76d1d279d98cfcdd0f4d286aed3a39bedeb1be4cf1d69c1"
+      "sha256": "7cd2e1512a74eff5e4ea23b50db15730bbba3ddba426d075298f0f82bbd82686"
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.linux.json",
@@ -124,7 +124,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.toml",
-      "sha256": "5396b01405fb6dee490177bf93369a0b62c90685c3607899a87e8ba48c564627"
+      "sha256": "c44ebe6c29ab85003c87ba689a93b4e380e3298329cb4939e1a4b3f8fc08ab08"
     },
     {
       "path": "plugins/myorg-starter/hooks/bash-patterns.windows.json",
@@ -212,7 +212,7 @@
     },
     {
       "path": "plugins/myorg-starter/hooks/validate-bash.py",
-      "sha256": "fb796c2f907560bbbc9435b9f73408548ddeb15062463e5e6a650da4f08761ba"
+      "sha256": "47378ea0238a0ea2ba149693b735117f1bae067f248094e6a33729ad484cc88c"
     },
     {
       "path": "plugins/myorg-starter/hooks/validate-bash.sh",
